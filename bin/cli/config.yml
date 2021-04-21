@@ -1,0 +1,218 @@
+port: &port
+  name: -p, --port <port>
+  desc: Specify the service port number
+  callback: parsePort
+host: &host
+  name: -h, --host <host>
+  desc: Specify the service host
+
+server: &server
+  - *port
+  - *host
+
+ScriptingLan: &ScriptingLan
+  name: languageType
+  type: checkbox
+  message: Select Scripting Language
+  default:
+    -
+      js
+  choices:
+    -
+      name: Javascript
+      value: js
+    -
+      name: Typescript
+      value: ts
+
+ScriptingLanOption: &ScriptingLanOption
+  -
+    name: -l, --language-type <type>
+    desc: Specify a scripting language for the project
+    callback: parseLanguageType
+
+Commands:
+  server:
+    name: server
+    alias: sv
+    desc: Start sever by node
+    options:
+      - *port
+      - *host
+      - htmlPath:
+        name: -hp, --htmlPath <path>
+        desc: Specify the service index.html file path
+
+    interactive:
+      type: input
+      name: Server
+      value: server
+      message: Entry The Port Number
+      default: 4001
+      key: port
+      children:
+        type: input
+        name: host
+        message: Entry The Host Address
+        default: 127.0.0.1
+        children:
+          type: input
+          name: htmlPath
+          message: Entry the service index.html path
+          default: dist/index.html
+
+  create:
+    children:
+      -
+        name: create <project-name>
+        alias: csa
+        desc: Create a new normal project by default javascript
+        options: *ScriptingLanOption
+      -
+        name: create-react <project-name>
+        alias: csr
+        desc: Create a new project with react & redux, by default javascript
+        options: *ScriptingLanOption
+      -
+        name: create-vue <project-name>
+        alias: csv
+        desc: Create a new project with vue, by default javascript
+        options: *ScriptingLanOption
+
+      - name: create-nodejs <project-name>
+        alias: cna
+        desc: Create a new node project by default javascript
+        options: *ScriptingLanOption
+
+      -
+        name: create-miniprogram <project-name>
+        alias: cmpa
+        desc: Create a new create-miniprogram by default javascript
+        options: *ScriptingLanOption
+
+    interactive:
+      -
+        type: input
+        name: Create A Normal Project
+        value: create-normal
+        message: Entry The Project Name
+        key: projectName
+        validate: parseProjectName
+        children: *ScriptingLan
+      -
+        type: input
+        name: Create A React Project (& Redux)
+        value: create-react
+        message: Entry The Project Name
+        key: projectName
+        validate: parseProjectName
+        children: *ScriptingLan
+
+      -
+        type: input
+        name: Create A Vue Project (& Vuex)
+        value: create-vue
+        message: Entry The Project Name
+        key: projectName
+        validate: parseProjectName
+        children: *ScriptingLan
+
+      -
+        type: input
+        name: Create A Node Project
+        value: create-nodejs
+        message: Entry The Project Name
+        key: projectName
+        validate: parseProjectName
+        children: *ScriptingLan
+
+      -
+        type: input
+        name: Create A Miniprogram Project
+        value: create-miniProgram
+        message: Entry The Project Name
+        key: projectName
+        validate: parseProjectName
+        children: *ScriptingLan
+
+  start:
+    name: start
+    alias: s
+    desc: To development
+    options: *server
+    interactive:
+      name: Development
+      value: start
+
+  build:
+    name: build <env>
+    alias: b
+    desc: env = test | staging | release
+    callback: parseEnv
+    options:
+      - name: -A, --API_PATH [value]
+        desc: set API-PATH value replace of configuration value at building
+        callback: parseApiPath
+    interactive:
+      type: list
+      name: Build
+      value: build
+      message: Select Build ENV
+      key: env
+      choices:
+        - name: Test
+          value: test
+
+        - name: Staging
+          value: staging
+
+        - name: Release
+          value: release
+
+  page:
+    name: page <names...>
+    alias: p
+    desc: create new page, more than one use the empty space splice
+    interactive:
+      type: input
+      name: Page
+      value: page
+      key: names
+      message: Enter one or more names [* more than one use comma splice. *]
+      validate: parsePages
+
+  page-child:
+    name: page-child <parent-name>, <names...>
+    alias: pc
+    desc: create new page which is a children for existing page
+    interactive:
+      type: input
+      name: Page-Child
+      message: Entry The Parent Name
+      key: names
+      children:
+        type: input
+        name: Page
+        message: Enter one or more names [* more than one use comma splice. *]
+        validate: parsePages
+        precomand: page-child
+
+  component:
+    name: component <names...>
+    alias: m
+    desc: create new Component, more than one use the empty space splice
+    interactive:
+      type: input
+      name: Component
+      value: component
+      key: names
+      message: Enter one or more names [* more than one use comma splice. *]
+      validate: parsePages
+
+  upgrade:
+    name: upgrade
+    alias: u
+    desc: Update Smart
+    interactive:
+      name: Upgrade
+      value: upgrade
