@@ -13,10 +13,9 @@
     "noEmit": true,
     "strict": true,
     "types": ["node", "jest"],
-    "typeRoots" : ["./node_modules/@types", "./typings", "./typings.d.ts"],
+    "typeRoots": ["./node_modules/@types", "./typings.d.ts"],
     "lib": [
-      "es2020",
-      "dom"
+      "es2020"
     ],
     "baseUrl": ".",
     "paths": {
@@ -33,6 +32,5 @@
     "bin/smart/templates",
     "node_modules",
     "babel.config.js",
-    "jest.config.js"
   ]
 }
