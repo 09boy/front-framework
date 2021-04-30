@@ -16,7 +16,7 @@ export type EntryAndOutputOptionsType = {
   name: string;
   publicPath: string;
   buildPath: string;
-};
+}
 
 function getDevelopmentHRMItem(devMode: boolean, entryPath: string, projectType: ProjectType, host: string, port: number | string, name: string): string | string[] {
 
