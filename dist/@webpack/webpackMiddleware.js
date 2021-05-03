@@ -15,10 +15,10 @@ var _index = _interopRequireDefault(require("./index"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getWebpackMiddleware(env, config) {
+function getWebpackMiddleware(option) {
   var _webpackConfig$output;
 
-  const webpackConfig = (0, _index.default)(env, config);
+  const webpackConfig = (0, _index.default)(option);
   const compiler = (0, _webpack.default)(webpackConfig);
   const publicPath = (_webpackConfig$output = webpackConfig.output) === null || _webpackConfig$output === void 0 ? void 0 : _webpackConfig$output.publicPath;
 

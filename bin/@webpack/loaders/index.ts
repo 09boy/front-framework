@@ -1,33 +1,30 @@
 import { RuleSetRule } from 'webpack';
-import { EnvType } from 'types/EnvType';
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
+import { SmartStructureOption } from 'types/SmartProjectConfig';
 import { getStyleLoader } from './styleLoader';
 import { getFileLoader } from './fileLoader';
 import { getTemplatingLoader } from './templatingLoader';
 import { getTranspilingLoader } from './transpilingLoader';
-import { ProjectStructureType } from 'types/SmartConfigType';
 import { PROJECT_ROOT_PATH } from 'share/path';
+import { SmartProjectOption } from 'types/Smart';
 
 
-type Props = {
-  env: EnvType;
-  projectType: ProjectType;
-  projectLanguageType: ProjectLanguageType;
-  structure: ProjectStructureType;
+export type LoaderProps = {
+  projectOption: SmartProjectOption;
+  structure: SmartStructureOption;
   maxSize: number
 };
 
-export default function getLoaders({env, projectType, projectLanguageType, structure, maxSize}: Props, include: string[] = []): RuleSetRule[] {
+export default function getLoaders({ projectOption, structure, maxSize }: LoaderProps, include: string[] = []): RuleSetRule[] {
   const { assets, src } = structure;
   const staticPath = assets + '/';
 
   include = include.map(s => PROJECT_ROOT_PATH + '/' + s);
 
   return [
-    ...getTranspilingLoader(env, projectType, projectLanguageType),
+    ...getTranspilingLoader(projectOption),
     ...getTemplatingLoader(),
-    ...getStyleLoader(env),
-    ...getFileLoader(env, staticPath, maxSize),
+    ...getStyleLoader(),
+    ...getFileLoader(staticPath, maxSize),
   ].map(rule => ({
     ...rule,
     exclude: [

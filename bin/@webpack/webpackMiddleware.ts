@@ -1,13 +1,13 @@
 import webpack, { Compiler, Configuration, WebpackPluginInstance } from 'webpack';
-import { EnvType } from 'types/EnvType';
-import { SmartConfigType } from 'types/SmartConfigType';
-import devMiddleware, { Options as ServerMiddlewareOptions, } from 'webpack-dev-middleware';
+import { SmartWebpackOption } from 'types/Smart';
+import { SmartConfigOption } from 'types/SmartProjectConfig';
+import devMiddleware, { Options as ServerMiddlewareOptions } from 'webpack-dev-middleware';
 import hotMiddleware from 'webpack-hot-middleware';
 import configuration from '@webpack';
 
 
-export function getWebpackMiddleware(env: EnvType, config: SmartConfigType): WebpackPluginInstance[] {
-  const webpackConfig: Configuration = configuration(env, config);
+export function getWebpackMiddleware(option: SmartWebpackOption): WebpackPluginInstance[] {
+  const webpackConfig: Configuration = configuration(option);
   const compiler: Compiler = webpack(webpackConfig);
   const publicPath = webpackConfig.output?.publicPath;
 
@@ -27,8 +27,8 @@ export function getWebpackMiddleware(env: EnvType, config: SmartConfigType): Web
   };
 
   return [
-    devMiddleware(compiler, devOptions),
-    hotMiddleware(compiler, {
+    devMiddleware(compiler as any, devOptions),
+    hotMiddleware(compiler as any, {
       path: '/__webpack_hmr',
     }),
   ];

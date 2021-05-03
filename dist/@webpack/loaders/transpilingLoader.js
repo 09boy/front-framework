@@ -5,15 +5,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getTranspilingLoader = getTranspilingLoader;
 
-var _tool = require("../tool");
+var _env = require("../../share/env");
 
-var _tool2 = require("../../share/tool");
+var _projectHelper = require("../../share/projectHelper");
 
-var _ProjectType = require("../../types/ProjectType");
-
-function getTranspilingLoader(env, projectType, projectLanguageType) {
-  const devMode = (0, _tool.isDevEnv)(env);
-  const isTs = projectLanguageType === _ProjectType.ProjectLanguageType.Typescript;
+function getTranspilingLoader({
+  scriptType,
+  projectType
+}) {
+  const devMode = (0, _env.isDevEnv)();
+  const isTs = scriptType === 'ts';
   const isReact = projectType === 'react';
   let envOptions = {
     targets: 'defaults',
@@ -26,26 +27,26 @@ function getTranspilingLoader(env, projectType, projectLanguageType) {
     bugfixes: devMode
   };
   const presets = [];
-  const plugins = [(0, _tool2.getDynamicModule)('@babel/plugin-transform-runtime'), [(0, _tool2.getDynamicModule)('@babel/plugin-proposal-decorators'), {
+  const plugins = [(0, _projectHelper.getDynamicModule)('@babel/plugin-transform-runtime'), [(0, _projectHelper.getDynamicModule)('@babel/plugin-proposal-decorators'), {
     legacy: true
-  }], [(0, _tool2.getDynamicModule)('@babel/plugin-proposal-class-properties'), {
+  }], [(0, _projectHelper.getDynamicModule)('@babel/plugin-proposal-class-properties'), {
     loose: true
-  }], (0, _tool2.getDynamicModule)('@babel/plugin-syntax-dynamic-import'), (0, _tool2.getDynamicModule)('@babel/plugin-proposal-async-generator-functions')];
+  }], (0, _projectHelper.getDynamicModule)('@babel/plugin-syntax-dynamic-import'), (0, _projectHelper.getDynamicModule)('@babel/plugin-proposal-async-generator-functions')];
 
   if (isReact) {
-    plugins.push((0, _tool2.getDynamicModule)('@babel/plugin-syntax-jsx'), (0, _tool2.getDynamicModule)('@babel/plugin-transform-react-jsx'), (0, _tool2.getDynamicModule)('@babel/plugin-transform-react-display-name'));
+    plugins.push((0, _projectHelper.getDynamicModule)('@babel/plugin-syntax-jsx'), (0, _projectHelper.getDynamicModule)('@babel/plugin-transform-react-jsx'), (0, _projectHelper.getDynamicModule)('@babel/plugin-transform-react-display-name'));
 
     if (devMode) {
-      plugins.push((0, _tool2.getDynamicModule)('@babel/plugin-transform-react-jsx-self'), (0, _tool2.getDynamicModule)('@babel/plugin-transform-react-jsx-source'), (0, _tool2.getDynamicModule)('react-hot-loader/babel'));
+      plugins.push((0, _projectHelper.getDynamicModule)('@babel/plugin-transform-react-jsx-self'), (0, _projectHelper.getDynamicModule)('@babel/plugin-transform-react-jsx-source'), (0, _projectHelper.getDynamicModule)('react-hot-loader/babel'));
     }
 
-    presets.push([(0, _tool2.getDynamicModule)('@babel/preset-react'), {
+    presets.push([(0, _projectHelper.getDynamicModule)('@babel/preset-react'), {
       development: devMode
-    }], (0, _tool2.getDynamicModule)('@babel/preset-flow'));
+    }], (0, _projectHelper.getDynamicModule)('@babel/preset-flow'));
   }
 
   if (isTs) {
-    presets.push([(0, _tool2.getDynamicModule)('@babel/preset-typescript'), {
+    presets.push([(0, _projectHelper.getDynamicModule)('@babel/preset-typescript'), {
       onlyRemoveTypeImports: true,
       allowDeclareFields: true
     }] //It includes   @babel/plugin-transform-typescript
@@ -61,11 +62,11 @@ function getTranspilingLoader(env, projectType, projectLanguageType) {
 
   presets.unshift([// https://github.com/babel/babel/issues/10008
   // https://github.com/babel/babel/issues/9853
-  (0, _tool2.getDynamicModule)('@babel/preset-env'), envOptions]);
+  (0, _projectHelper.getDynamicModule)('@babel/preset-env'), envOptions]);
   return [{
     test: /\.(ts|js)x?$/,
     use: {
-      loader: (0, _tool2.getDynamicModule)('babel-loader'),
+      loader: (0, _projectHelper.getDynamicModule)('babel-loader'),
       options: {
         // extends: PROJECT_ROOT_PATH + '/babel.config.js',
         cacheDirectory: true,

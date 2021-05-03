@@ -1,66 +1,58 @@
 import { exec, cd, which, rm } from 'shelljs';
 import { RequestHandler } from 'express';
-import { SmartOptionType } from 'types/SmartOptionType';
 import LogProgressTask from 'share/logProgress';
 import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
 import { isValidProjectName } from 'share/projectHelper';
-import { SmartConfigType } from 'types/SmartConfigType';
-import { Server,
-  ServerOptionType,
-  createProjectStructure,
-  createProjectConfigurationFiles, } from './tasks';
+import { SmartTaskOption } from 'types/Smart';
+import { Server, createProjectStructure, createProjectConfigurationFiles, } from './tasks';
 import { getWebpackMiddleware } from '@webpack/webpackMiddleware';
 import { initFiles } from './tasks/create/initFiles';
 import createComponents from './tasks/create/createComponent';
-import createPages from 'smart/tasks/create/createPage';
+import createPages from './tasks/create/createPage';
 
-export default async function Smart({ cliType, cliArgs }: SmartOptionType, configData?: SmartConfigType) {
+export default async function Smart({ cli, projectOption, serverOption, configOption, pages, components } : SmartTaskOption): Promise<void> {
   let logTask;
 
-  if (cliType === 'start' || cliType === 'server') {
-    const server = new Server(cliArgs as ServerOptionType);
-    if (cliType === 'start' && configData) {
-      await rm('-rf', PROJECT_ROOT_PATH + '/' + configData.buildDir);
-      server.addHook(getWebpackMiddleware('development', configData) as RequestHandler[]);
+  if (serverOption && (cli === 'start' || cli === 'server')) {
+    const server = new Server(serverOption);
+    if (cli === 'start' && projectOption && configOption) {
+      rm('-rf', `${PROJECT_ROOT_PATH}/${configOption.buildDir}`);
+      process.env.NODE_ENV = 'development';
+      server.addHook(getWebpackMiddleware({ projectOption, configOption }) as RequestHandler[]);
     }
     server.start();
-  } else if (cliType === 'page') {
-    if (configData && cliArgs?.pages) {
-      await createPages(cliArgs.pages, configData);
-    }
-  } else if (cliType === 'component') {
-    if (configData && cliArgs?.components) {
-      await createComponents(cliArgs.components, configData);
-    }
-  } else if (cliType === 'build') {
-
-    process.env.BuildConfig = JSON.stringify(configData);
-    await exec(`${SMART_ROOT_PATH}/node_modules/.bin/webpack --config ${SMART_ROOT_PATH}/dist/@webpack/index.js --color`);
+  } else if (cli === 'page' && pages && projectOption) {
+    createPages(projectOption.projectType, pages);
+  } else if (cli === 'component' && components && projectOption) {
+    createComponents(projectOption.projectType, components);
+  } else if (cli === 'build' && projectOption && configOption) {
+    process.env.NODE_ENV = 'production';
+    process.env.BuildConfig = JSON.stringify({ projectOption, configOption });
+    exec(`${SMART_ROOT_PATH}/node_modules/.bin/webpack --config ${SMART_ROOT_PATH}/dist/@webpack/index.js --color`);
     process.env.BuildConfig = undefined;
-
-  } else if (cliType === 'upgrade') {
-
+    process.env.NODE_ENV = 'development';
+  } else if (cli === 'upgrade') {
     logTask = new LogProgressTask();
-    await logTask.add([
+    logTask.add([
       {
         title: 'Git',
         task: (ctx, task) => {
           return task.newListr([
             {
               title: 'Checking git status',
-              task: async () => {
-                const result = await exec('git status --porcelain', { silent: true });
+              task: () => {
+                const result = exec('git status --porcelain', { silent: true });
                 if (result !== '') {
                   throw new Error('Unclean working tree. Commit or stash changes first.');
                 }
 
-                await exec('git init');
+                exec('git init');
               }
             },
             {
               title: 'Checking remote history',
-              task: async () => {
-                const result = await exec('git rev-list --count --left-only @{u}...HEAD', { silent: true });
+              task: () => {
+                const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true });
                 if (result !== '0') {
                   throw new Error('Remote history differ. Please pull changes.');
                 }
@@ -82,11 +74,11 @@ export default async function Smart({ cliType, cliArgs }: SmartOptionType, confi
       }
     ]);
     await logTask.run();
-  } else if (cliType === 'create' && cliArgs?.createOption) {
-    const { structure, projectName, projectType, projectLanguageType } = cliArgs.createOption;
+  } else if (cli === 'create' && projectOption && configOption) {
+    const { dirName,  projectType } = projectOption;
 
     logTask = new LogProgressTask();
-    await logTask.add([
+    logTask.add([
        {
           title: 'Smart',
           task: (ctx, task) => {
@@ -104,20 +96,20 @@ export default async function Smart({ cliType, cliArgs }: SmartOptionType, confi
        },
       {
         title: 'Create the project directory structure',
-        task: async () => {
-          if (!isValidProjectName(projectName)) {
-            throw new Error(`The '${projectName}' project is already exist.`);
+        task: () => {
+          if (!isValidProjectName(dirName)) {
+            throw new Error(`The '${dirName}' project is already exist.`);
           }
-          await createProjectStructure(projectName, structure);
+          createProjectStructure(projectType, dirName, configOption.structure);
         },
       },
       {
         title: 'Write the configuration entry file',
-        task: async () => initFiles({ structure, projectName, projectType, projectLanguageType }),
+        task: () => initFiles(projectOption, configOption.structure),
       },
       {
         title: 'Generate project installation files',
-        task: async () =>  createProjectConfigurationFiles({ structure, projectName, projectType, projectLanguageType }),
+        task: () => createProjectConfigurationFiles(projectOption, configOption),
       },
       {
         title: 'Install package dependencies with npm',

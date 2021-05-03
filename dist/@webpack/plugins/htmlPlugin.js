@@ -7,13 +7,16 @@ exports.getHtmlPlugin = getHtmlPlugin;
 
 var _htmlWebpackPlugin = _interopRequireDefault(require("html-webpack-plugin"));
 
+var _env = require("../../share/env");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getHtmlPlugin(devMode, publicPath, entryFiles) {
+function getHtmlPlugin(publicPath, entryFiles) {
+  const devMode = (0, _env.isDevEnv)();
   const instances = [];
 
-  for (let key in entryFiles) {
-    if (entryFiles.hasOwnProperty(key)) {
+  for (const key in entryFiles) {
+    if (Object.hasOwnProperty.call(entryFiles, key)) {
       const pages = entryFiles[key];
       const options = {
         hash: devMode,

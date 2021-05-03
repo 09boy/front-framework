@@ -1,54 +1,47 @@
 import { mkdir, test, touch } from 'shelljs';
 import { join } from 'path';
 import { writeFileSync, readFileSync } from 'fs';
-import { SmartConfigType } from 'types/SmartConfigType';
-import { getProjectPaths, getClassName, getComponentDirName } from 'share/tool';
-import { ProjectLanguageType } from 'types/ProjectType';
+import { ProjectType, ScriptType } from 'types/SmartProjectConfig';
+import { getClassName, getComponentDirName } from 'share/projectHelper';
+import { SmartCreatePage } from 'types/Smart';
+import { PROJECT_ROOT_PATH } from 'share/path';
 
-export default async function createComponents(names: string[], {  structure, projectType, scriptingLanguageType }: SmartConfigType) {
-  scriptingLanguageType = scriptingLanguageType || ProjectLanguageType.Javascript;
-
-  const { componentsPath } = getProjectPaths(structure);
-  const indexFile = componentsPath + '/index.' + scriptingLanguageType;
+export default function createComponents(projectType: ProjectType, { names, scriptType, dirPath }: SmartCreatePage): void {
+  // const { componentsPath } = getProjectPaths(structure);
+  const indexFile = PROJECT_ROOT_PATH + '/' + dirPath + '/index.' + scriptType;
 
   if (!test('-f', indexFile)) {
-    await touch(indexFile);
+    touch(indexFile);
   }
 
-  const dirPaths = names.map(s => componentsPath + '/' + getComponentDirName(s));
-  await mkdir('-p', dirPaths);
+  const dirPaths = names.map(n => `${PROJECT_ROOT_PATH}/${dirPath}/${getComponentDirName(n)}`);
+  mkdir('-p', dirPaths);
 
-  const dirNames: string[] = [];
-
-  if (projectType === 'react') {
-    for (let i = 0; i < dirPaths.length; i++ ) {
-      const s = dirPaths[i];
-      const dirName = s.split('/').pop() as string;
-      await parseReact(scriptingLanguageType, s,  getClassName(names[i]));
-      dirNames.push(dirName);
-    }
-  }
-
-  const indexData = await readFileSync(indexFile, 'utf-8');
+  const indexData = readFileSync(indexFile, 'utf-8');
   const indexDatas = indexData.split('\n').filter(s => !!s);
 
-  dirNames.map(dirName => {
-    indexDatas.push(`export * from './${dirName}';`);
+  dirPaths.map((n, i) => {
+    const className = getClassName(names[i]);
+    const pageDirName = n.split('/').pop() as string;
+    indexDatas.push(`export * from './${pageDirName}';`);
+    if (projectType === 'react') {
+      parseReact(scriptType, pageDirName, className);
+    }
   });
 
-  await writeFileSync(indexFile, indexDatas.join('\n').trim(), 'utf-8');
+  writeFileSync(indexFile, indexDatas.join('\n').trim(), 'utf-8');
 }
 
-async function parseReact(languageType: ProjectLanguageType, savePath: string, ClassName: string) {
-  const indexFilePath = join(__dirname,  '..', '..', '/templates/react/', languageType, `/components/index.${languageType}x`);
-  const styleFilepath = join(__dirname,  '..', '..', '/templates/react/', languageType, '/components/style.scss');
+function parseReact(scriptType: ScriptType, savePath: string, ClassName: string) {
+  const indexFilePath = join(__dirname,  '..', '..', '/templates/react/', scriptType, `/components/index.${scriptType}x`);
+  const styleFilepath = join(__dirname,  '..', '..', '/templates/react/', scriptType, '/components/style.scss');
 
-  let indexData = await readFileSync(indexFilePath, 'utf-8');
+  let indexData = readFileSync(indexFilePath, 'utf-8');
   indexData = indexData.replace(/<ComponentName>/g, ClassName);
 
-  let styleData = await readFileSync(styleFilepath, 'utf-8');
+  let styleData = readFileSync(styleFilepath, 'utf-8');
   styleData = styleData.replace(/<ComponentName>/g, ClassName);
 
-  await writeFileSync(savePath + '/index.' + languageType + 'x', indexData, 'utf-8');
-  await writeFileSync(savePath + '/style.scss', styleData, 'utf-8');
+  writeFileSync(savePath + '/index.' + scriptType + 'x', indexData, 'utf-8');
+  writeFileSync(savePath + '/style.scss', styleData, 'utf-8');
 }

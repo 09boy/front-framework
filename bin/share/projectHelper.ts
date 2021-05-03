@@ -1,10 +1,7 @@
 import { existsSync } from 'fs';
-import { PROJECT_ROOT_PATH } from 'share/path';
-import { SmartCliResultType } from 'cli';
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
-import { CreateOptionType } from 'types/SmartConfigType';
-import { SmartOptionType } from 'types/SmartOptionType';
-import { CliType } from 'types/CliType';
+import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
+import { ScriptType, SmartStructureOption } from 'types/SmartProjectConfig';
+import { SmartCreateDirArg } from 'types/Smart';
 
 export function isSmartProject(): boolean {
   const hastPackageFile = existsSync('package.json');
@@ -17,68 +14,62 @@ export function isValidProjectName(name: string): boolean {
 }
 
 export function getProjectName(name: string): string {
-  return name.trim().replace(/\s/g, '-');
+  return name.trim().replace(/\s/g, '-').toLocaleLowerCase();
 }
 
-function getScriptingLanguageType(type: string | string[] | undefined): ProjectLanguageType {
-  if (typeof type === 'string') {
-    return type === ProjectLanguageType.Typescript || type === ProjectLanguageType.Typescript1 ? ProjectLanguageType.Typescript : ProjectLanguageType.Javascript;
-  } else if (Array.isArray(type)) {
-    return type.includes('ts') ? ProjectLanguageType.Typescript : ProjectLanguageType.Javascript;
-  }
-  return ProjectLanguageType.Javascript;
+const FILE_Reg = /[.\-_ ']/g;
+
+export function getComponentDirName(name: string): string {
+  name = name.trim().toLocaleLowerCase().replace(FILE_Reg, '#');
+  name = name.replace(/#/g, '-');
+  return name;
 }
 
-function parseDirNames(args: any): string[] {
-  let names: string[] = [];
-  if (typeof args === 'object') {
-    if (args.hasOwnProperty('names') && typeof args.names === 'string') {
-      names = args.names.split(',');
-    } else {
-      names = Object.values(args);
-    }
+export function getClassName(name: string): string {
+  name = name.trim().toLocaleLowerCase().replace(FILE_Reg, '#');
+  return name.split('#').map(s => s.replace(s.charAt(0), s.charAt(0).toUpperCase())).join('');
+}
+
+// default javascript
+export function getScriptType(type?: string): ScriptType {
+  if (type === 'ts') {
+    return 'ts';
   }
-  names = names.filter(s => s.trim() !== '');
+  return 'js';
+}
+
+// for creating new pages or new components
+export function getCreateNames(option: SmartCreateDirArg): string[] {
+  let names: string[];
+  if (typeof option === 'string') {
+    names = option.split(',');
+  } else if (Array.isArray(option)) {
+    names = option;
+  } else {
+    names = Object.values(option);
+  }
+  names = names.filter(s => s.trim() !== '').map(s => s.trim());
   return [...new Set(names)];
 }
 
-export function parseCli(data: SmartCliResultType, smartConfig?: any): SmartOptionType {
-  const { cliName, args } = data;
-  const cliArr =  cliName.split('-');
-  const cliType: CliType = cliArr[0] as CliType;
-  const projectType: string = cliArr[1] || smartConfig?.projectType || 'normal';
-  const port = args?.port || smartConfig?.port;
-  const host = args?.host || smartConfig?.host;
-  const htmlPath = args?.htmlPath || `${smartConfig?.buildDir}/index.html`;
+export function getDynamicModule(name: string): string {
+  return `${SMART_ROOT_PATH}/node_modules/${name.trim()}`;
+}
 
-  const result: SmartOptionType = { cliType };
-
-  switch (cliType) {
-    case 'start':
-    case 'server':
-      result.cliArgs = { port, host, htmlPath: `${PROJECT_ROOT_PATH}/${htmlPath}` };
-      break;
-    case 'page':
-      result.cliArgs = { pages: parseDirNames(args) };
-      break;
-    case 'component':
-      result.cliArgs = { components: parseDirNames(args) };
-      break;
-    case 'build':
-      result.cliArgs = args;
-      break;
-    case 'upgrade':
-      break;
-    case 'create':
-    default:
-      const createOption: CreateOptionType = {
-        projectType: projectType as ProjectType,
-        projectName: getProjectName(args?.projectName.trim()),
-        projectLanguageType: getScriptingLanguageType(args?.languageType),
-        structure: smartConfig.structure,
-      };
-      result.cliArgs = { createOption };
-      break;
-  }
-  return result;
+export function getProjectStructurePath({ src, app, assets, components, pages }: SmartStructureOption): {
+  appPath: string;
+  assetsPath: string;
+  pagesPath: string;
+  componentsPath: string;
+} {
+  const appPath = `${src}/${app || 'app'}`;
+  const assetsPath = `${src}/${assets}`;
+  const pagesPath = `${src}/${pages}`;
+  const componentsPath = `${src}/${components || 'components'}`;
+  return {
+    appPath,
+    assetsPath,
+    pagesPath,
+    componentsPath,
+  };
 }

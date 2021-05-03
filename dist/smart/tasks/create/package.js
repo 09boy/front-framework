@@ -7,8 +7,6 @@ exports.getPackageData = getPackageData;
 
 var _shelljs = require("shelljs");
 
-var _ProjectType = require("../../../types/ProjectType");
-
 const packageData = {
   name: 'smart-sample-project',
   version: '1.0.0',
@@ -37,12 +35,11 @@ function getDependenciesName(projectType, isTs) {
   let devDependencies = isTs ? ['typescript', '@typescript-eslint/parser', '@typescript-eslint/eslint-plugin', 'ts-jest', '@types/jest', ...commonsDev] : ['@babel/eslint-parser', ...commonsDev];
 
   switch (projectType) {
-    case _ProjectType.ProjectType.Unknown:
-    case _ProjectType.ProjectType.Normal:
+    case 'normal':
       dependencies = ['moment'];
       break;
 
-    case _ProjectType.ProjectType.React:
+    case 'react':
       dependencies = ['moment', 'react', '@hot-loader/react-dom', '@reduxjs/toolkit', 'redux-saga', 'reselect', 'redux-logger', 'react-redux', 'react-router-dom'];
       devDependencies = [...devDependencies, 'eslint-plugin-react', 'eslint-plugin-react-hooks', 'eslint-plugin-jsx-a11y', 'react-test-renderer', 'prop-types'];
 
@@ -52,13 +49,13 @@ function getDependenciesName(projectType, isTs) {
 
       break;
 
-    case _ProjectType.ProjectType.Vue:
+    case 'vue':
       break;
 
-    case _ProjectType.ProjectType.Nodejs:
+    case 'nodejs':
       break;
 
-    case _ProjectType.ProjectType.MiniProgram:
+    case 'miniProgram':
       break;
 
     default:
@@ -71,20 +68,20 @@ function getDependenciesName(projectType, isTs) {
   };
 }
 
-async function getDependenciesVersion({
+function getDependenciesVersion({
   dependencies,
   devDependencies
 }) {
   const ds = {};
   const devS = {};
-  [...dependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(async p => {
-    const version = await (0, _shelljs.exec)(`npm view ${p.trim()} version`, {
+  [...dependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(p => {
+    const version = (0, _shelljs.exec)(`npm view ${p.trim()} version`, {
       silent: true
     });
     ds[p.trim()] = `^${version.replace('\n', '')}`;
   });
-  [...devDependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(async p => {
-    const version = await (0, _shelljs.exec)(`npm view ${p.trim()} version`, {
+  [...devDependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(p => {
+    const version = (0, _shelljs.exec)(`npm view ${p.trim()} version`, {
       silent: true
     });
     devS[p.trim()] = `^${version.replace('\n', '')}`;
@@ -95,9 +92,13 @@ async function getDependenciesVersion({
   };
 }
 
-async function getPackageData(projectName, projectType, scriptingLanguageType = _ProjectType.ProjectLanguageType.Javascript, src = 'src') {
-  const isTs = scriptingLanguageType === _ProjectType.ProjectLanguageType.Typescript;
-  const dependenciesData = await getDependenciesVersion(getDependenciesName(projectType, isTs));
+function getPackageData({
+  projectType,
+  scriptType,
+  dirName
+}, src) {
+  const isTs = scriptType === 'ts';
+  const dependenciesData = getDependenciesVersion(getDependenciesName(projectType, isTs));
   let lint;
 
   if (projectType === 'normal') {
@@ -108,13 +109,13 @@ async function getPackageData(projectName, projectType, scriptingLanguageType = 
 
   return { ...packageData,
     ...dependenciesData,
-    name: `smart-${projectName}-project`,
+    name: `smart-${dirName}-project`,
     scripts: { ...packageData.scripts,
       lint
     },
     smart: {
       projectType,
-      scriptingLanguageType
+      scriptType
     }
   };
 }

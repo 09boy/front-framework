@@ -13,17 +13,24 @@ var _compressionWebpackPlugin = _interopRequireDefault(require("compression-webp
 
 var _imageMinimizerWebpackPlugin = _interopRequireDefault(require("image-minimizer-webpack-plugin"));
 
-var _tool = require("../../share/tool");
+var _projectHelper = require("../../share/projectHelper");
+
+var _env = require("../../share/env");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getProductionPlugins(devMode) {
+// import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+function getProductionPlugins() {
+  const devMode = (0, _env.isDevEnv)();
+
   if (devMode) {
     return [];
   }
 
-  return [// new ProgressPlugin({ percentBy: 'entries' }),
-  new _cleanWebpackPlugin.CleanWebpackPlugin(), new _webpack.BannerPlugin({
+  return [new _webpack.ProgressPlugin({
+    percentBy: 'entries'
+  }), new _cleanWebpackPlugin.CleanWebpackPlugin(), new _webpack.BannerPlugin({
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     banner: `fullhash:[fullhash], chunkhash:[chunkhash], name:[name], base:[base], query:[query], file:[file], @author: 09boy- ${new Date()}`,
     entryOnly: false,
     exclude: /\/node_modules/
@@ -40,13 +47,13 @@ function getProductionPlugins(devMode) {
     loader: false,
     severityError: false,
     minimizerOptions: {
-      plugins: [[(0, _tool.getDynamicModule)('imagemin-gifsicle'), {
+      plugins: [[(0, _projectHelper.getDynamicModule)('imagemin-gifsicle'), {
         interlaced: true
-      }], [(0, _tool.getDynamicModule)('imagemin-jpegtran'), {
+      }], [(0, _projectHelper.getDynamicModule)('imagemin-jpegtran'), {
         progressive: true
-      }], [(0, _tool.getDynamicModule)('imagemin-optipng'), {
+      }], [(0, _projectHelper.getDynamicModule)('imagemin-optipng'), {
         optimizationLevel: 5
-      }], [(0, _tool.getDynamicModule)('imagemin-svgo'), {
+      }], [(0, _projectHelper.getDynamicModule)('imagemin-svgo'), {
         /*plugins: [
           {removeViewBox: false,}
         ],*/

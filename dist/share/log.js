@@ -8,8 +8,11 @@ exports.LogWarn = LogWarn;
 exports.LogError = LogError;
 exports.getLogErrorStr = getLogErrorStr;
 exports.getLogInfoStr = getLogInfoStr;
+exports.PrintLog = PrintLog;
 
 var _chalk = _interopRequireDefault(require("chalk"));
+
+var _LogType = require("../types/LogType");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -46,3 +49,29 @@ log(chalk`
     There are {bold 5280 feet} in a mile.
     In {bold ${miles} miles}, there are {green.bold ${calculateFeet(miles)} feet}.
 `);*/
+
+
+function PrintLog(logType, message = '', endMessage) {
+  switch (logType) {
+    case _LogType.LogType.configFileLoadFailed:
+      log(error(`Load Failed:
+        smart config file load failed! please try again.
+        detail: ${message}!`));
+      break;
+
+    case _LogType.LogType.cliNotExist:
+      log(error(`Error: unknown command '${message}', to run 'smart --help'`));
+      break;
+
+    case _LogType.LogType.cliArgTypeError:
+      log(error(`Command Arg Error: ${message} not a valid value.
+         ${endMessage ? endMessage : 'to run \'smart --help\''}`));
+      break;
+
+    case _LogType.LogType.projectNotExist:
+      break;
+
+    case _LogType.LogType.projectExist:
+      break;
+  }
+}

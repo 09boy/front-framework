@@ -1,11 +1,11 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { rm } from 'shelljs';
-import { ProjectLanguageType } from 'types/ProjectType';
+import { ScriptType } from 'types/SmartProjectConfig';
 
 export type ContentItemType = {
   indent: number;
   data: {
-    [key in  ProjectLanguageType]?: string;
+    [key in  ScriptType]?: string;
   };
   upEmptyLine?: number;
   children?: ContentItemType[];
@@ -18,6 +18,7 @@ function getMaker(num: number, marker: string): string {
     return indentStr;
   }
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (num <= 0) {
       break;
@@ -28,11 +29,11 @@ function getMaker(num: number, marker: string): string {
   return indentStr;
 }
 
-function getIndentStr(item: ContentItemType, parentIndent: number, type: ProjectLanguageType): string {
+function getIndentStr(item: ContentItemType, parentIndent: number, type: ScriptType): string {
   const { indent, data, upEmptyLine, end, children } = item;
   const startIndent = parentIndent + indent;
 
-  let str = getMaker(upEmptyLine || 0, '\n') + data[type];
+  let str = `${getMaker(upEmptyLine || 0, '\n')}${data[type] || ''}`;
 
   str = `${getMaker(startIndent, '\t')}${str}`;
 
@@ -47,7 +48,7 @@ function getIndentStr(item: ContentItemType, parentIndent: number, type: Project
   return str;
 }
 
-export function getFileContent(data: ContentItemType[], parentIndent = 0, type: ProjectLanguageType = ProjectLanguageType.Javascript): string {
+export function getFileContent(data: ContentItemType[], parentIndent = 0, type: ScriptType = 'js'): string {
   let content = '';
   data.map(s => {
     content += getIndentStr(s, parentIndent, type) + '\n';
@@ -55,9 +56,9 @@ export function getFileContent(data: ContentItemType[], parentIndent = 0, type: 
   return content;
 }
 
-export async function parseJsonFileToJsFile(fileName: string) {
+export function parseJsonFileToJsFile(fileName: string): void {
   const jsonName = `${fileName}.json`;
-  const data = await readFileSync(jsonName, 'utf-8');
+  const data = readFileSync(jsonName, 'utf-8');
   rm(jsonName);
 
   let content = 'module.exports = ';

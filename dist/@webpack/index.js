@@ -19,19 +19,24 @@ var _optimization = _interopRequireDefault(require("./optimization"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function configuration(env = 'start', config) {
+function configuration(option) {
+  var _option$configOption;
+
+  if (process.env.BuildConfig) {
+    option = JSON.parse(process.env.BuildConfig);
+  }
+
   const {
+    devMode,
     name,
     target,
-    vendors,
-    devMode,
     devtool,
     entryOutOption,
     pluginsProps,
     loadersProps,
     resolveAlias,
     performance
-  } = (0, _tool.parseConfigData)(env, config);
+  } = (0, _tool.parseConfigData)(option);
   return {
     name,
     context: _path.PROJECT_ROOT_PATH,
@@ -42,7 +47,7 @@ function configuration(env = 'start', config) {
     devtool,
     module: {
       unsafeCache: true,
-      rules: (0, _loaders.default)(loadersProps, config === null || config === void 0 ? void 0 : config.loaderIncludes)
+      rules: (0, _loaders.default)(loadersProps, (_option$configOption = option.configOption) === null || _option$configOption === void 0 ? void 0 : _option$configOption.loaderIncludes)
       /*parser: {
         javascript: {
           commonjsMagicComments: true,
@@ -64,7 +69,7 @@ function configuration(env = 'start', config) {
       modules: [`${_path.SMART_ROOT_PATH}/node_modules`],
       extensions: ['.js', '.json']
     },
-    optimization: (0, _optimization.default)(devMode, vendors),
+    optimization: (0, _optimization.default)(devMode, option.configOption.vendors),
     stats: {
       cached: true,
       cachedAssets: true,

@@ -16,9 +16,7 @@ var _transpilingLoader = require("./transpilingLoader");
 var _path = require("../../share/path");
 
 function getLoaders({
-  env,
-  projectType,
-  projectLanguageType,
+  projectOption,
   structure,
   maxSize
 }, include = []) {
@@ -28,7 +26,7 @@ function getLoaders({
   } = structure;
   const staticPath = assets + '/';
   include = include.map(s => _path.PROJECT_ROOT_PATH + '/' + s);
-  return [...(0, _transpilingLoader.getTranspilingLoader)(env, projectType, projectLanguageType), ...(0, _templatingLoader.getTemplatingLoader)(), ...(0, _styleLoader.getStyleLoader)(env), ...(0, _fileLoader.getFileLoader)(env, staticPath, maxSize)].map(rule => ({ ...rule,
+  return [...(0, _transpilingLoader.getTranspilingLoader)(projectOption), ...(0, _templatingLoader.getTemplatingLoader)(), ...(0, _styleLoader.getStyleLoader)(), ...(0, _fileLoader.getFileLoader)(staticPath, maxSize)].map(rule => ({ ...rule,
     exclude: [// \\ for Windows, / for macOS and Linux
     /node_modules[\\/]core-js/, /node_modules[\\/]webpack[\\/]buildin/, /bower_components/],
     include: [_path.PROJECT_ROOT_PATH + '/' + src, _path.PROJECT_ROOT_PATH + '/index.js', _path.PROJECT_ROOT_PATH + '/index.ts', ...include]

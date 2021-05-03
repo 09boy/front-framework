@@ -3,15 +3,21 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.loadCliData = loadCliData;
+exports.parseCliDocData = parseCliDocData;
 exports.default = SmartCli;
 
 var _jsYaml = _interopRequireDefault(require("js-yaml"));
 
 var _fs = require("fs");
 
-var _smartCommander = require("./smartCommander");
+var _log = require("../share/log");
 
-var _smartInquirer = require("./smartInquirer");
+var _LogType = require("../types/LogType");
+
+var _smartCommander = _interopRequireDefault(require("./smartCommander"));
+
+var _smartInquirer = _interopRequireDefault(require("./smartInquirer"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -19,12 +25,12 @@ function loadCliData() {
   try {
     return _jsYaml.default.load((0, _fs.readFileSync)(`${__dirname}/config.yml`, 'utf8'));
   } catch (e) {
-    console.log(e);
-    return undefined;
+    (0, _log.PrintLog)(_LogType.LogType.configFileLoadFailed, e.message);
+    throw new Error(e.message);
   }
 }
 
-function parseData(doc, filtersCli = []) {
+function parseCliDocData(doc, includesCli) {
   const {
     Commands
   } = doc;
@@ -32,24 +38,38 @@ function parseData(doc, filtersCli = []) {
   const inquirerOptions = [];
 
   for (const key in Commands) {
-    if (filtersCli.includes(key)) {
-      continue;
-    }
+    if (Object.hasOwnProperty.call(Commands, key) && key) {
+      if (!includesCli.includes(key)) {
+        continue;
+      }
 
-    const config = Commands[key];
-    const {
-      children,
-      interactive
-    } = config;
+      const {
+        interactive,
+        children,
+        alias,
+        desc,
+        name,
+        options,
+        callback
+      } = Commands[key];
 
-    if (interactive) {
-      !Array.isArray(interactive) ? inquirerOptions.push(interactive) : inquirerOptions.push(...interactive);
-    }
+      if (Array.isArray(interactive)) {
+        inquirerOptions.push(...interactive);
+      } else {
+        inquirerOptions.push(interactive);
+      }
 
-    if (!children) {
-      commandOptions.push(config);
-    } else {
-      commandOptions.push(...children);
+      if (children) {
+        commandOptions.push(...children);
+      } else {
+        commandOptions.push({
+          name: name,
+          alias: alias,
+          desc: desc,
+          options,
+          callback
+        });
+      }
     }
   }
 
@@ -59,24 +79,16 @@ function parseData(doc, filtersCli = []) {
   };
 }
 
-async function SmartCli(filtersCli) {
-  const cliData = loadCliData();
-
-  if (!cliData) {
-    return;
-  }
-
+async function SmartCli(includesCli = []) {
+  const configData = loadCliData();
   const {
     commandOptions,
     inquirerOptions
-  } = parseData(cliData, filtersCli);
-  let result = await (0, _smartCommander.smartCommand)(commandOptions);
+  } = parseCliDocData(configData, includesCli);
 
-  if (!result) {
-    result = await (0, _smartInquirer.SmartInquirer)(inquirerOptions);
+  if (process.argv.length <= 2) {
+    return await (0, _smartInquirer.default)(inquirerOptions);
   }
 
-  return result;
+  return await (0, _smartCommander.default)(commandOptions);
 }
-
-module.exports = exports.default;

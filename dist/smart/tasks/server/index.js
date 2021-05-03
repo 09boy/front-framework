@@ -15,9 +15,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 class Server {
   constructor({
-    port = 3000,
-    host = '127.0.0.1',
-    htmlPath = `${_path.PROJECT_ROOT_PATH}/dist/index.html`
+    port,
+    host,
+    htmlPath
   }) {
     const ps = htmlPath === null || htmlPath === void 0 ? void 0 : htmlPath.split('/');
     ps === null || ps === void 0 ? void 0 : ps.pop();

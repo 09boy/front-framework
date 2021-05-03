@@ -1,15 +1,17 @@
 import { WebpackPluginInstance, HotModuleReplacementPlugin, NoEmitOnErrorsPlugin } from 'webpack';
 import ESLintPlugin, { Options } from 'eslint-webpack-plugin';
-import { getDynamicModule } from 'share/tool';
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
+import { getDynamicModule } from 'share/projectHelper';
 import { PROJECT_ROOT_PATH } from 'share/path';
+import { isDevEnv } from 'share/env';
+import { SmartProjectOption } from 'types/Smart';
 
-export function getDevelopmentPlugins(devMode: boolean, projectType: ProjectType, projectLanguageType: ProjectLanguageType): WebpackPluginInstance[] {
+export function getDevelopmentPlugins({ projectType, scriptType }: SmartProjectOption): WebpackPluginInstance[] {
+  const devMode = isDevEnv();
   if (!devMode) {
     return [];
   }
 
-  const isTs = projectLanguageType !== 'js';
+  const isTs = scriptType === 'ts';
   const options: Options = {
     extensions: ['js', 'ts', 'jsx', 'tsx', 'json'],
     fix: true,

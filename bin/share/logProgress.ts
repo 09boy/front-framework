@@ -1,28 +1,28 @@
-import { Listr, ListrTask } from 'listr2';
+import { Listr, ListrTask, ListrContext } from 'listr2';
 import { LogError } from './log';
 
 
-interface Ctx {
+interface Ctx extends ListrContext{
   /* some variables for internal use */
+  k?: any;
 }
 
-const ctx: Ctx = {
-};
+const ctx: Ctx = {};
 
 export default class LogProgressTask {
   private tasks: Listr  = new Listr<Ctx>([], { ctx, concurrent: false });
 
-  async add(tasks: ListrTask[]) {
+  add(tasks: ListrTask[]): void {
     tasks.map(t => {
       this.tasks.add(t);
     });
   }
 
-  async run() {
+  async run(): Promise<void> {
     try {
-      const cc = await this.tasks.run();
-    } catch (e) {
-      LogError(`LogProgress Error: ${e}`);
+      await this.tasks.run();
+    } catch (error: unknown) {
+      LogError(`LogProgress Error: ${(error as TypeError).message}`);
     }
   }
 }

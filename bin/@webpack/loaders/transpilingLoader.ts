@@ -1,14 +1,13 @@
 import { RuleSetRule } from 'webpack';
 import { Options } from '@babel/preset-env';
-import { EnvType } from 'types/EnvType';
-import { isDevEnv } from '../tool';
-import { getDynamicModule } from 'share/tool';
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
+import { isDevEnv } from 'share/env';
+import { getDynamicModule } from 'share/projectHelper';
+import { SmartProjectOption } from 'types/Smart';
 
 
-export function getTranspilingLoader(env: EnvType, projectType: ProjectType, projectLanguageType: ProjectLanguageType): RuleSetRule[] {
-  const devMode = isDevEnv(env);
-  const isTs = projectLanguageType === ProjectLanguageType.Typescript;
+export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOption): RuleSetRule[] {
+  const devMode = isDevEnv();
+  const isTs = scriptType === 'ts';
   const isReact = projectType === 'react';
 
   let envOptions: Options = {
@@ -24,7 +23,7 @@ export function getTranspilingLoader(env: EnvType, projectType: ProjectType, pro
   const plugins: string | any[] = [
     getDynamicModule('@babel/plugin-transform-runtime'),
     [getDynamicModule('@babel/plugin-proposal-decorators'), { legacy: true }],
-    [getDynamicModule('@babel/plugin-proposal-class-properties'), {loose: true}],
+    [getDynamicModule('@babel/plugin-proposal-class-properties'), { loose: true }],
     getDynamicModule('@babel/plugin-syntax-dynamic-import'),
     getDynamicModule('@babel/plugin-proposal-async-generator-functions'),
   ];

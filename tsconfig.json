@@ -15,7 +15,8 @@
     "types": ["node", "jest"],
     "typeRoots": ["./node_modules/@types", "./typings.d.ts"],
     "lib": [
-      "es2020"
+      "es2020",
+      "dom"
     ],
     "baseUrl": ".",
     "paths": {
@@ -25,12 +26,11 @@
     "outDir": "./dist"
   },
   "include": [
-    "bin/**/*"
+    "bin/**/*",
+    "__tests__"
   ],
   "exclude": [
-    "__tests__",
     "bin/smart/templates",
     "node_modules",
-    "babel.config.js",
   ]
 }

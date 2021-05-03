@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.smartCommand = smartCommand;
+exports.default = smartCommand;
 
 var _commander = require("commander");
 
@@ -11,116 +11,76 @@ var _version = require("../share/version");
 
 var _log = require("../share/log");
 
-var _EnvType = require("../types/EnvType");
+var _LogType = require("../types/LogType");
 
-var _ProjectType = require("../types/ProjectType");
-
-function parsePort(port) {
-  if (isNaN(port)) {
-    throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)('Not a number.'));
-  }
-
-  if (port.toString().length !== 4) {
-    throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)('Port must be 4 digits.'));
-  }
-
-  return port;
-}
-
-function parseEnv(env) {
-  if (!_EnvType.EnvNames.includes(env)) {
-    (0, _log.LogError)(`
-Error: Not a valid value.
-The value is one of  'test'、 'staging'、'release.`);
-    process.exit(1);
-  }
-
-  return env;
-}
-
-function parseApiPath(path) {
-  return path || '/';
-}
-
-function parseLanguageType(type) {
-  type = type.toLocaleLowerCase();
-
-  if (type === _ProjectType.ProjectLanguageType.Typescript || type === _ProjectType.ProjectLanguageType.Javascript || type === _ProjectType.ProjectLanguageType.Javascript1 || type === _ProjectType.ProjectLanguageType.Typescript1) {
-    return type;
-  }
-
-  throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)('Aot a valid value, js、javascript、ts、typescript'));
-}
+var _parseFun = require("./parseFun");
 
 function validationOptionParams(callback) {
-  if (callback === 'parsePort') {
-    return parsePort;
-  } else if (callback === 'parseEnv') {
-    return parseEnv;
-  }
-
   switch (callback) {
     case 'parsePort':
-      return parsePort;
+      return _parseFun.parsePortByCli;
 
     case 'parseApiPath':
-      return parseApiPath;
+      return _parseFun.parseApiPathByCli;
 
-    case 'parseLanguageType':
-      return parseLanguageType;
+    case 'parseScriptType':
+      return _parseFun.parseScriptTypeByCli;
+
+    case 'parseProjectType':
+      return _parseFun.parseProjectTypeByCli;
 
     default:
       return undefined;
   }
 }
 
-let resultValue;
+let commandValue;
 
-async function commandAction(args, option, command) {
-  let options = option;
-  let argValues = args;
-  const name = (command === null || command === void 0 ? void 0 : command.name()) || (option === null || option === void 0 ? void 0 : option.name());
+function commandAction(commandArg, options, command) {
+  const cliName = (command === null || command === void 0 ? void 0 : command.name()) || (options === null || options === void 0 ? void 0 : options.name());
+  const {
+    cli,
+    projectType
+  } = (0, _parseFun.parseSmartCliByCli)(cliName);
+  const args = {
+    projectType
+  };
 
-  if (name === 'build') {
-    args = parseEnv(args);
-    argValues = {
-      env: args
-    };
+  if (cli === 'build') {
+    args.modeType = (0, _parseFun.parseBuildEnv)(commandArg, false);
   }
 
-  if (!command) {
-    // 如果一个命令没有参数也没有options
-    options = args;
-    argValues = undefined;
+  if (options && !command) {
+    Object.assign(args, commandArg);
   }
 
-  if (typeof argValues === 'string') {
-    const key = name.includes('create') ? 'projectName' : argValues;
-    argValues = {
-      [key]: argValues
-    };
-  }
+  if (options && command) {
+    Object.assign(args, options);
 
-  resultValue = {
-    cliName: name,
-    args: { ...argValues,
-      ...options
+    if (cli === 'init' || cli === 'create') {
+      args.projectDir = commandArg;
+    } else if (Array.isArray(commandArg)) {
+      if (cli === 'page') {
+        args.pages = commandArg;
+      } else if (cli === 'component') {
+        args.components = commandArg;
+      }
     }
+  }
+
+  commandValue = {
+    cli,
+    args
   };
 }
 
 async function smartCommand(data) {
-  if (process.argv.length <= 2) {
-    return undefined;
-  }
-
   const program = new _commander.Command();
   program.version(_version.SMART_VERSION).name('smart').on('command:*', operands => {
     if (operands[0]) {
-      (0, _log.LogError)(`Error: unknown command '${operands[0]}'. See 'smart --help'.`);
+      (0, _log.PrintLog)(_LogType.LogType.cliNotExist, operands[0]);
     }
 
-    resultValue = undefined;
     process.exitCode = 1;
   });
   data.map(({
@@ -131,12 +91,14 @@ async function smartCommand(data) {
   }) => {
     const currentProgram = program.command(name).alias(alias).description(desc).action(commandAction);
 
-    if (options) {
+    if (Array.isArray(options)) {
       options.map(o => {
         currentProgram.option(o.name, o.desc, validationOptionParams(o.callback));
       });
     }
   });
   await program.parseAsync(process.argv);
-  return resultValue;
+  return commandValue;
 }
+
+module.exports = exports.default;

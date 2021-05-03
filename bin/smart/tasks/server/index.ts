@@ -1,13 +1,8 @@
 import express, { Application, RequestHandler } from 'express';
 import { LogError } from 'share/log';
 import { PROJECT_ROOT_PATH } from 'share/path';
-import fs from 'fs';
+import { SmartServerOptionType } from 'types/Smart';
 
-export type ServerOptionType = {
-  port?: string | number;
-  host?: string;
-  htmlPath?: string;
-};
 
 export class Server {
   private readonly app: Application;
@@ -15,7 +10,7 @@ export class Server {
   private readonly port: number | string;
   private readonly htmlPath: string;
 
-  constructor({ port = 3000, host= '127.0.0.1', htmlPath = `${PROJECT_ROOT_PATH}/dist/index.html` }: ServerOptionType) {
+  constructor({ port, host, htmlPath }: SmartServerOptionType) {
     const ps =  htmlPath?.split('/');
     ps?.pop();
     const buildDir = ps?.pop() || 'dist';
@@ -27,7 +22,7 @@ export class Server {
     this.app.use(express.static(PROJECT_ROOT_PATH + '/' + buildDir + '/home'));
   }
 
-  addHook(handles: RequestHandler | RequestHandler[]) {
+  addHook(handles: RequestHandler | RequestHandler[]): void {
     if (Array.isArray(handles)) {
       handles.map(h => this.app.use(h));
     } else {
@@ -35,7 +30,7 @@ export class Server {
     }
   }
 
-  start() {
+  start(): void {
     if (!this.app) {
       LogError('Server instance not found!');
       return;

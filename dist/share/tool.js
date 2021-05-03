@@ -62,16 +62,15 @@ function getProjectPaths({
   };
 }
 
-const FILE_Reg = /[.\-_' ']/g;
+const FILE_Reg = /[.\-_']/g;
 
 function getComponentDirName(name) {
   name = name.trim().toLocaleLowerCase().replace(FILE_Reg, '#');
-  name = name.replace(/\#/g, '-');
+  name = name.replace(/#/g, '-');
   return name;
 }
 
 function getClassName(name) {
   name = name.trim().toLocaleLowerCase().replace(FILE_Reg, '#');
-  const names = name.split('#').map(s => s.replace(s.charAt(0), s.charAt(0).toUpperCase())).join('');
-  return names;
+  return name.split('#').map(s => s.replace(s.charAt(0), s.charAt(0).toUpperCase())).join('');
 }

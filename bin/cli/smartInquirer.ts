@@ -1,23 +1,9 @@
-import inquirer, { ListQuestionOptions, QuestionTypeName, ChoiceCollection } from 'inquirer';
+import inquirer, { ListQuestionOptions } from 'inquirer';
 import { getLogErrorStr } from 'share/log';
-import { SmartCliResultType } from './index';
 import { isValidProjectName } from 'share/projectHelper';
-
-type Option = {
-  name: string;
-  value: string;
-  type?: QuestionTypeName;
-  children?: ChoiceCollection;
-  validate?: string;
-  [key: string]: any;
-};
-
-type ChildOption = {
-  result: SmartCliResultType;
-  data?: Option | any;
-};
-
-export type InquirerDataType = Option[];
+import { SmartInquirerOption } from 'types/SmartCliConfig';
+import { SmartCliArgs, SmartOption } from 'types/Smart';
+import { parseSmartCliByCli, parsePortByCli } from './parseFun';
 
 function parsePages(value: string): boolean | string {
   if (!value) {
@@ -37,10 +23,18 @@ function parseProjectName(value: string): boolean | string {
   return true;
 }
 
+function parsePort(value: string): boolean | string {
+  parsePortByCli(value);
+  return true;
+}
 
-function applyValidate(option: any): any {
+
+function applyValidate(option: SmartInquirerOption): SmartInquirerOption {
   let validate;
-  switch (option.validate) {
+  switch (option.callback) {
+    case 'parsePort':
+      validate = parsePort;
+      break;
     case 'parsePages':
       validate = parsePages;
       break;
@@ -50,24 +44,37 @@ function applyValidate(option: any): any {
     default:
       break;
   }
-
   return { ...option, validate };
 }
 
-async function parseValues({ result, data }: ChildOption): Promise<SmartCliResultType> {
-  if (data) {
-    const copyResult: SmartCliResultType = { ...result };
-    const { children, name, key } = data;
-    const copyData = applyValidate(data);
-    const args: any = await inquirer.prompt(copyData);
-    if (key) {
-      args[key] = args[name];
-      delete args[name];
+async function parseValues(cliName: string, cliArgs?: SmartCliArgs, option?: SmartInquirerOption): Promise<SmartOption> {
+  const { cli, projectType } = parseSmartCliByCli(cliName);
+  const args: SmartCliArgs = {  projectType, ...cliArgs };
+
+  if (option) {
+    const { children, name, key } = option;
+    const copyOption = applyValidate(option);
+
+    const values: any = await inquirer.prompt(copyOption);
+    if (key && typeof key === 'string') {
+      let keyValue = (values as Record<string, string | string[]>)[name];
+      if (Array.isArray(keyValue)) {
+        keyValue = keyValue[0];
+      }
+      if (key !== 'port' && keyValue.includes(',')) {
+        keyValue = keyValue.split(',');
+      }
+      Object.assign(args, { [key]: keyValue });
+    } else {
+      Object.assign(args, { ...values });
     }
-    copyResult.args = { ...copyResult.args, ...args };
-    return parseValues({ result: copyResult, data: children });
+    return parseValues(cliName, args, children as SmartInquirerOption);
   }
-  return result;
+
+  return {
+    cli,
+    args,
+  };
 }
 
 const smartOption: ListQuestionOptions = {
@@ -77,9 +84,10 @@ const smartOption: ListQuestionOptions = {
   choices: [],
 };
 
-export async function SmartInquirer(data: InquirerDataType): Promise<SmartCliResultType | undefined> {
+export default async function SmartInquirer(data: SmartInquirerOption[]): Promise<SmartOption> {
+  data = data.map(o => applyValidate(o));
   smartOption.choices = data.map(({ name, value }) => ({ name: name, value: value }));
-  const { name } = await inquirer.prompt([smartOption]);
-  const option = data.filter(({ value, type }) => value === name && !!type)[0];
-  return parseValues({ result: { cliName: name }, data: option });
+  const { name: cliName } = await inquirer.prompt([smartOption]);
+  const option = data.filter(({ value, type }) => value === cliName && !!type)[0];
+  return parseValues(cliName, {}, option);
 }

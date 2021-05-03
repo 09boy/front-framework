@@ -3,54 +3,37 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isDevEnv = isDevEnv;
 exports.parseConfigData = parseConfigData;
-
-var _ProjectType = require("../types/ProjectType");
 
 var _log = require("../share/log");
 
 var _path = require("../share/path");
 
-var _tool = require("../share/tool");
+var _projectHelper = require("../share/projectHelper");
 
-function isDevEnv(env) {
-  return env === 'development' || env === 'start';
-}
+var _env = require("../share/env");
 
-function parseConfigData(env, config) {
-  if (process.env.BuildConfig) {
-    var _config;
-
-    config = JSON.parse(process.env.BuildConfig);
-    env = (_config = config) === null || _config === void 0 ? void 0 : _config.env;
-  }
-
-  const devMode = isDevEnv(env);
-  let {
-    name,
+function parseConfigData({
+  projectOption,
+  configOption
+}) {
+  const devMode = (0, _env.isDevEnv)();
+  const {
+    projectType,
+    name
+  } = projectOption;
+  const {
     port,
     host,
-    projectType,
-    structure,
+    base64Limit,
     entry,
-    vendors,
     devtool,
-    publicPath,
-    buildDir,
+    vendors,
     provide,
-    resolveAlias,
-    scriptingLanguageType,
-    base64Limit
-  } = config;
-  const projectLanguageType = scriptingLanguageType || _ProjectType.ProjectLanguageType.Javascript;
-  name = name || 'Smart App';
-  projectType = projectType || 'normal';
-  port = port || 3000;
-  host = host || '127.0.0.1';
-  devtool = devMode ? devtool || 'inline-source-map' : 'source-map';
-  publicPath = publicPath || '/';
-  buildDir = _path.PROJECT_ROOT_PATH + '/' + (buildDir || 'dist');
+    structure
+  } = configOption;
+  const publicPath = configOption.publicPath || '/';
+  const buildDir = _path.PROJECT_ROOT_PATH + '/' + (configOption.buildDir || 'dist');
 
   if (vendors && typeof vendors === 'object' && Array.isArray(vendors)) {
     throw new Error((0, _log.getLogErrorStr)('"vendors" is not valid object.'));
@@ -60,48 +43,46 @@ function parseConfigData(env, config) {
     throw new Error((0, _log.getLogErrorStr)('"structure" is error.'));
   }
 
-  resolveAlias = { ...resolveAlias
+  const resolveAlias = { ...configOption.resolveAlias
   };
   const copyStructure = { ...structure
   };
 
   for (const key in copyStructure) {
-    if (copyStructure.hasOwnProperty(key)) {
+    if (Object.hasOwnProperty.call(copyStructure, key)) {
       const value = copyStructure[key];
 
       if (key !== 'src' && value) {
-        resolveAlias[key] = _path.PROJECT_ROOT_PATH + '/' + copyStructure.src + '/' + value;
+        resolveAlias[key] = `${_path.PROJECT_ROOT_PATH}/${copyStructure.src}/${value}`;
       }
     }
   }
 
   const htmlEntryFiles = {};
 
-  for (let key in entry) {
-    if (entry.hasOwnProperty(key)) {
+  for (const key in entry) {
+    if (Object.hasOwnProperty.call(entry, key)) {
+      var _entry$key;
+
       htmlEntryFiles[key] = { ...entry[key],
-        favicon: structure.src + '/' + structure.assets + '/' + entry[key].favicon
+        favicon: (_entry$key = entry[key]) !== null && _entry$key !== void 0 && _entry$key.favicon ? `${structure.src}/${structure.assets}/${entry[key].favicon}` : undefined
       };
     }
   }
 
   const pluginsProps = {
-    devMode,
-    projectType,
+    projectOption,
     publicPath,
     provide,
-    projectLanguageType,
     entryFiles: htmlEntryFiles
   };
   const loadersProps = {
-    env,
-    projectType,
-    projectLanguageType,
+    projectOption,
     structure,
     maxSize: base64Limit || 8192
   };
   const entryOutOption = {
-    env,
+    devMode,
     name,
     port,
     host,
@@ -110,26 +91,24 @@ function parseConfigData(env, config) {
     publicPath,
     buildPath: buildDir
   };
-  const performance = devMode ? false : {
+  const performance = devMode ? undefined : {
     hints: 'warning',
     maxEntrypointSize: 400000,
     maxAssetSize: 307200,
     assetFilter: filename => !/\.(mp4|mov|wmv|flv)$/i.test(filename)
   };
   return {
+    devMode,
     name,
-    structure,
     entryOutOption,
-    devtool,
-    vendors,
+    devtool: devMode ? devtool || 'inline-source-map' : 'source-map',
     target: devMode ? 'web' : 'browserslist',
     publicPath,
-    devMode,
     pluginsProps,
     loadersProps,
     performance,
     resolveAlias: {
-      '@babel/runtime-corejs3': (0, _tool.getDynamicModule)('@babel/runtime-corejs3'),
+      '@babel/runtime-corejs3': (0, _projectHelper.getDynamicModule)('@babel/runtime-corejs3'),
       'react': _path.PROJECT_ROOT_PATH + '/node_modules/react',
       '@hot-loader/react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
       'react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',

@@ -1,13 +1,12 @@
 import { RuleSetRule } from 'webpack';
-import { EnvType } from 'types/EnvType';
-import { isDevEnv } from '../tool';
-import { getDynamicModule } from 'share/tool';
+import { isDevEnv } from 'share/env';
+import { getDynamicModule } from 'share/projectHelper';
 
 const isJPGReg = /\.(jpe?g)$/i;
 const isPngRef = /\.(png)$/i;
 
-export function getFileLoader(env: EnvType, staticPath: string, maxSize: number): RuleSetRule[] {
-  const envModel = isDevEnv(env);
+export function getFileLoader(staticPath: string, maxSize: number): RuleSetRule[] {
+  const envModel = isDevEnv();
   const name = envModel ? '[name][ext][query]' : '[contenthash][ext][query]';
   const dataUrlCondition = {
     maxSize,

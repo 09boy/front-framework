@@ -1,22 +1,20 @@
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
+import { ProjectType } from 'types/SmartProjectConfig';
 
-const JestData: any = {
+const JestData: Record<string, any> = {
   verbose: true,
+  testEnvironment: 'node', // 测试环境
   setupFiles: ['<rootDir>/jest.setup.js'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  // 忽略覆盖率的目录
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/__test__/',
+  ],
 };
 
-export function getJestConfigData(projectType: ProjectType, srcDir: string,  projectLanguageType: ProjectLanguageType = ProjectLanguageType.Javascript): object {
-  const isTs = projectLanguageType === ProjectLanguageType.Typescript;
-  JestData.testMatch = [`${srcDir}/__tests__/*.js`];
-
-  if (isTs) {
-    JestData.testMatch.push(`${srcDir}/__tests__/*.ts`);
-  }
-
+export function getJestConfigData(projectType: ProjectType): Record<string, any> {
   if (projectType === 'react') {
     JestData.preset = 'react';
   }
-
   return JestData;
 }

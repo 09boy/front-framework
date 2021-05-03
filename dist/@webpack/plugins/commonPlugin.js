@@ -7,7 +7,10 @@ exports.getCommonPlugins = getCommonPlugins;
 
 var _webpack = require("webpack");
 
-function getCommonPlugins(devMode, provide) {
+var _env = require("../../share/env");
+
+function getCommonPlugins(provide) {
+  const devMode = (0, _env.isDevEnv)();
   const items = [new _webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(devMode ? 'development' : 'production')
   })];

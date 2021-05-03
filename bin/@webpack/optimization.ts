@@ -2,7 +2,7 @@ import { EntryNormalized, Template } from 'webpack';
 import TerserPlugin  from 'terser-webpack-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 
-export default function getOptimizationConfig(devMode: Boolean, vendors?: Record<string, string[]>): Template {
+export default function getOptimizationConfig(devMode: boolean, vendors?: Record<string, string[]>): Template {
   let option: Template = {
     chunkIds: 'named',
   };
@@ -39,7 +39,7 @@ export default function getOptimizationConfig(devMode: Boolean, vendors?: Record
 
     if (vendors) {
       let priority = 10;
-      for (let key in vendors) {
+      for (const key in vendors) {
         if (vendors.hasOwnProperty(key)) {
           const value: string[] = vendors[key];
           const reg = value.join('|');

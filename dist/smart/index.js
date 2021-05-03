@@ -26,41 +26,50 @@ var _createPage = _interopRequireDefault(require("./tasks/create/createPage"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 async function Smart({
-  cliType,
-  cliArgs
-}, configData) {
+  cli,
+  projectOption,
+  serverOption,
+  configOption,
+  pages,
+  components
+}) {
   let logTask;
 
-  if (cliType === 'start' || cliType === 'server') {
-    const server = new _tasks.Server(cliArgs);
+  if (serverOption && (cli === 'start' || cli === 'server')) {
+    const server = new _tasks.Server(serverOption);
 
-    if (cliType === 'start' && configData) {
-      await (0, _shelljs.rm)('-rf', _path.PROJECT_ROOT_PATH + '/' + configData.buildDir);
-      server.addHook((0, _webpackMiddleware.getWebpackMiddleware)('development', configData));
+    if (cli === 'start' && projectOption && configOption) {
+      (0, _shelljs.rm)('-rf', `${_path.PROJECT_ROOT_PATH}/${configOption.buildDir}`);
+      process.env.NODE_ENV = 'development';
+      server.addHook((0, _webpackMiddleware.getWebpackMiddleware)({
+        projectOption,
+        configOption
+      }));
     }
 
     server.start();
-  } else if (cliType === 'page') {
-    if (configData && cliArgs !== null && cliArgs !== void 0 && cliArgs.pages) {
-      await (0, _createPage.default)(cliArgs.pages, configData);
-    }
-  } else if (cliType === 'component') {
-    if (configData && cliArgs !== null && cliArgs !== void 0 && cliArgs.components) {
-      await (0, _createComponent.default)(cliArgs.components, configData);
-    }
-  } else if (cliType === 'build') {
-    process.env.BuildConfig = JSON.stringify(configData);
-    await (0, _shelljs.exec)(`${_path.SMART_ROOT_PATH}/node_modules/.bin/webpack --config ${_path.SMART_ROOT_PATH}/dist/@webpack/index.js --color`);
+  } else if (cli === 'page' && pages && projectOption) {
+    (0, _createPage.default)(projectOption.projectType, pages);
+  } else if (cli === 'component' && components && projectOption) {
+    (0, _createComponent.default)(projectOption.projectType, components);
+  } else if (cli === 'build' && projectOption && configOption) {
+    process.env.NODE_ENV = 'production';
+    process.env.BuildConfig = JSON.stringify({
+      projectOption,
+      configOption
+    });
+    (0, _shelljs.exec)(`${_path.SMART_ROOT_PATH}/node_modules/.bin/webpack --config ${_path.SMART_ROOT_PATH}/dist/@webpack/index.js --color`);
     process.env.BuildConfig = undefined;
-  } else if (cliType === 'upgrade') {
+    process.env.NODE_ENV = 'development';
+  } else if (cli === 'upgrade') {
     logTask = new _logProgress.default();
-    await logTask.add([{
+    logTask.add([{
       title: 'Git',
       task: (ctx, task) => {
         return task.newListr([{
           title: 'Checking git status',
-          task: async () => {
-            const result = await (0, _shelljs.exec)('git status --porcelain', {
+          task: () => {
+            const result = (0, _shelljs.exec)('git status --porcelain', {
               silent: true
             });
 
@@ -68,12 +77,12 @@ async function Smart({
               throw new Error('Unclean working tree. Commit or stash changes first.');
             }
 
-            await (0, _shelljs.exec)('git init');
+            (0, _shelljs.exec)('git init');
           }
         }, {
           title: 'Checking remote history',
-          task: async () => {
-            const result = await (0, _shelljs.exec)('git rev-list --count --left-only @{u}...HEAD', {
+          task: () => {
+            const result = (0, _shelljs.exec)('git rev-list --count --left-only @{u}...HEAD', {
               silent: true
             });
 
@@ -98,15 +107,13 @@ async function Smart({
       task: () => 'Done'
     }]);
     await logTask.run();
-  } else if (cliType === 'create' && cliArgs !== null && cliArgs !== void 0 && cliArgs.createOption) {
+  } else if (cli === 'create' && projectOption && configOption) {
     const {
-      structure,
-      projectName,
-      projectType,
-      projectLanguageType
-    } = cliArgs.createOption;
+      dirName,
+      projectType
+    } = projectOption;
     logTask = new _logProgress.default();
-    await logTask.add([{
+    logTask.add([{
       title: 'Smart',
       task: (ctx, task) => {
         return task.newListr([{
@@ -122,29 +129,19 @@ async function Smart({
       }
     }, {
       title: 'Create the project directory structure',
-      task: async () => {
-        if (!(0, _projectHelper.isValidProjectName)(projectName)) {
-          throw new Error(`The '${projectName}' project is already exist.`);
+      task: () => {
+        if (!(0, _projectHelper.isValidProjectName)(dirName)) {
+          throw new Error(`The '${dirName}' project is already exist.`);
         }
 
-        await (0, _tasks.createProjectStructure)(projectName, structure);
+        (0, _tasks.createProjectStructure)(projectType, dirName, configOption.structure);
       }
     }, {
       title: 'Write the configuration entry file',
-      task: async () => (0, _initFiles.initFiles)({
-        structure,
-        projectName,
-        projectType,
-        projectLanguageType
-      })
+      task: () => (0, _initFiles.initFiles)(projectOption, configOption.structure)
     }, {
       title: 'Generate project installation files',
-      task: async () => (0, _tasks.createProjectConfigurationFiles)({
-        structure,
-        projectName,
-        projectType,
-        projectLanguageType
-      })
+      task: () => (0, _tasks.createProjectConfigurationFiles)(projectOption, configOption)
     }, {
       title: 'Install package dependencies with npm',
       task: () => (0, _shelljs.exec)('npm install', {

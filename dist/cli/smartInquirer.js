@@ -3,13 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.SmartInquirer = SmartInquirer;
+exports.default = SmartInquirer;
 
 var _inquirer = _interopRequireDefault(require("inquirer"));
 
 var _log = require("../share/log");
 
 var _projectHelper = require("../share/projectHelper");
+
+var _parseFun = require("./parseFun");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -33,10 +35,19 @@ function parseProjectName(value) {
   return true;
 }
 
+function parsePort(value) {
+  (0, _parseFun.parsePortByCli)(value);
+  return true;
+}
+
 function applyValidate(option) {
   let validate;
 
-  switch (option.validate) {
+  switch (option.callback) {
+    case 'parsePort':
+      validate = parsePort;
+      break;
+
     case 'parsePages':
       validate = parsePages;
       break;
@@ -54,36 +65,51 @@ function applyValidate(option) {
   };
 }
 
-async function parseValues({
-  result,
-  data
-}) {
-  if (data) {
-    const copyResult = { ...result
-    };
+async function parseValues(cliName, cliArgs, option) {
+  const {
+    cli,
+    projectType
+  } = (0, _parseFun.parseSmartCliByCli)(cliName);
+  const args = {
+    projectType,
+    ...cliArgs
+  };
+
+  if (option) {
     const {
       children,
       name,
       key
-    } = data;
-    const copyData = applyValidate(data);
-    const args = await _inquirer.default.prompt(copyData);
+    } = option;
+    const copyOption = applyValidate(option);
+    const values = await _inquirer.default.prompt(copyOption);
 
-    if (key) {
-      args[key] = args[name];
-      delete args[name];
+    if (key && typeof key === 'string') {
+      let keyValue = values[name];
+
+      if (Array.isArray(keyValue)) {
+        keyValue = keyValue[0];
+      }
+
+      if (key !== 'port' && keyValue.includes(',')) {
+        keyValue = keyValue.split(',');
+      }
+
+      Object.assign(args, {
+        [key]: keyValue
+      });
+    } else {
+      Object.assign(args, { ...values
+      });
     }
 
-    copyResult.args = { ...copyResult.args,
-      ...args
-    };
-    return parseValues({
-      result: copyResult,
-      data: children
-    });
+    return parseValues(cliName, args, children);
   }
 
-  return result;
+  return {
+    cli,
+    args
+  };
 }
 
 const smartOption = {
@@ -94,6 +120,7 @@ const smartOption = {
 };
 
 async function SmartInquirer(data) {
+  data = data.map(o => applyValidate(o));
   smartOption.choices = data.map(({
     name,
     value
@@ -102,16 +129,13 @@ async function SmartInquirer(data) {
     value: value
   }));
   const {
-    name
+    name: cliName
   } = await _inquirer.default.prompt([smartOption]);
   const option = data.filter(({
     value,
     type
-  }) => value === name && !!type)[0];
-  return parseValues({
-    result: {
-      cliName: name
-    },
-    data: option
-  });
+  }) => value === cliName && !!type)[0];
+  return parseValues(cliName, {}, option);
 }
+
+module.exports = exports.default;

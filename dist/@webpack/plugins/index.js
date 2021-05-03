@@ -16,14 +16,12 @@ var _developmentPlugin = require("./developmentPlugin");
 var _productionPlugin = require("./productionPlugin");
 
 function getPlugins({
-  devMode,
-  entryFiles,
-  publicPath,
+  projectOption,
   provide,
-  projectType,
-  projectLanguageType
+  entryFiles,
+  publicPath
 }) {
-  return [...(0, _stylePlugin.getStylePlugin)(devMode), ...(0, _htmlPlugin.getHtmlPlugin)(devMode, publicPath, entryFiles), ...(0, _commonPlugin.getCommonPlugins)(devMode, provide), ...(0, _developmentPlugin.getDevelopmentPlugins)(devMode, projectType, projectLanguageType), ...(0, _productionPlugin.getProductionPlugins)(devMode)];
+  return [...(0, _stylePlugin.getStylePlugin)(), ...(0, _htmlPlugin.getHtmlPlugin)(publicPath, entryFiles), ...(0, _commonPlugin.getCommonPlugins)(provide), ...(0, _developmentPlugin.getDevelopmentPlugins)(projectOption), ...(0, _productionPlugin.getProductionPlugins)()];
 }
 
 module.exports = exports.default;

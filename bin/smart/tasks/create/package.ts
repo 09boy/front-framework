@@ -1,5 +1,6 @@
 import { exec } from 'shelljs';
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
+import { ProjectType } from 'types/SmartProjectConfig';
+import { SmartProjectOption } from 'types/Smart';
 
 const packageData = {
   name: 'smart-sample-project',
@@ -30,7 +31,7 @@ type DependenciesType = {
 
 const commonsDev = ['jest', 'babel-jest', 'pre-commit', 'eslint-plugin-import', 'eslint-import-resolver-babel-module', 'eslint', 'babel-plugin-module-resolver', 'babel-plugin-add-module-exports'];
 
-function getDependenciesName(projectType: ProjectType, isTs: Boolean): DependenciesType {
+function getDependenciesName(projectType: ProjectType, isTs: boolean): DependenciesType {
   let dependencies: string[] = [];
   let devDependencies: string[] = isTs ?
     ['typescript', '@typescript-eslint/parser',
@@ -39,22 +40,21 @@ function getDependenciesName(projectType: ProjectType, isTs: Boolean): Dependenc
     : ['@babel/eslint-parser', ...commonsDev];
 
   switch (projectType) {
-    case ProjectType.Unknown:
-    case ProjectType.Normal:
+    case 'normal':
       dependencies = ['moment'];
       break;
-    case ProjectType.React:
+    case 'react':
       dependencies = ['moment', 'react', '@hot-loader/react-dom', '@reduxjs/toolkit', 'redux-saga', 'reselect', 'redux-logger', 'react-redux', 'react-router-dom'];
       devDependencies = [...devDependencies, 'eslint-plugin-react', 'eslint-plugin-react-hooks', 'eslint-plugin-jsx-a11y', 'react-test-renderer', 'prop-types'];
       if (isTs) {
         devDependencies.push('@types/react', '@types/react-redux', '@types/redux-logger', '@types/react-router-dom');
       }
       break;
-    case ProjectType.Vue:
+    case 'vue':
       break;
-    case ProjectType.Nodejs:
+    case 'nodejs':
       break;
-    case ProjectType.MiniProgram:
+    case 'miniProgram':
       break;
     default:
       break;
@@ -65,16 +65,19 @@ function getDependenciesName(projectType: ProjectType, isTs: Boolean): Dependenc
   };
 }
 
-async function getDependenciesVersion({ dependencies, devDependencies }: DependenciesType ): Promise<DependenciesType> {
-  const ds: any = {};
-  const devS: any = {};
+function getDependenciesVersion({ dependencies, devDependencies }: DependenciesType ): {
+  dependencies: Record<string, string>,
+  devDependencies: Record<string, string>
+} {
+  const ds: Record<string, string> = {};
+  const devS: Record<string, string> = {};
 
-  [...dependencies].sort((a, b) => (a + '').localeCompare(b + '')).map((async (p) => {
-    const version = await exec(`npm view ${p.trim()} version`, { silent: true });
+  [...dependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(((p) => {
+    const version = exec(`npm view ${p.trim()} version`, { silent: true });
     ds[p.trim()] = `^${version.replace('\n', '')}`;
   }));
-  [...devDependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(async (p) => {
-    const version = await exec(`npm view ${p.trim()} version`, { silent: true });
+  [...devDependencies].sort((a, b) => (a + '').localeCompare(b + '')).map((p) => {
+    const version = exec(`npm view ${p.trim()} version`, { silent: true });
     devS[p.trim()] = `^${version.replace('\n', '')}`;
   });
 
@@ -84,9 +87,9 @@ async function getDependenciesVersion({ dependencies, devDependencies }: Depende
   };
 }
 
-export async function getPackageData(projectName: string, projectType: ProjectType, scriptingLanguageType: ProjectLanguageType = ProjectLanguageType.Javascript, src: string = 'src'): Promise<object> {
-  const isTs = scriptingLanguageType === ProjectLanguageType.Typescript;
-  const dependenciesData = await getDependenciesVersion(getDependenciesName(projectType, isTs));
+export function getPackageData({ projectType, scriptType, dirName } :SmartProjectOption, src: string): Record<string, any> {
+  const isTs = scriptType === 'ts';
+  const dependenciesData = getDependenciesVersion(getDependenciesName(projectType, isTs));
   let lint;
   if (projectType === 'normal') {
     lint = `eslint --ext .js,.ts ./${src} --fix`;
@@ -97,14 +100,14 @@ export async function getPackageData(projectName: string, projectType: ProjectTy
   return {
     ...packageData,
     ...dependenciesData,
-    name: `smart-${projectName}-project`,
+    name: `smart-${dirName}-project`,
     scripts: {
       ...packageData.scripts,
       lint,
     },
     smart: {
       projectType,
-      scriptingLanguageType,
+      scriptType,
     },
   };
 }

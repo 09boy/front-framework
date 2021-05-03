@@ -1,52 +1,46 @@
 import { join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { SmartConfigType } from 'types/SmartConfigType';
-import { ProjectLanguageType } from 'types/ProjectType';
-import { getClassName, getComponentDirName, getProjectPaths } from 'share/tool';
+import { SmartCreatePage } from 'types/Smart';
 import { mkdir } from 'shelljs';
+import { ProjectType, ScriptType } from 'types/SmartProjectConfig';
+import { PROJECT_ROOT_PATH } from 'share/path';
+import { getClassName, getComponentDirName } from 'share/projectHelper';
 
 
-export default async function createPages(names: string[], {  structure, projectType, scriptingLanguageType }: SmartConfigType) {
-  scriptingLanguageType = scriptingLanguageType || ProjectLanguageType.Javascript;
-  const { pagesPath } = getProjectPaths(structure);
+export default function createPages(projectType: ProjectType, { names, scriptType, dirPath }: SmartCreatePage): void {
+  const routConfigPath =  PROJECT_ROOT_PATH + '/' + dirPath + '/route.config.' + scriptType + 'x';
+  const dirPaths = names.map(n => `${PROJECT_ROOT_PATH}/${dirPath}/${getComponentDirName(n)}`);
+  mkdir('-p', dirPaths);
 
-  const routConfigPath = pagesPath + '/route.config.' + scriptingLanguageType + 'x';
-
-  const dirPaths = names.map(s => pagesPath + '/' + getComponentDirName(s));
-  await mkdir('-p', dirPaths);
-
-  const pageNames: {dirName: string; className: string;}[] = [];
-
-  if (projectType === 'react') {
-    for (let i = 0; i < dirPaths.length; i++ ) {
-      const s = dirPaths[i];
-      const dirName = s.split('/').pop() as string;
-      const className = getClassName(names[i]);
-      await parseReact(scriptingLanguageType, s, className);
-      pageNames.push({dirName, className});
+  // const pageNames: {dirName: string; className: string;}[] = [];
+  dirPaths.map((n, i) => {
+    const className = getClassName(names[i]);
+    const pageDirName = n.split('/').pop() as string;
+    if (projectType === 'react') {
+      parseReact(scriptType, n, className);
+      updateRouteConfig(routConfigPath, className, dirPath + '/' + pageDirName);
     }
-  }
-  console.log(pageNames, dirPaths);
-  await updateRouteConfig(routConfigPath, pageNames);
+  });
+  console.log(dirPaths);
 }
 
-async function parseReact(languageType: ProjectLanguageType, savePath: string, ClassName: string) {
-  const indexFilePath = join(__dirname,  '..', '..', '/templates/react/', languageType, `/page/index.${languageType}x`);
-  const styleFilepath = join(__dirname,  '..', '..', '/templates/react/', languageType, '/page/style.scss');
+function parseReact(scriptType: ScriptType, savePath: string, ClassName: string) {
+  const indexFilePath = join(__dirname,  '..', '..', '/templates/react/', scriptType, `/page/index.${scriptType}x`);
+  const styleFilepath = join(__dirname,  '..', '..', '/templates/react/', scriptType, '/page/style.scss');
 
-  let indexData = await readFileSync(indexFilePath, 'utf-8');
+  let indexData = readFileSync(indexFilePath, 'utf-8');
   indexData = indexData.replace(/<PageName>/g, ClassName);
 
-  let styleData = await readFileSync(styleFilepath, 'utf-8');
+  let styleData = readFileSync(styleFilepath, 'utf-8');
   styleData = styleData.replace(/<PageName>/g, ClassName);
 
-  await writeFileSync(savePath + '/index.' + languageType + 'x', indexData, 'utf-8');
-  await writeFileSync(savePath + '/style.scss', styleData, 'utf-8');
+  writeFileSync(savePath + '/index.' + scriptType + 'x', indexData, 'utf-8');
+  writeFileSync(savePath + '/style.scss', styleData, 'utf-8');
 }
 
-async function updateRouteConfig(configPath: string, pageNames: Record<string, unknown>[]) {
-  const routeConfigData = await readFileSync(configPath, 'utf-8');
+function updateRouteConfig(configPath: string, className: string, pagePath: string) {
+  const routeConfigData = readFileSync(configPath, 'utf-8');
   const [importsData, contentData] = routeConfigData.split('const');
-  const newImports = importsData.trim() + '\n' + pageNames.map(o => `import ${o.className}Screen from 'pages/${o.dirName}';`).join('\n');
-  await writeFileSync(configPath, newImports + '\n\n' + 'const' + contentData, 'utf-8');
+  const newImports = importsData.trim() + '\n' + `import ${className}Screen from '${pagePath}';` + '\n';
+  writeFileSync(configPath, newImports + '\n\n' + 'const' + contentData, 'utf-8');
 }

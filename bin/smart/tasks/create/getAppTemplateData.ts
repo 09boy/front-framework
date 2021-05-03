@@ -1,16 +1,19 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
+import { ScriptType, ProjectType } from 'types/SmartProjectConfig';
 
-export async function getTemplateData(projectType: ProjectType, projectLanguageType: ProjectLanguageType) {
+export function getTemplateData(projectType: ProjectType, scriptType: ScriptType): {
+  indexData: string;
+  appData: string;
+} {
   let indexData = '';
   let appData = '';
 
   if (projectType === 'normal') {
-
+    console.log('');
   } else if (projectType === 'react') {
-    indexData = await readFileSync(join(__dirname, '..', '..', `templates/react/${projectLanguageType}/index.${projectLanguageType}`), 'utf-8');
-    appData = await readFileSync(join(__dirname, '..', '..', `templates/react/${projectLanguageType}/app.${projectLanguageType}x`), 'utf-8');
+    indexData = readFileSync(join(__dirname, '..', '..', `templates/react/${scriptType}/index.${scriptType}`), 'utf-8');
+    appData = readFileSync(join(__dirname, '..', '..', `templates/react/${scriptType}/app.${scriptType}x`), 'utf-8');
   }
 
   return {

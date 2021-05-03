@@ -1,26 +1,22 @@
 import webpack, { Entry } from 'webpack';
-import { EnvType } from 'types/EnvType';
-import { ProjectType } from 'types/ProjectType';
-import { EntryType } from 'types/SmartConfigType';
-import { getDynamicModule } from 'share/tool';
-import { isDevEnv } from './tool';
+import { ProjectType, SmartEntryOption } from 'types/SmartProjectConfig';
+import { getDynamicModule } from 'share/projectHelper';
 import { PROJECT_ROOT_PATH } from 'share/path';
 
 
 export type EntryAndOutputOptionsType = {
-  env: EnvType;
+  devMode: boolean;
   projectType: ProjectType;
   host: string;
   port: number;
-  entryFiles: EntryType;
+  entryFiles: SmartEntryOption;
   name: string;
   publicPath: string;
   buildPath: string;
 }
 
-function getDevelopmentHRMItem(devMode: boolean, entryPath: string, projectType: ProjectType, host: string, port: number | string, name: string): string | string[] {
-
-   if (devMode) {
+function getEntryItem(devMode: boolean, projectType: ProjectType, host: string, port: number | string, name: string, entryPath: string): string | string[] {
+  if (devMode) {
      const item: string[] = [
        `${getDynamicModule('webpack-hot-middleware')}/client?path=http://${host}:${port}/__webpack_hmr&name=${name}&reload=true&overlay=true&timeout=3000`,
        entryPath,
@@ -36,20 +32,18 @@ function getDevelopmentHRMItem(devMode: boolean, entryPath: string, projectType:
    return entryPath;
 }
 
-export function getWebpackEntryAndOutputConfiguration({ env, entryFiles, projectType, host, port, name, publicPath, buildPath }: EntryAndOutputOptionsType): {
+export function getWebpackEntryAndOutputConfiguration({ devMode, entryFiles, projectType, host, port, name, publicPath, buildPath }: EntryAndOutputOptionsType): {
   entry: Entry,
   output: any,
 } {
-  const devMode = isDevEnv(env);
+
   const entry: Entry = {};
 
-
   for (const key in entryFiles) {
-    if (entryFiles.hasOwnProperty(key)) {
-      let { path } = entryFiles[key];
-      path = PROJECT_ROOT_PATH + '/' + path;
+    if (Object.hasOwnProperty.call(entryFiles, key)) {
+      const entryPath = `${PROJECT_ROOT_PATH}/${entryFiles[key].path}`;
       entry[key] = {
-        import: getDevelopmentHRMItem(devMode, path, projectType, host, port, name),
+        import: getEntryItem(devMode, projectType, host, port, name, entryPath),
         dependOn: entry.shared ? 'shared' : undefined,
       };
     }

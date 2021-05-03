@@ -1,34 +1,35 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { cp } from 'shelljs';
-import { getProjectPaths } from 'share/tool';
-import { CreateOptionType } from 'types/SmartConfigType';
+import { getProjectStructurePath } from 'share/projectHelper';
+import { SmartProjectOption } from 'types/Smart';
+import { SmartStructureOption } from 'types/SmartProjectConfig';
 import { getTemplateData } from './getAppTemplateData';
 
 
-export async function initFiles({ projectType, structure, projectLanguageType }: CreateOptionType) {
-  const { pagesPath, appPath, pages, app } = getProjectPaths(structure);
-  const isTs = projectLanguageType === 'ts';
-  let fileSuffixName: string = projectLanguageType;
+export function initFiles({ projectType, scriptType }: SmartProjectOption, structure: SmartStructureOption): void {
+  const { pagesPath, appPath } = getProjectStructurePath(structure);
+  const isTs = scriptType === 'ts';
+  let fileSuffixName: string = scriptType;
   if (projectType === 'react') {
     fileSuffixName = fileSuffixName + 'x';
 
-    await cp('-R', join(__dirname, '..', '..', '/templates/', projectType, '/', projectLanguageType, '/app/*'), appPath);
-    await cp('-R', join(__dirname, '..', '..', '/templates/', projectType, '/', projectLanguageType, '/home'), pagesPath);
-    await cp('-R', join(__dirname, '..', '..', '/templates/', projectType, '/', projectLanguageType, '/route.config.' + fileSuffixName), pagesPath);
+    cp('-R', join(__dirname, '..', '..', '/templates/', projectType, '/', scriptType, '/app/*'), appPath);
+    cp('-R', join(__dirname, '..', '..', '/templates/', projectType, '/', scriptType, '/home'), pagesPath);
+    cp('-R', join(__dirname, '..', '..', '/templates/', projectType, '/', scriptType, '/route.config.' + fileSuffixName), pagesPath);
 
     if (isTs) {
-      await cp('-R', join(__dirname, '..', '..', '/templates/', projectType, '/', projectLanguageType, '/typings.d.ts'), 'typings.d.ts');
+      cp('-R', join(__dirname, '..', '..', '/templates/', projectType, '/', scriptType, '/typings.d.ts'), 'typings.d.ts');
     }
   }
 
-  await cp(join(__dirname, '..', '..', '..', '/config/template/index.template.html'), 'index.template.html');
-  await cp(join(__dirname, '..', '..', '..', `/config/template/${projectType}.smart.config.yml`), 'smart.config.yml');
+  cp(join(__dirname, '..', '..', '..', '/config/template/index.template.html'), 'index.template.html');
+  cp(join(__dirname, '..', '..', '..', `/config/template/${projectType}.smart.config.yml`), 'smart.config.yml');
 
- let { indexData, appData } = await getTemplateData(projectType, projectLanguageType);
- indexData = indexData.replace(/<pagesPath>/g, pages || 'pages');
- appData = appData.replace(/<appPath>/g, app || 'app');
+ let { indexData, appData } = getTemplateData(projectType, scriptType);
+ indexData = indexData.replace(/<pagesPath>/g, structure.pages || 'pages');
+ appData = appData.replace(/<appPath>/g, structure.app || 'app');
 
- await writeFileSync('index.js', indexData, 'utf-8');
- await writeFileSync(pagesPath + '/app.' + fileSuffixName, appData, 'utf-8');
+ writeFileSync('index.js', indexData, 'utf-8');
+ writeFileSync(pagesPath + '/app.' + fileSuffixName, appData, 'utf-8');
 }

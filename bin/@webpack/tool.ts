@@ -1,33 +1,34 @@
-import { EnvType } from 'types/EnvType';
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
-import { SmartConfigType } from 'types/SmartConfigType';
+import { SmartWebpackOption } from 'types/Smart';
+import { SmartEntryOption } from 'types/SmartProjectConfig';
 import { EntryAndOutputOptionsType } from '@webpack/entryAndOutput';
 import { getLogErrorStr } from 'share/log';
 import { PROJECT_ROOT_PATH } from 'share/path';
-import { getDynamicModule } from 'share/tool';
+import { getDynamicModule } from 'share/projectHelper';
+import { isDevEnv } from 'share/env';
+import { PluginProps } from '@webpack/plugins';
+import { LoaderProps } from '@webpack/loaders';
 
-export function isDevEnv(env: EnvType): boolean {
-  return env === 'development' || env === 'start';
-}
+type Value = {
+  devMode: boolean;
+  name: string;
+  entryOutOption: EntryAndOutputOptionsType;
+  devtool: string;
+  target: string;
+  publicPath: string;
+  pluginsProps: PluginProps;
+  loadersProps: LoaderProps;
+  performance: undefined | Record<string, any>;
+  resolveAlias: Record<string, any>;
+};
 
-export function parseConfigData(env: EnvType, config: SmartConfigType) {
-  if (process.env.BuildConfig) {
-    config = JSON.parse(process.env.BuildConfig);
-    env = config?.env as EnvType;
-  }
+export function parseConfigData({ projectOption, configOption }: SmartWebpackOption): Value {
 
-  const devMode = isDevEnv(env);
-  let { name, port, host, projectType, structure, entry, vendors, devtool, publicPath, buildDir, provide, resolveAlias, scriptingLanguageType, base64Limit } = config;
-  const projectLanguageType: ProjectLanguageType = scriptingLanguageType || ProjectLanguageType.Javascript;
+  const devMode = isDevEnv();
+  const { projectType, name } = projectOption;
 
-  name = name || 'Smart App';
-  projectType = projectType as ProjectType || 'normal';
-  port = port || 3000;
-  host = host || '127.0.0.1';
-  devtool = devMode ? devtool || 'inline-source-map' : 'source-map';
-  publicPath = publicPath || '/';
-  buildDir = PROJECT_ROOT_PATH + '/' + (buildDir || 'dist');
-
+  const { port, host, base64Limit, entry, devtool, vendors, provide, structure } = configOption;
+  const publicPath = configOption.publicPath || '/';
+  const buildDir = PROJECT_ROOT_PATH + '/' + (configOption.buildDir || 'dist');
 
   if (vendors && typeof vendors === 'object' && Array.isArray(vendors)) {
     throw new Error(getLogErrorStr('"vendors" is not valid object.'));
@@ -37,46 +38,42 @@ export function parseConfigData(env: EnvType, config: SmartConfigType) {
     throw new Error(getLogErrorStr('"structure" is error.'));
   }
 
-  resolveAlias = { ...resolveAlias };
-  const copyStructure: Record<string, any> = { ...structure };
+  const resolveAlias = { ...configOption.resolveAlias };
+  const copyStructure: Record<string, string> = { ...structure };
   for (const key in copyStructure) {
-    if (copyStructure.hasOwnProperty(key)) {
+    if (Object.hasOwnProperty.call(copyStructure, key)) {
       const value = copyStructure[key];
       if (key !== 'src' && value) {
-        resolveAlias[key] = PROJECT_ROOT_PATH + '/' + copyStructure.src + '/' + value;
+        resolveAlias[key] = `${PROJECT_ROOT_PATH}/${copyStructure.src}/${value}`;
       }
     }
   }
 
-  const htmlEntryFiles: Record<string, any> = {};
-  for (let key in entry) {
-    if (entry.hasOwnProperty(key)) {
+  const htmlEntryFiles: SmartEntryOption = {};
+  for (const key in entry) {
+    if (Object.hasOwnProperty.call(entry, key)) {
       htmlEntryFiles[key] = {
         ...entry[key],
-        favicon: structure.src + '/' + structure.assets + '/' + entry[key].favicon,
+        favicon: entry[key]?.favicon ? `${structure.src}/${structure.assets}/${entry[key].favicon as string}` : undefined,
       };
     }
   }
 
   const pluginsProps = {
-    devMode,
-    projectType,
+    projectOption,
     publicPath,
     provide,
-    projectLanguageType,
     entryFiles: htmlEntryFiles
   };
 
   const loadersProps = {
-    env,
-    projectType,
-    projectLanguageType,
+    projectOption,
     structure,
     maxSize: base64Limit || 8192,
   };
 
   const entryOutOption: EntryAndOutputOptionsType = {
-    env,
+    devMode,
     name,
     port,
     host,
@@ -86,7 +83,7 @@ export function parseConfigData(env: EnvType, config: SmartConfigType) {
     buildPath: buildDir,
   };
 
-  const performance: boolean | Record<string, any> = devMode ? false : {
+  const performance: undefined | Record<string, any> = devMode ? undefined : {
     hints: 'warning',
     maxEntrypointSize: 400000,
     maxAssetSize: 307200,
@@ -94,14 +91,12 @@ export function parseConfigData(env: EnvType, config: SmartConfigType) {
   };
 
   return {
+    devMode,
     name,
-    structure,
     entryOutOption,
-    devtool,
-    vendors,
+    devtool: devMode ? devtool || 'inline-source-map' : 'source-map',
     target: devMode ? 'web' : 'browserslist',
     publicPath,
-    devMode,
     pluginsProps,
     loadersProps,
     performance,

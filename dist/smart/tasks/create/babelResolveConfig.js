@@ -4,9 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getBabelResolveConfigData = getBabelResolveConfigData;
-
-var _ProjectType = require("../../../types/ProjectType");
-
 const data = {
   compilerOptions: {
     noImplicitAny: true,
@@ -29,21 +26,25 @@ const data = {
   exclude: ['__tests__', 'node_modules', 'babel.config.js', 'jest.config.js']
 };
 
-function getBabelResolveConfigData(projectType, projectLanguageType = _ProjectType.ProjectLanguageType.Javascript, srcPath) {
-  const isTs = projectLanguageType === _ProjectType.ProjectLanguageType.Typescript;
-  data.compilerOptions.paths = {
+function getBabelResolveConfigData(projectType, scriptType, srcPath) {
+  const isTs = scriptType === 'ts';
+  const compilerOptions = { ...data.compilerOptions
+  };
+  compilerOptions.paths = {
     '*': [`${srcPath}/*`]
   };
 
   if (isTs) {
-    data.compilerOptions.allowJs = true;
-    data.compilerOptions.lib = ['es2020', 'dom'];
+    compilerOptions.allowJs = true;
+    compilerOptions.lib = ['es2020', 'dom'];
   }
 
   if (projectType === 'react') {
-    data.compilerOptions.paths['react-dom'] = ['node_modules/@hot-loader/react-dom'];
-    data.compilerOptions.jsx = 'react';
+    compilerOptions.paths['react-dom'] = ['node_modules/@hot-loader/react-dom'];
+    compilerOptions.jsx = 'react';
   }
 
-  return data;
+  return { ...data,
+    compilerOptions
+  };
 }

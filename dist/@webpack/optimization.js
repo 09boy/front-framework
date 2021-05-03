@@ -47,7 +47,7 @@ function getOptimizationConfig(devMode, vendors) {
     if (vendors) {
       let priority = 10;
 
-      for (let key in vendors) {
+      for (const key in vendors) {
         if (vendors.hasOwnProperty(key)) {
           const value = vendors[key];
           const reg = value.join('|');

@@ -5,13 +5,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getFileLoader = getFileLoader;
 
-var _tool = require("../tool");
+var _env = require("../../share/env");
 
 const isJPGReg = /\.(jpe?g)$/i;
 const isPngRef = /\.(png)$/i;
 
-function getFileLoader(env, staticPath, maxSize) {
-  const envModel = (0, _tool.isDevEnv)(env);
+function getFileLoader(staticPath, maxSize) {
+  const envModel = (0, _env.isDevEnv)();
   const name = envModel ? '[name][ext][query]' : '[contenthash][ext][query]';
   const dataUrlCondition = {
     maxSize

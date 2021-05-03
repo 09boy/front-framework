@@ -9,13 +9,15 @@ var _fs = require("fs");
 
 var _path = require("path");
 
-async function getTemplateData(projectType, projectLanguageType) {
+function getTemplateData(projectType, scriptType) {
   let indexData = '';
   let appData = '';
 
-  if (projectType === 'normal') {} else if (projectType === 'react') {
-    indexData = await (0, _fs.readFileSync)((0, _path.join)(__dirname, '..', '..', `templates/react/${projectLanguageType}/index.${projectLanguageType}`), 'utf-8');
-    appData = await (0, _fs.readFileSync)((0, _path.join)(__dirname, '..', '..', `templates/react/${projectLanguageType}/app.${projectLanguageType}x`), 'utf-8');
+  if (projectType === 'normal') {
+    console.log('');
+  } else if (projectType === 'react') {
+    indexData = (0, _fs.readFileSync)((0, _path.join)(__dirname, '..', '..', `templates/react/${scriptType}/index.${scriptType}`), 'utf-8');
+    appData = (0, _fs.readFileSync)((0, _path.join)(__dirname, '..', '..', `templates/react/${scriptType}/app.${scriptType}x`), 'utf-8');
   }
 
   return {

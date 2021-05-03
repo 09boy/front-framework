@@ -9,9 +9,12 @@ var _miniCssExtractPlugin = _interopRequireDefault(require("mini-css-extract-plu
 
 var _cssMinimizerWebpackPlugin = _interopRequireDefault(require("css-minimizer-webpack-plugin"));
 
+var _env = require("../../share/env");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getStylePlugin(devMode) {
+function getStylePlugin() {
+  const devMode = (0, _env.isDevEnv)();
   let filename = '[name].css';
   let chunkFilename = '[id].css';
   const plugins = [];

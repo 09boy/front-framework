@@ -5,18 +5,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getWebpackEntryAndOutputConfiguration = getWebpackEntryAndOutputConfiguration;
 
-var _tool = require("../share/tool");
-
-var _tool2 = require("./tool");
+var _projectHelper = require("../share/projectHelper");
 
 var _path = require("../share/path");
 
-function getDevelopmentHRMItem(devMode, entryPath, projectType, host, port, name) {
+function getEntryItem(devMode, projectType, host, port, name, entryPath) {
   if (devMode) {
-    const item = [`${(0, _tool.getDynamicModule)('webpack-hot-middleware')}/client?path=http://${host}:${port}/__webpack_hmr&name=${name}&reload=true&overlay=true&timeout=3000`, entryPath];
+    const item = [`${(0, _projectHelper.getDynamicModule)('webpack-hot-middleware')}/client?path=http://${host}:${port}/__webpack_hmr&name=${name}&reload=true&overlay=true&timeout=3000`, entryPath];
 
     if (projectType === 'react') {
-      item.splice(1, 0, (0, _tool.getDynamicModule)('react-hot-loader/patch'));
+      item.splice(1, 0, (0, _projectHelper.getDynamicModule)('react-hot-loader/patch'));
     }
 
     return item;
@@ -26,7 +24,7 @@ function getDevelopmentHRMItem(devMode, entryPath, projectType, host, port, name
 }
 
 function getWebpackEntryAndOutputConfiguration({
-  env,
+  devMode,
   entryFiles,
   projectType,
   host,
@@ -35,17 +33,13 @@ function getWebpackEntryAndOutputConfiguration({
   publicPath,
   buildPath
 }) {
-  const devMode = (0, _tool2.isDevEnv)(env);
   const entry = {};
 
   for (const key in entryFiles) {
-    if (entryFiles.hasOwnProperty(key)) {
-      let {
-        path
-      } = entryFiles[key];
-      path = _path.PROJECT_ROOT_PATH + '/' + path;
+    if (Object.hasOwnProperty.call(entryFiles, key)) {
+      const entryPath = `${_path.PROJECT_ROOT_PATH}/${entryFiles[key].path}`;
       entry[key] = {
-        import: getDevelopmentHRMItem(devMode, path, projectType, host, port, name),
+        import: getEntryItem(devMode, projectType, host, port, name, entryPath),
         dependOn: entry.shared ? 'shared' : undefined
       };
     }

@@ -1,120 +1,65 @@
-import { Command, OptionValues, InvalidOptionArgumentError }  from 'commander';
+import { Command, OptionValues } from 'commander';
 import { SMART_VERSION } from 'share/version';
-import { getLogErrorStr, LogError } from 'share/log';
-import { EnvNames } from 'types/EnvType';
-import { SmartCliResultType } from './index';
-import { ProjectLanguageType } from 'types/ProjectType';
-
-export type CommandListType= {
-  name: string;
-  alias: string;
-  desc: string;
-  options?: CommandOptionType[];
-  children?: CommandListType[];
-};
-
-export type CommandOptionType = {
-  name: string;
-  desc: string;
-  callback?: string;
-};
-
-function parsePort(port: any): number {
-  if (isNaN(port)) {
-    throw new InvalidOptionArgumentError(getLogErrorStr('Not a number.'));
-  }
-
-  if (port.toString().length !== 4) {
-    throw new InvalidOptionArgumentError(getLogErrorStr('Port must be 4 digits.'));
-  }
-
-  return port;
-}
-
-function parseEnv(env: any): string {
-  if (!EnvNames.includes(env)) {
-LogError(`
-Error: Not a valid value.
-The value is one of  'test'、 'staging'、'release.`);
-    process.exit(1);
-  }
-  return env;
-}
-
-function parseApiPath(path: any): string {
-  return path || '/';
-}
-
-function parseLanguageType(type: any): string {
-  type = type.toLocaleLowerCase();
-  if (type === ProjectLanguageType.Typescript || type === ProjectLanguageType.Javascript ||
-      type === ProjectLanguageType.Javascript1 || type === ProjectLanguageType.Typescript1) {
-    return type;
-  }
-  throw new InvalidOptionArgumentError(getLogErrorStr('Aot a valid value, js、javascript、ts、typescript'));
-}
+import { PrintLog } from 'share/log';
+import { SmartCommandsOption } from 'types/SmartCliConfig';
+import { LogType } from 'types/LogType';
+import { SmartCliArgs, SmartOption } from 'types/Smart';
+import { parseApiPathByCli, parseBuildEnv, parsePortByCli, parseScriptTypeByCli, parseProjectTypeByCli, parseSmartCliByCli } from './parseFun';
 
 function validationOptionParams(callback?: string): any {
-  if (callback === 'parsePort') {
-    return parsePort;
-  } else if (callback === 'parseEnv') {
-    return parseEnv;
-  }
   switch (callback) {
     case 'parsePort':
-      return parsePort;
+      return parsePortByCli;
     case 'parseApiPath':
-      return parseApiPath;
-    case 'parseLanguageType':
-      return parseLanguageType;
+      return parseApiPathByCli;
+    case 'parseScriptType':
+      return parseScriptTypeByCli;
+    case 'parseProjectType':
+      return parseProjectTypeByCli;
     default:
       return undefined;
   }
 }
 
-let resultValue: SmartCliResultType | undefined;
+let commandValue: SmartOption;
 
-async function commandAction(args?: string | string[], option?: OptionValues | Command, command?: Command) {
-  let options = option;
-  let argValues: any = args;
-  const name = command?.name() || option?.name();
+function commandAction(commandArg: any, options?:OptionValues | Command , command?: Command) {
+  const cliName = command?.name() || (options as Command)?.name();
+  const { cli, projectType } = parseSmartCliByCli(cliName);
+  const args: SmartCliArgs = { projectType };
 
-  if (name === 'build') {
-    args = parseEnv(args);
-    argValues = { env: args };
+  if (cli === 'build') {
+    args.modeType = parseBuildEnv(commandArg, false);
   }
 
-  if (!command) { // 如果一个命令没有参数也没有options
-    options = args as OptionValues;
-    argValues = undefined;
+  if (options && !command) {
+    Object.assign(args, commandArg);
   }
 
-  if (typeof argValues === 'string') {
-    const key = name.includes('create') ? 'projectName' : argValues;
-    argValues = { [key]: argValues };
+  if(options && command) {
+    Object.assign(args, options);
+    if (cli === 'init' || cli === 'create') {
+      args.projectDir = commandArg as string;
+    } else if (Array.isArray(commandArg)){
+      if (cli === 'page') {
+        args.pages = commandArg;
+      } else if (cli === 'component') {
+        args.components = commandArg;
+      }
+    }
   }
 
-  resultValue = {
-    cliName: name,
-    args: {
-      ...argValues,
-      ...options,
-    },
-  };
+  commandValue = { cli, args };
 }
 
-export async function smartCommand(data: CommandListType[]): Promise<SmartCliResultType | undefined> {
-  if (process.argv.length <= 2) {
-    return undefined;
-  }
+export default async function smartCommand(data: SmartCommandsOption[]): Promise<SmartOption> {
   const program = new Command();
   program.version(SMART_VERSION)
          .name('smart')
-         .on('command:*', (operands) => {
+         .on('command:*', (operands: any[]) => {
            if (operands[0]) {
-             LogError(`Error: unknown command '${operands[0]}'. See 'smart --help'.`);
+             PrintLog(LogType.cliNotExist, operands[0]);
            }
-           resultValue = undefined;
            process.exitCode = 1;
          });
 
@@ -124,7 +69,8 @@ export async function smartCommand(data: CommandListType[]): Promise<SmartCliRes
       .description(desc)
       .action(commandAction);
 
-    if (options) {
+    if (Array.isArray(options)) {
+
       options.map(o => {
         currentProgram.option(o.name, o.desc, validationOptionParams(o.callback));
       });
@@ -132,5 +78,5 @@ export async function smartCommand(data: CommandListType[]): Promise<SmartCliRes
   });
 
   await program.parseAsync(process.argv);
-  return resultValue;
+  return commandValue;
 }

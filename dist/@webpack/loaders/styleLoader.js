@@ -5,9 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getStyleLoader = getStyleLoader;
 
-var _tool = require("../../share/tool");
+var _projectHelper = require("../../share/projectHelper");
 
-var _tool2 = require("../tool");
+var _env = require("../../share/env");
 
 var _miniCssExtractPlugin = _interopRequireDefault(require("mini-css-extract-plugin"));
 
@@ -21,13 +21,13 @@ function getCssLoader(devMode, importLoaders = 1, isLessLoader = false) {
   }
 
   const styleLoader = devMode ? {
-    loader: (0, _tool.getDynamicModule)('style-loader'),
+    loader: (0, _projectHelper.getDynamicModule)('style-loader'),
     options: {
       insert: element => {
         const parent = document.querySelector('body'); // eslint-disable-next-line no-underscore-dangle
         // @ts-ignore
 
-        let lastInsertedElement = window['_lastElementInsertedByStyleLoader'];
+        const lastInsertedElement = window['_lastElementInsertedByStyleLoader'];
 
         if (!lastInsertedElement) {
           // @ts-ignore
@@ -59,7 +59,7 @@ function getCssLoader(devMode, importLoaders = 1, isLessLoader = false) {
   return [{
     test,
     use: [styleLoader, {
-      loader: (0, _tool.getDynamicModule)('css-loader'),
+      loader: (0, _projectHelper.getDynamicModule)('css-loader'),
       options: {
         importLoaders,
         sourceMap: true,
@@ -120,16 +120,16 @@ function getCssLoader(devMode, importLoaders = 1, isLessLoader = false) {
 
 function getPostCss() {
   return {
-    loader: (0, _tool.getDynamicModule)('postcss-loader'),
+    loader: (0, _projectHelper.getDynamicModule)('postcss-loader'),
     options: {
       sourceMap: true,
       postcssOptions: {
         /*parser: require('sugarss').parse,
         execute: true,
         syntax: require("sugarss"),*/
-        plugins: [[(0, _tool.getDynamicModule)('postcss-import'), [(0, _tool.getDynamicModule)('postcss-short'), {
+        plugins: [[(0, _projectHelper.getDynamicModule)('postcss-import'), [(0, _projectHelper.getDynamicModule)('postcss-short'), {
           prefix: 'x'
-        }], [(0, _tool.getDynamicModule)('postcss-preset-env'), {
+        }], [(0, _projectHelper.getDynamicModule)('postcss-preset-env'), {
           stage: 3,
           features: {
             'nesting-rules': true,
@@ -155,7 +155,7 @@ function getSassLoader(devMode) {
     outputStyle: 'compressed'
   };
   return {
-    loader: (0, _tool.getDynamicModule)('sass-loader'),
+    loader: (0, _projectHelper.getDynamicModule)('sass-loader'),
     options: {
       sourceMap: true,
       implementation: require('sass'),
@@ -167,7 +167,7 @@ function getSassLoader(devMode) {
 
 function getLessLoader() {
   return {
-    loader: (0, _tool.getDynamicModule)('less-loader'),
+    loader: (0, _projectHelper.getDynamicModule)('less-loader'),
     options: {
       sourceMap: true,
       lessOptions: {
@@ -189,8 +189,8 @@ function getLessLoader() {
 }*/
 
 
-function getStyleLoader(env) {
-  const devMode = (0, _tool2.isDevEnv)(env);
+function getStyleLoader() {
+  const devMode = (0, _env.isDevEnv)();
   const sLoaders = getCssLoader(devMode, 2).map(item => {
     if (Array.isArray(item.use)) {
       return { ...item,

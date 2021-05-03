@@ -9,15 +9,19 @@ var _listr = require("listr2");
 
 var _log = require("./log");
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 const ctx = {};
 
 class LogProgressTask {
-  tasks = new _listr.Listr([], {
-    ctx,
-    concurrent: false
-  });
+  constructor() {
+    _defineProperty(this, "tasks", new _listr.Listr([], {
+      ctx,
+      concurrent: false
+    }));
+  }
 
-  async add(tasks) {
+  add(tasks) {
     tasks.map(t => {
       this.tasks.add(t);
     });
@@ -25,9 +29,9 @@ class LogProgressTask {
 
   async run() {
     try {
-      const cc = await this.tasks.run();
-    } catch (e) {
-      (0, _log.LogError)(`LogProgress Error: ${e}`);
+      await this.tasks.run();
+    } catch (error) {
+      (0, _log.LogError)(`LogProgress Error: ${error.message}`);
     }
   }
 

@@ -1,10 +1,9 @@
 import { RuleSetRule } from 'webpack';
-import { EnvType } from 'types/EnvType';
-import { getDynamicModule } from 'share/tool';
-import { isDevEnv } from '../tool';
+import { getDynamicModule } from 'share/projectHelper';
+import { isDevEnv } from 'share/env';
 import  MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
-function getCssLoader(devMode: boolean, importLoaders = 1, isLessLoader: boolean = false,):RuleSetRule[] {
+function getCssLoader(devMode: boolean, importLoaders = 1, isLessLoader = false,):RuleSetRule[] {
 
   let test = !isLessLoader ? /\.(sa|sc)ss$/ : /\.less$/;
   // let lazyTest = !isLessLoader ?/\.lazy\.(sa|sc)ss$/ : /\.lazy\.less$/;
@@ -22,7 +21,7 @@ function getCssLoader(devMode: boolean, importLoaders = 1, isLessLoader: boolean
           const parent = document.querySelector('body');
           // eslint-disable-next-line no-underscore-dangle
           // @ts-ignore
-          let lastInsertedElement = window['_lastElementInsertedByStyleLoader'];
+          const lastInsertedElement = window['_lastElementInsertedByStyleLoader'];
 
           if (!lastInsertedElement) {
             // @ts-ignore
@@ -149,7 +148,7 @@ function getPostCss(): RuleSetRule {
   };
 }
 
-function getSassLoader(devMode: Boolean): RuleSetRule {
+function getSassLoader(devMode: boolean): RuleSetRule {
   // Compiles Sass to CSS
   const sassOptions = devMode ? {
     fiber: false,
@@ -191,18 +190,18 @@ function getLessLoader(): RuleSetRule {
   ];
 }*/
 
-export function getStyleLoader(env: EnvType): RuleSetRule[] {
-  const devMode = isDevEnv(env);
+export function getStyleLoader(): RuleSetRule[] {
+  const devMode = isDevEnv();
   const sLoaders: RuleSetRule[] = getCssLoader(devMode, 2).map(item => {
     if (Array.isArray(item.use)) {
-      return {...item, use: [...item.use, getSassLoader(devMode)]};
+      return { ...item, use: [...item.use, getSassLoader(devMode)] };
     }
     return item;
   });
 
   const lessLoaders: RuleSetRule[] = getCssLoader(devMode, 2, true).map(item => {
     if (Array.isArray(item.use)) {
-      return {...item, use: [...item.use, getLessLoader()]};
+      return { ...item, use: [...item.use, getLessLoader()] };
     }
     return item;
   });

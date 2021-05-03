@@ -1,13 +1,15 @@
 import { WebpackPluginInstance } from 'webpack';
 import HtmlWebpackPlugin, { Options } from 'html-webpack-plugin';
-import { EntryType } from 'types/SmartConfigType';
+import { SmartEntryOption } from 'types/SmartProjectConfig';
+import { isDevEnv } from 'share/env';
 
 
-export function getHtmlPlugin(devMode: boolean, publicPath: string, entryFiles: EntryType): WebpackPluginInstance[] {
+export function getHtmlPlugin(publicPath: string, entryFiles: SmartEntryOption): WebpackPluginInstance[] {
+  const devMode = isDevEnv();
   const instances: WebpackPluginInstance[] = [];
 
-  for (let key in entryFiles) {
-    if (entryFiles.hasOwnProperty(key)) {
+  for (const key in entryFiles) {
+    if (Object.hasOwnProperty.call(entryFiles, key)) {
       const pages = entryFiles[key];
       const options: Options = {
         hash: devMode,

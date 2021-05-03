@@ -1,7 +1,6 @@
 import { Configuration } from 'webpack';
-import { SmartConfigType } from 'types/SmartConfigType';
 import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
-import { EnvType } from 'types/EnvType';
+import { SmartWebpackOption } from 'types/Smart';
 import { getWebpackEntryAndOutputConfiguration } from './entryAndOutput';
 import { parseConfigData } from './tool';
 import getLoaders from './loaders';
@@ -9,8 +8,11 @@ import getPlugins from './plugins';
 import getOptimizationConfig from './optimization';
 
 
-export default function configuration(env: EnvType = 'start', config: SmartConfigType):Configuration {
-  const { name, target, vendors, devMode, devtool, entryOutOption, pluginsProps, loadersProps, resolveAlias, performance } = parseConfigData(env, config);
+export default function configuration(option: SmartWebpackOption):Configuration {
+  if (process.env.BuildConfig) {
+    option = JSON.parse(process.env.BuildConfig) as SmartWebpackOption;
+  }
+  const { devMode, name, target, devtool, entryOutOption, pluginsProps, loadersProps, resolveAlias, performance } = parseConfigData(option);
 
   return {
     name,
@@ -23,7 +25,7 @@ export default function configuration(env: EnvType = 'start', config: SmartConfi
     devtool,
     module: {
       unsafeCache: true,
-      rules: getLoaders(loadersProps, config?.loaderIncludes),
+      rules: getLoaders(loadersProps, option.configOption?.loaderIncludes),
       /*parser: {
         javascript: {
           commonjsMagicComments: true,
@@ -43,7 +45,7 @@ export default function configuration(env: EnvType = 'start', config: SmartConfi
       modules: [`${SMART_ROOT_PATH}/node_modules`],
       extensions: ['.js', '.json'],
     },
-    optimization: getOptimizationConfig(devMode, vendors),
+    optimization: getOptimizationConfig(devMode, option.configOption.vendors),
     stats: {
       cached: true,
       cachedAssets: true,

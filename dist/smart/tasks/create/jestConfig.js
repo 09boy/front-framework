@@ -4,23 +4,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getJestConfigData = getJestConfigData;
-
-var _ProjectType = require("../../../types/ProjectType");
-
 const JestData = {
   verbose: true,
+  testEnvironment: 'node',
+  // 测试环境
   setupFiles: ['<rootDir>/jest.setup.js'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  // 忽略覆盖率的目录
+  coveragePathIgnorePatterns: ['/node_modules/', '/__test__/']
 };
 
-function getJestConfigData(projectType, srcDir, projectLanguageType = _ProjectType.ProjectLanguageType.Javascript) {
-  const isTs = projectLanguageType === _ProjectType.ProjectLanguageType.Typescript;
-  JestData.testMatch = [`${srcDir}/__tests__/*.js`];
-
-  if (isTs) {
-    JestData.testMatch.push(`${srcDir}/__tests__/*.ts`);
-  }
-
+function getJestConfigData(projectType) {
   if (projectType === 'react') {
     JestData.preset = 'react';
   }

@@ -4,25 +4,23 @@ import { getStylePlugin } from './stylePlugin';
 import { getCommonPlugins } from './commonPlugin';
 import { getDevelopmentPlugins } from './developmentPlugin';
 import { getProductionPlugins } from './productionPlugin';
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
-import { EntryType } from 'types/SmartConfigType';
+import { SmartProjectOption } from 'types/Smart';
+import { SmartEntryOption } from 'types/SmartProjectConfig';
 
-type Props = {
-  devMode: boolean;
+export type PluginProps = {
+  projectOption: SmartProjectOption;
   publicPath: string;
-  projectType: ProjectType;
-  entryFiles: EntryType;
-  projectLanguageType: ProjectLanguageType;
+  entryFiles: SmartEntryOption;
   provide?: Record<string, any>;
 };
 
-export default function getPlugins({ devMode, entryFiles,publicPath, provide, projectType, projectLanguageType}: Props): WebpackPluginInstance[] {
+export default function getPlugins({ projectOption, provide, entryFiles, publicPath }: PluginProps): WebpackPluginInstance[] {
 
   return [
-    ...getStylePlugin(devMode),
-    ...getHtmlPlugin(devMode, publicPath, entryFiles),
-    ...getCommonPlugins(devMode, provide),
-    ...getDevelopmentPlugins(devMode, projectType, projectLanguageType),
-    ...getProductionPlugins(devMode),
+    ...getStylePlugin(),
+    ...getHtmlPlugin(publicPath, entryFiles),
+    ...getCommonPlugins(provide),
+    ...getDevelopmentPlugins(projectOption),
+    ...getProductionPlugins(),
   ];
 }

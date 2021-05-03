@@ -1,8 +1,10 @@
 import { WebpackPluginInstance } from 'webpack';
 import  MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
+import { isDevEnv } from 'share/env';
 
-export function getStylePlugin(devMode: boolean): WebpackPluginInstance[] {
+export function getStylePlugin(): WebpackPluginInstance[] {
+  const devMode = isDevEnv();
   let filename = '[name].css';
   let chunkFilename = '[id].css';
 
@@ -21,5 +23,5 @@ export function getStylePlugin(devMode: boolean): WebpackPluginInstance[] {
   return [
     new MiniCssExtractPlugin({ filename, chunkFilename }),
     ...plugins,
-  ]
+  ];
 }

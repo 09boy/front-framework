@@ -1,4 +1,4 @@
-import { ProjectLanguageType, ProjectType } from 'types/ProjectType';
+import { ScriptType, ProjectType } from 'types/SmartProjectConfig';
 
 const data: Record<string, any> = {
     compilerOptions: {
@@ -29,23 +29,24 @@ const data: Record<string, any> = {
     ]
 };
 
-export function getBabelResolveConfigData(projectType: ProjectType, projectLanguageType: ProjectLanguageType = ProjectLanguageType.Javascript, srcPath: string): object {
-    const isTs = projectLanguageType === ProjectLanguageType.Typescript;
+export function getBabelResolveConfigData(projectType: ProjectType, scriptType: ScriptType, srcPath: string): Record<string, any> {
+    const isTs = scriptType === 'ts';
+    const compilerOptions: Record<string, any> = { ...(data.compilerOptions as Record<string, any>) };
 
-    data.compilerOptions.paths = {
+    compilerOptions.paths = {
         '*': [`${srcPath}/*`],
     };
 
     if (isTs) {
-        data.compilerOptions.allowJs = true;
-        data.compilerOptions.lib = ['es2020', 'dom'];
+        compilerOptions.allowJs = true;
+        compilerOptions.lib = ['es2020', 'dom'];
     }
 
     if (projectType === 'react') {
-        data.compilerOptions.paths['react-dom'] = ['node_modules/@hot-loader/react-dom'];
-        data.compilerOptions.jsx = 'react';
+        (compilerOptions.paths as Record<string, any>)['react-dom'] = ['node_modules/@hot-loader/react-dom'];
+        compilerOptions.jsx = 'react';
     }
 
-    return data;
+    return { ...data, compilerOptions };
 }
 

@@ -9,32 +9,39 @@ var _webpack = require("webpack");
 
 var _eslintWebpackPlugin = _interopRequireDefault(require("eslint-webpack-plugin"));
 
-var _tool = require("../../share/tool");
+var _projectHelper = require("../../share/projectHelper");
 
 var _path = require("../../share/path");
 
+var _env = require("../../share/env");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getDevelopmentPlugins(devMode, projectType, projectLanguageType) {
+function getDevelopmentPlugins({
+  projectType,
+  scriptType
+}) {
+  const devMode = (0, _env.isDevEnv)();
+
   if (!devMode) {
     return [];
   }
 
-  const isTs = projectLanguageType !== 'js';
+  const isTs = scriptType === 'ts';
   const options = {
     extensions: ['js', 'ts', 'jsx', 'tsx', 'json'],
     fix: true
   };
 
   if (projectType === 'react') {
-    const presets = !isTs ? [[(0, _tool.getDynamicModule)('@babel/preset-react'), {
+    const presets = !isTs ? [[(0, _projectHelper.getDynamicModule)('@babel/preset-react'), {
       development: true
-    }], (0, _tool.getDynamicModule)('@babel/preset-flow')] : [[(0, _tool.getDynamicModule)('@babel/preset-react'), {
+    }], (0, _projectHelper.getDynamicModule)('@babel/preset-flow')] : [[(0, _projectHelper.getDynamicModule)('@babel/preset-react'), {
       development: true
-    }], [(0, _tool.getDynamicModule)('@babel/preset-typescript'), {
+    }], [(0, _projectHelper.getDynamicModule)('@babel/preset-typescript'), {
       isTsx: true,
       allExtensions: true
-    }], (0, _tool.getDynamicModule)('@babel/preset-flow')];
+    }], (0, _projectHelper.getDynamicModule)('@babel/preset-flow')];
     options.baseConfig = {
       parserOptions: {
         ecmaFeatures: {
