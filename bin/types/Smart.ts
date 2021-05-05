@@ -45,6 +45,12 @@ export interface SmartServerOptionType {
   htmlPath: string;
 }
 
+export interface SmartServerParamsType {
+  port: number | string | undefined;
+  host: string | undefined;
+  htmlPath: string | undefined;
+}
+
 export interface SmartCreatePage {
   dirPath: string;
   scriptType: ScriptType;

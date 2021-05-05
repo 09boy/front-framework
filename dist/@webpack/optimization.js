@@ -11,13 +11,13 @@ var _cssMinimizerWebpackPlugin = _interopRequireDefault(require("css-minimizer-w
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getOptimizationConfig(devMode, vendors) {
+function getOptimizationConfig(devMode, modeType, vendors) {
   let option = {
     chunkIds: 'named'
   };
 
-  if (!devMode && process.env.BuildConfig) {
-    const drop_console = JSON.parse(process.env.BuildConfig).env === 'release';
+  if (!devMode) {
+    const drop_console = modeType === 'release';
     const cacheGroups = {
       async: {
         chunks: 'async',
@@ -37,7 +37,7 @@ function getOptimizationConfig(devMode, vendors) {
       styles: {
         name: 'styles',
         type: 'css/mini-extract',
-        test: /\.css$/,
+        // test: /\.css$/,
         chunks: 'all',
         enforce: true,
         priority: 20
@@ -48,7 +48,7 @@ function getOptimizationConfig(devMode, vendors) {
       let priority = 10;
 
       for (const key in vendors) {
-        if (vendors.hasOwnProperty(key)) {
+        if (Object.hasOwnProperty.call(vendors, key)) {
           const value = vendors[key];
           const reg = value.join('|');
           cacheGroups[key] = {
@@ -72,7 +72,7 @@ function getOptimizationConfig(devMode, vendors) {
       removeAvailableModules: true,
       removeEmptyChunks: true,
       mergeDuplicateChunks: true,
-      minimizer: [new _terserWebpackPlugin.default({
+      minimizer: ['...', new _terserWebpackPlugin.default({
         parallel: true,
         extractComments: true,
         exclude: /\/node_modules/,
@@ -85,9 +85,7 @@ function getOptimizationConfig(devMode, vendors) {
           }
         }
       }), new _cssMinimizerWebpackPlugin.default({
-        cache: true,
         parallel: true,
-        sourceMap: true,
         minimizerOptions: {
           preset: ['default', {
             discardComments: {
@@ -96,9 +94,10 @@ function getOptimizationConfig(devMode, vendors) {
           }]
         }
       })],
-      runtimeChunk: {
-        name: entryPoint => `runtimeChunk~${entryPoint.name}`
-      },
+
+      /*runtimeChunk: {
+        name: (entryPoint: any) => `runtimeChunk~${entryPoint.name}`,
+      },*/
       splitChunks: {
         // default
         chunks: 'all',

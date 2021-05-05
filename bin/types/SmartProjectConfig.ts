@@ -19,6 +19,12 @@ export interface SmartStructureOption {
   components?: string;
 }
 
+export interface SmartModeOption {
+  [key: string]: {
+    [ k in EnvModeType ]: string;
+  };
+}
+
 export interface SmartConfigOption {
   host: string;
   port: number;
@@ -32,9 +38,7 @@ export interface SmartConfigOption {
   structure: SmartStructureOption;
   provide?: Record<string, any>;
   resolveAlias?: Record<string, any>;
-  mode: {
-    [key in keyof EnvModeType]: string;
-  };
+  mode: SmartModeOption;
 }
 
 export type PackageData = Record<string, {

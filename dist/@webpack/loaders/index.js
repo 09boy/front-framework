@@ -19,13 +19,13 @@ function getLoaders({
   projectOption,
   structure,
   maxSize
-}, include = []) {
+}, include) {
   const {
     assets,
     src
   } = structure;
   const staticPath = assets + '/';
-  include = include.map(s => _path.PROJECT_ROOT_PATH + '/' + s);
+  include = include ? include.map(s => _path.PROJECT_ROOT_PATH + '/' + s) : [];
   return [...(0, _transpilingLoader.getTranspilingLoader)(projectOption), ...(0, _templatingLoader.getTemplatingLoader)(), ...(0, _styleLoader.getStyleLoader)(), ...(0, _fileLoader.getFileLoader)(staticPath, maxSize)].map(rule => ({ ...rule,
     exclude: [// \\ for Windows, / for macOS and Linux
     /node_modules[\\/]core-js/, /node_modules[\\/]webpack[\\/]buildin/, /bower_components/],

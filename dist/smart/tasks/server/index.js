@@ -21,13 +21,12 @@ class Server {
   }) {
     const ps = htmlPath === null || htmlPath === void 0 ? void 0 : htmlPath.split('/');
     ps === null || ps === void 0 ? void 0 : ps.pop();
-    const buildDir = (ps === null || ps === void 0 ? void 0 : ps.pop()) || 'dist';
+    const buildDir = (ps === null || ps === void 0 ? void 0 : ps.pop()) || '';
     this.port = port;
     this.host = host;
     this.htmlPath = htmlPath;
     this.app = (0, _express.default)();
     this.app.use(_express.default.static(_path.PROJECT_ROOT_PATH + '/' + buildDir));
-    this.app.use(_express.default.static(_path.PROJECT_ROOT_PATH + '/' + buildDir + '/home'));
   }
 
   addHook(handles) {
@@ -44,7 +43,7 @@ class Server {
       return;
     }
 
-    this.app.get('*', (req, res) => {
+    this.app.use('*', (req, res) => {
       res.sendFile(this.htmlPath);
     });
     this.app.listen(this.port, () => {

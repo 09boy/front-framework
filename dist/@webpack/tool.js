@@ -30,7 +30,8 @@ function parseConfigData({
     devtool,
     vendors,
     provide,
-    structure
+    structure,
+    mode
   } = configOption;
   const publicPath = configOption.publicPath || '/';
   const buildDir = _path.PROJECT_ROOT_PATH + '/' + (configOption.buildDir || 'dist');
@@ -74,6 +75,7 @@ function parseConfigData({
     projectOption,
     publicPath,
     provide,
+    modeOption: mode,
     entryFiles: htmlEntryFiles
   };
   const loadersProps = {

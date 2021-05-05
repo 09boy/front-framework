@@ -14,7 +14,7 @@ export function getProductionPlugins(): WebpackPluginInstance[] {
   }
 
   return [
-    new ProgressPlugin({ percentBy: 'entries' }),
+    // new ProgressPlugin({ percentBy: 'entries' }),
     new CleanWebpackPlugin(),
     new BannerPlugin({
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

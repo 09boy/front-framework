@@ -3,10 +3,18 @@ import { getDynamicModule } from 'share/projectHelper';
 import { isDevEnv } from 'share/env';
 import  MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
-function getCssLoader(devMode: boolean, importLoaders = 1, isLessLoader = false,):RuleSetRule[] {
+type CssLoaderType = 'css' | 'scss' | 'less';
 
-  let test = !isLessLoader ? /\.(sa|sc)ss$/ : /\.less$/;
+function getCssLoader(devMode: boolean, importLoaders = 1, loaderType: CssLoaderType):RuleSetRule[] {
+
+  // let test = !isLessLoader ? /\.(sa|sc)ss$/ : /\.less$/;
   // let lazyTest = !isLessLoader ?/\.lazy\.(sa|sc)ss$/ : /\.lazy\.less$/;
+  let test = /\.css$/;
+  if (loaderType === 'scss') {
+    test = /\.(sa|sc)ss$/;
+  } else if (loaderType === 'less') {
+    test = /\.less$/;
+  }
 
   if (importLoaders === 1 && devMode) {
     test = /\.css$/;
@@ -17,7 +25,7 @@ function getCssLoader(devMode: boolean, importLoaders = 1, isLessLoader = false,
     ? {
       loader: getDynamicModule('style-loader'),
       options: {
-        insert: (element: Element) => {
+       /* insert: (element: Element) => {
           const parent = document.querySelector('body');
           // eslint-disable-next-line no-underscore-dangle
           // @ts-ignore
@@ -36,7 +44,7 @@ function getCssLoader(devMode: boolean, importLoaders = 1, isLessLoader = false,
           // eslint-disable-next-line no-underscore-dangle
           // @ts-ignore
           window._lastElementInsertedByStyleLoader = element;
-        },
+        },*/
         esModule: true,
         modules: {
           namedExport: true,
@@ -47,6 +55,9 @@ function getCssLoader(devMode: boolean, importLoaders = 1, isLessLoader = false,
       loader: MiniCssExtractPlugin.loader,
       options: {
         esModule: true,
+        modules: {
+          namedExport: true,
+        },
       }
     };
 
@@ -159,7 +170,7 @@ function getSassLoader(devMode: boolean): RuleSetRule {
     loader: getDynamicModule('sass-loader'),
     options: {
       sourceMap: true,
-        implementation: require('sass'),
+        // implementation: require('sass'),
         webpackImporter: false,
         sassOptions,
     },
@@ -192,14 +203,15 @@ function getLessLoader(): RuleSetRule {
 
 export function getStyleLoader(): RuleSetRule[] {
   const devMode = isDevEnv();
-  const sLoaders: RuleSetRule[] = getCssLoader(devMode, 2).map(item => {
+
+  const sLoaders: RuleSetRule[] = getCssLoader(devMode, 2, 'scss').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item, use: [...item.use, getSassLoader(devMode)] };
     }
     return item;
   });
 
-  const lessLoaders: RuleSetRule[] = getCssLoader(devMode, 2, true).map(item => {
+  const lessLoaders: RuleSetRule[] = getCssLoader(devMode, 2, 'less').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item, use: [...item.use, getLessLoader()] };
     }
@@ -207,7 +219,7 @@ export function getStyleLoader(): RuleSetRule[] {
   });
 
   return [
-    ...getCssLoader(devMode),
+    ...getCssLoader(devMode, 1, 'css'),
     ...sLoaders,
     ...lessLoaders,
   ];

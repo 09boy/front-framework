@@ -1,14 +1,15 @@
 import { EntryNormalized, Template } from 'webpack';
 import TerserPlugin  from 'terser-webpack-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
+import { EnvModeType } from 'types/Smart';
 
-export default function getOptimizationConfig(devMode: boolean, vendors?: Record<string, string[]>): Template {
+export default function getOptimizationConfig(devMode: boolean, modeType: EnvModeType , vendors?: Record<string, string[]>): Template {
   let option: Template = {
     chunkIds: 'named',
   };
 
-  if (!devMode && process.env.BuildConfig) {
-    const drop_console = JSON.parse(process.env.BuildConfig).env === 'release';
+  if (!devMode) {
+    const drop_console = modeType === 'release';
 
     const cacheGroups: Record<string, any> = {
       async: {
@@ -30,7 +31,7 @@ export default function getOptimizationConfig(devMode: boolean, vendors?: Record
       styles: {
         name: 'styles',
         type: 'css/mini-extract',
-        test: /\.css$/,
+        // test: /\.css$/,
         chunks: 'all',
         enforce: true,
         priority: 20,
@@ -40,7 +41,7 @@ export default function getOptimizationConfig(devMode: boolean, vendors?: Record
     if (vendors) {
       let priority = 10;
       for (const key in vendors) {
-        if (vendors.hasOwnProperty(key)) {
+        if (Object.hasOwnProperty.call(vendors, key)) {
           const value: string[] = vendors[key];
           const reg = value.join('|');
           cacheGroups[key] = {
@@ -64,6 +65,7 @@ export default function getOptimizationConfig(devMode: boolean, vendors?: Record
       removeEmptyChunks: true,
       mergeDuplicateChunks: true,
       minimizer: [
+        '...',
         new TerserPlugin({
           parallel: true,
           extractComments: true,
@@ -78,9 +80,7 @@ export default function getOptimizationConfig(devMode: boolean, vendors?: Record
           },
         }),
         new CssMinimizerPlugin({
-          cache: true,
           parallel: true,
-          sourceMap: true,
           minimizerOptions: {
             preset: [
               'default',
@@ -92,9 +92,9 @@ export default function getOptimizationConfig(devMode: boolean, vendors?: Record
         }),
       ],
 
-      runtimeChunk: {
-        name: (entryPoint: EntryNormalized) => `runtimeChunk~${entryPoint.name}`,
-      },
+      /*runtimeChunk: {
+        name: (entryPoint: any) => `runtimeChunk~${entryPoint.name}`,
+      },*/
 
       splitChunks: { // default
         chunks: 'all',

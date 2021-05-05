@@ -80,7 +80,7 @@ function getOutputConfiguration(devMode, publicPath, path) {
     environment: {
       // The environment supports arrow functions ('() => { ... }').
       arrowFunction: true,
-      // The environment supports BigInt as literal (123n).
+      // The environment supports BigInt as literalf (123n).
       bigIntLiteral: false,
       // The environment supports const and let for variable declarations.
       const: true,

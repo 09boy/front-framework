@@ -39,7 +39,7 @@ async function Smart({
     const server = new _tasks.Server(serverOption);
 
     if (cli === 'start' && projectOption && configOption) {
-      (0, _shelljs.rm)('-rf', `${_path.PROJECT_ROOT_PATH}/${configOption.buildDir}`);
+      (0, _shelljs.rm)('-rf', `${_path.PROJECT_ROOT_PATH}/${configOption.buildDir}/*`);
       process.env.NODE_ENV = 'development';
       server.addHook((0, _webpackMiddleware.getWebpackMiddleware)({
         projectOption,

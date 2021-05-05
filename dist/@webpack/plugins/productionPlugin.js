@@ -27,9 +27,8 @@ function getProductionPlugins() {
     return [];
   }
 
-  return [new _webpack.ProgressPlugin({
-    percentBy: 'entries'
-  }), new _cleanWebpackPlugin.CleanWebpackPlugin(), new _webpack.BannerPlugin({
+  return [// new ProgressPlugin({ percentBy: 'entries' }),
+  new _cleanWebpackPlugin.CleanWebpackPlugin(), new _webpack.BannerPlugin({
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     banner: `fullhash:[fullhash], chunkhash:[chunkhash], name:[name], base:[base], query:[query], file:[file], @author: 09boy- ${new Date()}`,
     entryOnly: false,

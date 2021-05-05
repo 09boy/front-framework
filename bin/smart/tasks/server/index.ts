@@ -13,13 +13,12 @@ export class Server {
   constructor({ port, host, htmlPath }: SmartServerOptionType) {
     const ps =  htmlPath?.split('/');
     ps?.pop();
-    const buildDir = ps?.pop() || 'dist';
+    const buildDir = ps?.pop() || '';
     this.port = port;
     this.host = host;
     this.htmlPath = htmlPath;
     this.app = express();
     this.app.use(express.static(PROJECT_ROOT_PATH + '/' + buildDir));
-    this.app.use(express.static(PROJECT_ROOT_PATH + '/' + buildDir + '/home'));
   }
 
   addHook(handles: RequestHandler | RequestHandler[]): void {
@@ -35,7 +34,7 @@ export class Server {
       LogError('Server instance not found!');
       return;
     }
-    this.app.get('*', (req, res) => {
+    this.app.use('*', (req, res) => {
       res.sendFile(this.htmlPath);
     });
 

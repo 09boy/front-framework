@@ -14,11 +14,11 @@ export type LoaderProps = {
   maxSize: number
 };
 
-export default function getLoaders({ projectOption, structure, maxSize }: LoaderProps, include: string[] = []): RuleSetRule[] {
+export default function getLoaders({ projectOption, structure, maxSize }: LoaderProps, include?: string[]): RuleSetRule[] {
   const { assets, src } = structure;
   const staticPath = assets + '/';
 
-  include = include.map(s => PROJECT_ROOT_PATH + '/' + s);
+  include = include ? include.map(s => PROJECT_ROOT_PATH + '/' + s) : [];
 
   return [
     ...getTranspilingLoader(projectOption),
@@ -37,7 +37,7 @@ export default function getLoaders({ projectOption, structure, maxSize }: Loader
       PROJECT_ROOT_PATH + '/' + src,
       PROJECT_ROOT_PATH + '/index.js',
       PROJECT_ROOT_PATH + '/index.ts',
-      ...include,
+      ...(include as string[]),
     ],
   }));
 }

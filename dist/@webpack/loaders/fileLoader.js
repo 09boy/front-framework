@@ -11,8 +11,8 @@ const isJPGReg = /\.(jpe?g)$/i;
 const isPngRef = /\.(png)$/i;
 
 function getFileLoader(staticPath, maxSize) {
-  const envModel = (0, _env.isDevEnv)();
-  const name = envModel ? '[name][ext][query]' : '[contenthash][ext][query]';
+  const devModel = (0, _env.isDevEnv)();
+  const name = devModel ? '[name][ext][query]' : '[contenthash][ext][query]';
   const dataUrlCondition = {
     maxSize
   };
@@ -48,7 +48,7 @@ function getFileLoader(staticPath, maxSize) {
     }
   }];
 
-  if (!envModel) {
+  if (!devModel) {
     /*rules.push({
       test:  /\.(gif|png|jpe?g|svg)$/i,
       loader: getDynamicModule('file-loader'),

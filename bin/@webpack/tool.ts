@@ -26,7 +26,7 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
   const devMode = isDevEnv();
   const { projectType, name } = projectOption;
 
-  const { port, host, base64Limit, entry, devtool, vendors, provide, structure } = configOption;
+  const { port, host, base64Limit, entry, devtool, vendors, provide, structure, mode } = configOption;
   const publicPath = configOption.publicPath || '/';
   const buildDir = PROJECT_ROOT_PATH + '/' + (configOption.buildDir || 'dist');
 
@@ -63,6 +63,7 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
     projectOption,
     publicPath,
     provide,
+    modeOption: mode,
     entryFiles: htmlEntryFiles
   };
 

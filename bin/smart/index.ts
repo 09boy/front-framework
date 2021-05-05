@@ -16,7 +16,7 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
   if (serverOption && (cli === 'start' || cli === 'server')) {
     const server = new Server(serverOption);
     if (cli === 'start' && projectOption && configOption) {
-      rm('-rf', `${PROJECT_ROOT_PATH}/${configOption.buildDir}`);
+      rm('-rf', `${PROJECT_ROOT_PATH}/${configOption.buildDir}/*`);
       process.env.NODE_ENV = 'development';
       server.addHook(getWebpackMiddleware({ projectOption, configOption }) as RequestHandler[]);
     }

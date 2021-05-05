@@ -6,8 +6,8 @@ const isJPGReg = /\.(jpe?g)$/i;
 const isPngRef = /\.(png)$/i;
 
 export function getFileLoader(staticPath: string, maxSize: number): RuleSetRule[] {
-  const envModel = isDevEnv();
-  const name = envModel ? '[name][ext][query]' : '[contenthash][ext][query]';
+  const devModel = isDevEnv();
+  const name = devModel ? '[name][ext][query]' : '[contenthash][ext][query]';
   const dataUrlCondition = {
     maxSize,
   };
@@ -49,7 +49,7 @@ export function getFileLoader(staticPath: string, maxSize: number): RuleSetRule[
     },
   ];
 
-  if (!envModel) {
+  if (!devModel) {
     /*rules.push({
       test:  /\.(gif|png|jpe?g|svg)$/i,
       loader: getDynamicModule('file-loader'),

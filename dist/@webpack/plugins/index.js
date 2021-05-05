@@ -18,10 +18,11 @@ var _productionPlugin = require("./productionPlugin");
 function getPlugins({
   projectOption,
   provide,
+  modeOption,
   entryFiles,
   publicPath
 }) {
-  return [...(0, _stylePlugin.getStylePlugin)(), ...(0, _htmlPlugin.getHtmlPlugin)(publicPath, entryFiles), ...(0, _commonPlugin.getCommonPlugins)(provide), ...(0, _developmentPlugin.getDevelopmentPlugins)(projectOption), ...(0, _productionPlugin.getProductionPlugins)()];
+  return [...(0, _stylePlugin.getStylePlugin)(), ...(0, _htmlPlugin.getHtmlPlugin)(publicPath, entryFiles), ...(0, _commonPlugin.getCommonPlugins)(projectOption.modeType, modeOption, provide), ...(0, _developmentPlugin.getDevelopmentPlugins)(projectOption), ...(0, _productionPlugin.getProductionPlugins)()];
 }
 
 module.exports = exports.default;

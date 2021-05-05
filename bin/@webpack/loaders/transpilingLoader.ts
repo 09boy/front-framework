@@ -18,7 +18,7 @@ export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOp
     bugfixes: devMode,
   };
 
-  const presets: any = [];
+  const presets: any[] = [];
 
   const plugins: string | any[] = [
     getDynamicModule('@babel/plugin-transform-runtime'),

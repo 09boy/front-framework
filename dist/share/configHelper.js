@@ -37,22 +37,33 @@ async function getSmartConfigureData(isSTProject, option) {
     }
   } = option;
 
-  if (cli === 'upgrade' || cli === 'server') {
+  if (cli === 'upgrade') {
     return {
-      cli,
-      serverOption: {
-        port: Number(port) || 3000,
-        host: host || '127.0.0.1',
-        htmlPath: htmlPath || _path2.PROJECT_ROOT_PATH
-      }
+      cli
     };
   }
 
+  if (!isSTProject && cli === 'server') {
+    return getServerTaskOption({
+      port,
+      host,
+      htmlPath
+    });
+  }
+
   try {
-    const packageData = ['start', 'build', 'page', 'component'].includes(cli) ? await Promise.resolve(`${_path2.PROJECT_ROOT_PATH}/package.json`).then(s => _interopRequireWildcard(require(s))) : undefined;
-    const path = !isSTProject ? `${_path2.PROJECT_ROOT_PATH}/smart.config.yml` : (0, _path.join)(__dirname, `config/template/${projectType || 'normal'}.smart.config.yml`);
+    const packageData = cli !== 'server' ? await Promise.resolve(`${_path2.PROJECT_ROOT_PATH}/package.json`).then(s => _interopRequireWildcard(require(s))) : undefined;
+    const path = isSTProject ? `${_path2.PROJECT_ROOT_PATH}/smart.config.yml` : (0, _path.join)(__dirname, '..', `config/template/${projectType || 'normal'}.smart.config.yml`);
 
     const smartConfigData = _jsYaml.default.load((0, _fs.readFileSync)(path, 'utf8'));
+
+    if (cli === 'server') {
+      return getServerTaskOption({
+        port,
+        host,
+        htmlPath: htmlPath || smartConfigData.buildDir
+      });
+    }
 
     return parseSmartOption(option, smartConfigData, packageData);
   } catch (e) {
@@ -82,7 +93,23 @@ function parseSmartOption(option, defaultData, packageData) {
   const {
     structure,
     buildDir
-  } = defaultData;
+  } = defaultData; // if structure value is null to use key
+
+  const copyStructure = { ...structure
+  };
+
+  for (const key in copyStructure) {
+    if (Object.hasOwnProperty.call(copyStructure, key)) {
+      const value = copyStructure[key];
+
+      if (!value) {
+        Object.assign(structure, {
+          [key]: key
+        });
+      }
+    }
+  }
+
   const {
     componentsPath,
     pagesPath
@@ -95,11 +122,11 @@ function parseSmartOption(option, defaultData, packageData) {
     dirName: projectDir || _path2.PROJECT_ROOT_PATH.split('/').pop(),
     name: (packageData === null || packageData === void 0 ? void 0 : packageData.name) || 'Smart App'
   };
-  const serverOption = {
-    port: Number(port) || Number(defaultData.port) || 3000,
+  const serverOption = getServerOption({
+    port: port || defaultData.port,
     host: host || defaultData.host,
-    htmlPath: htmlPath || `${buildDir}/index.html`
-  };
+    htmlPath: htmlPath || buildDir
+  });
   let smartPages;
   let smartComponents;
 
@@ -129,5 +156,34 @@ function parseSmartOption(option, defaultData, packageData) {
       port: serverOption.port,
       host: serverOption.host
     }
+  };
+}
+
+function getHtmlPath(htmlPath) {
+  if (!htmlPath) {
+    return _path2.PROJECT_ROOT_PATH + '/index.html';
+  }
+
+  htmlPath = htmlPath.startsWith('/') ? htmlPath.substr(1, htmlPath.length) : htmlPath;
+  htmlPath = htmlPath.endsWith('.html') ? htmlPath : htmlPath.endsWith('/') ? htmlPath + 'index.html' : htmlPath + '/index.html';
+  return _path2.PROJECT_ROOT_PATH + '/' + htmlPath;
+}
+
+function getServerOption({
+  port,
+  host,
+  htmlPath
+}) {
+  return {
+    port: Number(port) || 3000,
+    host: host || '127.0.0.1',
+    htmlPath: getHtmlPath(htmlPath)
+  };
+}
+
+function getServerTaskOption(serverParam) {
+  return {
+    cli: 'server',
+    serverOption: getServerOption(serverParam)
   };
 }

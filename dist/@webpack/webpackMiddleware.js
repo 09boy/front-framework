@@ -9,6 +9,8 @@ var _webpack = _interopRequireDefault(require("webpack"));
 
 var _webpackDevMiddleware = _interopRequireDefault(require("webpack-dev-middleware"));
 
+var _connectHistoryApiFallback = _interopRequireDefault(require("connect-history-api-fallback"));
+
 var _webpackHotMiddleware = _interopRequireDefault(require("webpack-hot-middleware"));
 
 var _index = _interopRequireDefault(require("./index"));
@@ -27,7 +29,7 @@ function getWebpackMiddleware(option) {
   }
 
   const devOptions = {
-    publicPath: publicPath,
+    publicPath,
     mimeTypes: {
       phtml: 'text/html'
     },
@@ -36,9 +38,11 @@ function getWebpackMiddleware(option) {
       'Access-Control-Allow-Headers': 'X-Requested-With',
       'X-Custom-Header': 'yes'
     },
-    writeToDisk: true
+    writeToDisk: filename => filename.includes('index.html')
   };
-  return [(0, _webpackDevMiddleware.default)(compiler, devOptions), (0, _webpackHotMiddleware.default)(compiler, {
+  const devCompiler = (0, _webpackDevMiddleware.default)(compiler, devOptions); // console.log(devCompiler);
+
+  return [(0, _connectHistoryApiFallback.default)(), devCompiler, (0, _webpackHotMiddleware.default)(compiler, {
     path: '/__webpack_hmr'
-  })];
+  }), (0, _connectHistoryApiFallback.default)()];
 }

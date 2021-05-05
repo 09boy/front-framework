@@ -1,10 +1,9 @@
 import webpack, { Compiler, Configuration, WebpackPluginInstance } from 'webpack';
 import { SmartWebpackOption } from 'types/Smart';
-import { SmartConfigOption } from 'types/SmartProjectConfig';
 import devMiddleware, { Options as ServerMiddlewareOptions } from 'webpack-dev-middleware';
+import historyApiFallback from 'connect-history-api-fallback';
 import hotMiddleware from 'webpack-hot-middleware';
 import configuration from '@webpack';
-
 
 export function getWebpackMiddleware(option: SmartWebpackOption): WebpackPluginInstance[] {
   const webpackConfig: Configuration = configuration(option);
@@ -16,20 +15,23 @@ export function getWebpackMiddleware(option: SmartWebpackOption): WebpackPluginI
   }
 
   const devOptions: ServerMiddlewareOptions = {
-    publicPath: publicPath,
+    publicPath,
     mimeTypes: { phtml: 'text/html' },
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'X-Requested-With',
       'X-Custom-Header': 'yes',
     },
-    writeToDisk: true,
+    writeToDisk: filename => filename.includes('index.html'),
   };
-
+  const devCompiler = devMiddleware(compiler as any, devOptions);
+  // console.log(devCompiler);
   return [
-    devMiddleware(compiler as any, devOptions),
+    historyApiFallback(),
+    devCompiler,
     hotMiddleware(compiler as any, {
       path: '/__webpack_hmr',
     }),
+    historyApiFallback(),
   ];
 }

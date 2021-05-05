@@ -13,8 +13,16 @@ var _miniCssExtractPlugin = _interopRequireDefault(require("mini-css-extract-plu
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getCssLoader(devMode, importLoaders = 1, isLessLoader = false) {
-  let test = !isLessLoader ? /\.(sa|sc)ss$/ : /\.less$/; // let lazyTest = !isLessLoader ?/\.lazy\.(sa|sc)ss$/ : /\.lazy\.less$/;
+function getCssLoader(devMode, importLoaders = 1, loaderType) {
+  // let test = !isLessLoader ? /\.(sa|sc)ss$/ : /\.less$/;
+  // let lazyTest = !isLessLoader ?/\.lazy\.(sa|sc)ss$/ : /\.lazy\.less$/;
+  let test = /\.css$/;
+
+  if (loaderType === 'scss') {
+    test = /\.(sa|sc)ss$/;
+  } else if (loaderType === 'less') {
+    test = /\.less$/;
+  }
 
   if (importLoaders === 1 && devMode) {
     test = /\.css$/; // lazyTest = /\.css$/;
@@ -23,27 +31,25 @@ function getCssLoader(devMode, importLoaders = 1, isLessLoader = false) {
   const styleLoader = devMode ? {
     loader: (0, _projectHelper.getDynamicModule)('style-loader'),
     options: {
-      insert: element => {
-        const parent = document.querySelector('body'); // eslint-disable-next-line no-underscore-dangle
-        // @ts-ignore
-
-        const lastInsertedElement = window['_lastElementInsertedByStyleLoader'];
-
-        if (!lastInsertedElement) {
-          // @ts-ignore
-          parent.insertBefore(element, parent.firstChild);
-        } else if (lastInsertedElement.nextSibling) {
-          // @ts-ignore
-          parent.insertBefore(element, lastInsertedElement.nextSibling);
-        } else {
-          // @ts-ignore
-          parent.appendChild(element);
-        } // eslint-disable-next-line no-underscore-dangle
-        // @ts-ignore
-
-
-        window._lastElementInsertedByStyleLoader = element;
-      },
+      /* insert: (element: Element) => {
+         const parent = document.querySelector('body');
+         // eslint-disable-next-line no-underscore-dangle
+         // @ts-ignore
+         const lastInsertedElement = window['_lastElementInsertedByStyleLoader'];
+          if (!lastInsertedElement) {
+           // @ts-ignore
+           parent.insertBefore(element, parent.firstChild);
+         } else if (lastInsertedElement.nextSibling) {
+           // @ts-ignore
+           parent.insertBefore(element, lastInsertedElement.nextSibling);
+         } else {
+           // @ts-ignore
+           parent.appendChild(element);
+         }
+         // eslint-disable-next-line no-underscore-dangle
+         // @ts-ignore
+         window._lastElementInsertedByStyleLoader = element;
+       },*/
       esModule: true,
       modules: {
         namedExport: true
@@ -52,7 +58,10 @@ function getCssLoader(devMode, importLoaders = 1, isLessLoader = false) {
   } : {
     loader: _miniCssExtractPlugin.default.loader,
     options: {
-      esModule: true
+      esModule: true,
+      modules: {
+        namedExport: true
+      }
     }
   };
   const postLoader = getPostCss();
@@ -158,7 +167,7 @@ function getSassLoader(devMode) {
     loader: (0, _projectHelper.getDynamicModule)('sass-loader'),
     options: {
       sourceMap: true,
-      implementation: require('sass'),
+      // implementation: require('sass'),
       webpackImporter: false,
       sassOptions
     }
@@ -191,7 +200,7 @@ function getLessLoader() {
 
 function getStyleLoader() {
   const devMode = (0, _env.isDevEnv)();
-  const sLoaders = getCssLoader(devMode, 2).map(item => {
+  const sLoaders = getCssLoader(devMode, 2, 'scss').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item,
         use: [...item.use, getSassLoader(devMode)]
@@ -200,7 +209,7 @@ function getStyleLoader() {
 
     return item;
   });
-  const lessLoaders = getCssLoader(devMode, 2, true).map(item => {
+  const lessLoaders = getCssLoader(devMode, 2, 'less').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item,
         use: [...item.use, getLessLoader()]
@@ -209,5 +218,5 @@ function getStyleLoader() {
 
     return item;
   });
-  return [...getCssLoader(devMode), ...sLoaders, ...lessLoaders];
+  return [...getCssLoader(devMode, 1, 'css'), ...sLoaders, ...lessLoaders];
 }

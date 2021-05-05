@@ -45,7 +45,7 @@ export default function configuration(option: SmartWebpackOption):Configuration 
       modules: [`${SMART_ROOT_PATH}/node_modules`],
       extensions: ['.js', '.json'],
     },
-    optimization: getOptimizationConfig(devMode, option.configOption.vendors),
+    optimization: getOptimizationConfig(devMode, option.projectOption.modeType,  option.configOption.vendors),
     stats: {
       cached: true,
       cachedAssets: true,

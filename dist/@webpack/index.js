@@ -69,7 +69,7 @@ function configuration(option) {
       modules: [`${_path.SMART_ROOT_PATH}/node_modules`],
       extensions: ['.js', '.json']
     },
-    optimization: (0, _optimization.default)(devMode, option.configOption.vendors),
+    optimization: (0, _optimization.default)(devMode, option.projectOption.modeType, option.configOption.vendors),
     stats: {
       cached: true,
       cachedAssets: true,
