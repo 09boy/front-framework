@@ -23,6 +23,8 @@ var _createComponent = _interopRequireDefault(require("./tasks/create/createComp
 
 var _createPage = _interopRequireDefault(require("./tasks/create/createPage"));
 
+var _init = _interopRequireDefault(require("./tasks/init"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 async function Smart({
@@ -34,6 +36,10 @@ async function Smart({
   components
 }) {
   let logTask;
+
+  if (projectOption && configOption) {
+    (0, _init.default)(projectOption);
+  }
 
   if (serverOption && (cli === 'start' || cli === 'server')) {
     const server = new _tasks.Server(serverOption);

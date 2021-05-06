@@ -62,5 +62,14 @@ structure:
   src:
   pages:
   assets:
+    - images
+    - styles
+    - fonts
   app:
+    - actions
+    - selectors
+    - reducers
+    - sagas
+    - constants
+    - store
   components:

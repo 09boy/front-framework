@@ -10,8 +10,13 @@ import { initFiles } from './tasks/create/initFiles';
 import createComponents from './tasks/create/createComponent';
 import createPages from './tasks/create/createPage';
 
+import intProject from './tasks/init';
+
 export default async function Smart({ cli, projectOption, serverOption, configOption, pages, components } : SmartTaskOption): Promise<void> {
   let logTask;
+  if (projectOption && configOption) {
+    intProject(projectOption);
+  }
 
   if (serverOption && (cli === 'start' || cli === 'server')) {
     const server = new Server(serverOption);

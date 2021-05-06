@@ -18,13 +18,20 @@ entry:
   app:
     path: index.js
     favicon: images/favicon.ico
-    title: normal smart application
+    title: smart react application
 
-# https://webpack.js.org/configuration/devtool/
 devtool: eval-source-map
 
-# # Object <key: []>
+# Object <key: []>
 vendors:
+  react-vendor:
+    - react
+    - '@hot-loader/react-dom'
+    - react-redux
+    - redux-saga
+    - '@reduxjs/toolkit'
+    - react-router-dom
+    - reselect
 
 base64Limit: 8192
 
@@ -33,9 +40,8 @@ base64Limit: 8192
 # error => /node_modules/xxx/xx.js
 loaderIncludes:
 
+# Object
 resolveAlias:
-  pages: pages
-  assets: assets
 
 globals:
   API_HTTPS:
@@ -52,7 +58,18 @@ globals:
 
 structure:
   # development directory
+  # use key when value is undefined
   src:
   pages:
   assets:
-
+    - images
+    - styles
+    - fonts
+  app:
+    - actions
+    - selectors
+    - reducers
+    - sagas
+    - constants
+    - store
+  components:

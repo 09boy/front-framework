@@ -36,7 +36,7 @@ export interface SmartProjectOption {
   modeType: EnvModeType;
   projectType: ProjectType;
   dirName: string;
-  name: string;
+  name: string; // use package.json->name
 }
 
 export interface SmartServerOptionType {
@@ -61,3 +61,6 @@ export interface SmartWebpackOption {
   projectOption: SmartProjectOption;
   configOption: SmartConfigOption;
 }
+
+
+/* task */

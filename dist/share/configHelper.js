@@ -52,8 +52,8 @@ async function getSmartConfigureData(isSTProject, option) {
   }
 
   try {
-    const packageData = cli !== 'server' ? await Promise.resolve(`${_path2.PROJECT_ROOT_PATH}/package.json`).then(s => _interopRequireWildcard(require(s))) : undefined;
-    const path = isSTProject ? `${_path2.PROJECT_ROOT_PATH}/smart.config.yml` : (0, _path.join)(__dirname, '..', `config/template/${projectType || 'normal'}.smart.config.yml`);
+    const packageData = cli !== 'server' && isSTProject ? await Promise.resolve(`${_path2.PROJECT_ROOT_PATH}/package.json`).then(s => _interopRequireWildcard(require(s))) : undefined;
+    const path = isSTProject ? `${_path2.PROJECT_ROOT_PATH}/smart.config.yml` : (0, _path.join)(__dirname, '..', `smart/templates/smart-config/${projectType || 'normal'}.smart.config.yml`);
 
     const smartConfigData = _jsYaml.default.load((0, _fs.readFileSync)(path, 'utf8'));
 
@@ -117,7 +117,7 @@ function parseSmartOption(option, defaultData, packageData) {
   const st = scriptType || (packageData === null || packageData === void 0 ? void 0 : packageData.smart.scriptType) || 'js';
   const projectOption = {
     scriptType: st,
-    projectType: projectType || (packageData === null || packageData === void 0 ? void 0 : packageData.smart.projectType),
+    projectType: projectType || (packageData === null || packageData === void 0 ? void 0 : packageData.smart.projectType) || 'normal',
     modeType: modeType || 'start',
     dirName: projectDir || _path2.PROJECT_ROOT_PATH.split('/').pop(),
     name: (packageData === null || packageData === void 0 ? void 0 : packageData.name) || 'Smart App'

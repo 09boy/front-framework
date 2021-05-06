@@ -24,8 +24,8 @@ export async function getSmartConfigureData(isSTProject: boolean, option: SmartO
   }
 
   try {
-    const packageData: PackageData | undefined = cli !== 'server' ? await import(`${PROJECT_ROOT_PATH}/package.json`) as PackageData : undefined;
-    const path = isSTProject ? `${PROJECT_ROOT_PATH}/smart.config.yml` : join(__dirname, '..', `config/template/${projectType || 'normal'}.smart.config.yml`);
+    const packageData: PackageData | undefined = cli !== 'server' && isSTProject  ? await import(`${PROJECT_ROOT_PATH}/package.json`) as PackageData : undefined;
+    const path = isSTProject ? `${PROJECT_ROOT_PATH}/smart.config.yml` : join(__dirname, '..', `smart/templates/smart-config/${projectType || 'normal'}.smart.config.yml`);
     const smartConfigData =  jsYaml.load(readFileSync(path, 'utf8')) as SmartConfigOption;
     if (cli === 'server') {
       return getServerTaskOption({ port, host, htmlPath: htmlPath || smartConfigData.buildDir });
@@ -60,7 +60,7 @@ export function parseSmartOption(option: SmartOption, defaultData: SmartConfigOp
 
   const projectOption: SmartProjectOption = {
     scriptType: st,
-    projectType: projectType || packageData?.smart.projectType as ProjectType,
+    projectType: projectType || packageData?.smart.projectType as ProjectType || 'normal',
     modeType: modeType || 'start',
     dirName: projectDir || PROJECT_ROOT_PATH.split('/').pop() as string,
     name: packageData?.name as unknown as string || 'Smart App',
