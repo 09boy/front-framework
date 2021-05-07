@@ -14,13 +14,13 @@ var _fs = require("fs");
 
 var _fsHelper = require("../../../share/fsHelper");
 
-var _package = require("./package");
+var _package = require("../init/package");
 
 var _jestConfig = require("./jestConfig");
 
-var _ignore = require("./ignore");
+var _ignore = require("../init/ignore");
 
-var _babelResolveConfig = require("./babelResolveConfig");
+var _babelResolveConfig = require("../init/babelResolveConfig");
 
 var _browserslistrc = require("./browserslistrc");
 

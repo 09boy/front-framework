@@ -15,7 +15,7 @@ import intProject from './tasks/init';
 export default async function Smart({ cli, projectOption, serverOption, configOption, pages, components } : SmartTaskOption): Promise<void> {
   let logTask;
   if (projectOption && configOption) {
-    intProject(projectOption);
+    intProject(projectOption, configOption?.structure.src);
   }
 
   if (serverOption && (cli === 'start' || cli === 'server')) {

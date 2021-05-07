@@ -38,7 +38,7 @@ async function Smart({
   let logTask;
 
   if (projectOption && configOption) {
-    (0, _init.default)(projectOption);
+    (0, _init.default)(projectOption, configOption === null || configOption === void 0 ? void 0 : configOption.structure.src);
   }
 
   if (serverOption && (cli === 'start' || cli === 'server')) {

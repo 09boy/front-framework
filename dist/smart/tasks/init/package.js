@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getPackageData = getPackageData;
+exports.default = getPackageData;
 
 var _shelljs = require("shelljs");
 
@@ -125,3 +125,5 @@ function getPackageData({
     }
   };
 }
+
+module.exports = exports.default;
