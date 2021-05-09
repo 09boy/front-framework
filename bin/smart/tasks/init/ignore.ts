@@ -16,8 +16,6 @@ const gitData = [
   '#Editor',
   '.idea/*',
   '.vscode/*',
-
-
 ];
 
 export function getIgnoreData(projectType: ProjectType): string[] {

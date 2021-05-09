@@ -1,19 +1,26 @@
 import { cd, cp, mkdir, touch } from 'shelljs';
 import { SmartProjectOption } from 'types/Smart';
 import getPackageData from './package';
-import { writeFileSync } from 'fs';
+import { writeFileSync } from "fs";
 import { getIgnoreData } from './ignore';
 import { getBabelResolveConfigData } from 'smart/tasks/init/babelResolveConfig';
+import { join } from 'path';
 
 export default function intProject(option: SmartProjectOption, src: string): void {
-  const { projectType, modeType, scriptType, name, dirName } = option;
+  const { projectType, scriptType, dirName } = option;
   mkdir(dirName);
   cd(dirName);
+
+  if (projectType !== 'miniProgram') {
+    cp(join(__dirname, '..', '..', 'templates/smart-config/index.template.html'), 'index.template.html');
+  }
+  cp(join(__dirname, '..', '..', `templates/smart-config/${projectType}.smart.config.yml`), 'smart.config.yml');
 
   const isTs = scriptType === 'ts';
   if (isTs) {
     touch('typings.d.ts');
   }
+
 
   // writeFileSync('.browserslistrc', getBrowserslistrcConfigData(projectType).join('\n'));
 

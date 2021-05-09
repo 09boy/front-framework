@@ -10,7 +10,7 @@
     "build": "npx babel bin --out-dir dist --extensions '.ts' --copy-files --ignore bin/smart/templates",
     "lint": "tsc --noEmit && eslint --fix 'bin/**/*.{js,ts}'",
     "test": "jest --forceExit --detectOpenHandles",
-    "prettier:write": "npx prettier --write **/*.{js,jsx,ts,tsx,json} && npx prettier --write *.{js,jsx,ts,tsx,json}"
+    "prettier:write": "npx prettier --write **/*.{js,ts,json} && npx prettier --write *.{js,ts,json}"
   },
   "description": "typescript, react, vue, front framework, smart",
   "keywords": [],

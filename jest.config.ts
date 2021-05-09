@@ -14,9 +14,5 @@ module.exports = {
     '^.+\\.ts?$': 'ts-jest' // 匹配 .ts
   },*/
   // 忽略覆盖率的目录
-  coveragePathIgnorePatterns: [
-    '/node_modules/',
-    '/__test__/',
-    '/dist/'
-  ],
+  coveragePathIgnorePatterns: ['/node_modules/', '/__test__/', '/dist/'],
 };
