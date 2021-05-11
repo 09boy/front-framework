@@ -37,8 +37,13 @@ async function Smart({
 }) {
   let logTask;
 
-  if (projectOption && configOption) {
-    (0, _init.default)(projectOption, configOption === null || configOption === void 0 ? void 0 : configOption.structure.src);
+  if (cli === 'init' && projectOption) {
+    logTask = new _logProgress.default();
+    logTask.add([{
+      title: `Smart Init ${projectOption.projectType} Project`,
+      task: () => (0, _init.default)(projectOption)
+    }]);
+    await logTask.run();
   }
 
   if (serverOption && (cli === 'start' || cli === 'server')) {

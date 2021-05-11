@@ -31,9 +31,6 @@ const commondev = ['moment', 'axios'];
 const commonsDev = [
   '@babel/core',
   '@babel/runtime',
-  'jest',
-  'babel-jest',
-  'babel-plugin-module-resolver',
   'eslint',
   'eslint-config-prettier',
   'eslint-plugin-import',
@@ -67,7 +64,6 @@ const commonReactDev = [
   'eslint-plugin-react',
   'react-test-renderer',
   'prop-types',
-
 ];
 
 const commonReactTsDev = [
@@ -143,6 +139,8 @@ function getDependenciesName(projectType: ProjectType, isTs: boolean): Dependenc
     case 'miniProgram':
       break;
     default:
+      // normal
+      devDependencies.push(isTs? '@typescript-eslint/parser' : '@babel/eslint-parser');
       break;
   }
   return {

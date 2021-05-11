@@ -14,11 +14,7 @@ var _fs = require("fs");
 
 var _fsHelper = require("../../../share/fsHelper");
 
-var _package = require("../init/package");
-
-var _jestConfig = require("./jestConfig");
-
-var _ignore = require("../init/ignore");
+var _jestConfig = require("../init/jestConfig");
 
 var _babelResolveConfig = require("../init/babelResolveConfig");
 
@@ -68,9 +64,6 @@ function createProjectConfigurationFiles(projectOption, {
     src,
     assets
   } = structure;
-  const packageData = (0, _package.getPackageData)(projectOption, src);
-  (0, _fs.writeFileSync)('package.json', JSON.stringify(packageData, null, 2));
-  (0, _fs.writeFileSync)('.gitignore', (0, _ignore.getIgnoreData)(projectType, ['dist']).join('\n'));
   (0, _fs.writeFileSync)('.browserslistrc', (0, _browserslistrc.getBrowserslistrcConfigData)(projectType).join('\n'));
   (0, _fs.writeFileSync)(`${scriptType}config.json`, JSON.stringify((0, _babelResolveConfig.getBabelResolveConfigData)(projectType, scriptType, src), null, 2));
   (0, _shelljs.cp)('-f', (0, _path.join)(__dirname, `../../templates/root/${projectType}.${scriptType}.eslint.js`), '.eslintrc.js'); // await cp('-f', join(__dirname, `../../templates/root/${projectType}.${projectLanguageType}.babel.config.js`), 'babel.config.js');

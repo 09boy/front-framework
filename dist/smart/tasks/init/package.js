@@ -32,7 +32,7 @@ const packageData = {
   smart: {}
 };
 const commondev = ['moment', 'axios'];
-const commonsDev = ['@babel/core', '@babel/runtime', 'jest', 'babel-jest', 'babel-plugin-module-resolver', 'eslint', 'eslint-config-prettier', 'eslint-plugin-import', 'eslint-import-resolver-babel-module', 'eslint', 'babel-plugin-module-resolver', 'babel-plugin-add-module-exports', 'prettier', 'pretty-quick'];
+const commonsDev = ['@babel/core', '@babel/runtime', 'eslint', 'eslint-config-prettier', 'eslint-plugin-import', 'eslint-import-resolver-babel-module', 'eslint', 'babel-plugin-module-resolver', 'babel-plugin-add-module-exports', 'prettier', 'pretty-quick'];
 const commonTsDev = ['@types/jest', '@typescript-eslint/eslint-plugin', 'eslint-config-airbnb-typescript', '@typescript-eslint/parser', 'typescript'];
 const commonReact = ['react', 'react-dom', 'redux', 'react-redux', 'redux-saga', 'react-router-dom', 'redux-logger'];
 const commonReactDev = ['eslint-plugin-react', 'react-test-renderer', 'prop-types'];
@@ -67,6 +67,8 @@ function getDependenciesName(projectType, isTs) {
       break;
 
     default:
+      // normal
+      devDependencies.push(isTs ? '@typescript-eslint/parser' : '@babel/eslint-parser');
       break;
   }
 

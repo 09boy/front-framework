@@ -2,7 +2,6 @@ import { RuleSetRule } from 'webpack';
 import { SmartStructureOption } from 'types/SmartProjectConfig';
 import { getStyleLoader } from './styleLoader';
 import { getFileLoader } from './fileLoader';
-import { getTemplatingLoader } from './templatingLoader';
 import { getTranspilingLoader } from './transpilingLoader';
 import { PROJECT_ROOT_PATH } from 'share/path';
 import { SmartProjectOption } from 'types/Smart';
@@ -22,7 +21,6 @@ export default function getLoaders({ projectOption, structure, maxSize }: Loader
 
   return [
     ...getTranspilingLoader(projectOption),
-    ...getTemplatingLoader(),
     ...getStyleLoader(),
     ...getFileLoader(staticPath, maxSize),
   ].map(rule => ({

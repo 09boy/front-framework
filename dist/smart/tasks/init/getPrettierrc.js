@@ -1,5 +1,9 @@
-import { ProjectType } from 'types/SmartProjectConfig';
+"use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getPrettierConfigData = getPrettierConfigData;
 const defaultData = {
   bracketSpacing: false,
   jsxBracketSameLine: true,
@@ -7,15 +11,18 @@ const defaultData = {
   semi: true,
   trailingComma: 'all',
   arrowParens: 'avoid',
-  tabWidth: 2,
+  tabWidth: 2
 };
 
-export function getPrettierConfigData(projectType: ProjectType): Record<string, any> {
-  const cpData: Record<string, any> = {...defaultData};
+function getPrettierConfigData(projectType) {
+  const cpData = { ...defaultData
+  };
+
   switch (projectType) {
     case 'normal':
       delete cpData.jsxBracketSameLine;
       return cpData;
+
     case 'react':
     case 'vue':
     case 'nodejs':
@@ -23,5 +30,3 @@ export function getPrettierConfigData(projectType: ProjectType): Record<string, 
       return cpData;
   }
 }
-
-

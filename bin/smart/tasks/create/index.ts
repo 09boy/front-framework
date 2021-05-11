@@ -2,9 +2,7 @@ import { cd, mkdir, cp } from 'shelljs';
 import { join } from 'path';
 import { writeFileSync, readFileSync } from 'fs';
 import { parseJsonFileToJsFile } from 'share/fsHelper';
-import { getPackageData } from '../init/package';
-import { getJestConfigData } from './jestConfig';
-import { getIgnoreData } from '../init/ignore';
+import { getJestConfigData } from '../init/jestConfig';
 import { getBabelResolveConfigData } from '../init/babelResolveConfig';
 import { getBrowserslistrcConfigData } from './browserslistrc';
 import { SMART_ROOT_PATH } from 'share/path';
@@ -45,9 +43,7 @@ export function createProjectStructure(projectType: ProjectType, projectName: st
 export function createProjectConfigurationFiles( projectOption :SmartProjectOption, { structure }: SmartConfigOption): void {
   const { projectType, scriptType } = projectOption;
   const { src, assets } = structure;
-  const packageData = getPackageData(projectOption, src);
-  writeFileSync('package.json', JSON.stringify(packageData, null, 2));
-  writeFileSync('.gitignore', getIgnoreData(projectType, ['dist']).join('\n'));
+
   writeFileSync('.browserslistrc', getBrowserslistrcConfigData(projectType).join('\n'));
   writeFileSync(`${scriptType}config.json`, JSON.stringify(getBabelResolveConfigData(projectType, scriptType, src), null, 2));
 
