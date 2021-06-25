@@ -47,7 +47,7 @@ export function createProjectConfigurationFiles( projectOption :SmartProjectOpti
   writeFileSync('.browserslistrc', getBrowserslistrcConfigData(projectType).join('\n'));
   writeFileSync(`${scriptType}config.json`, JSON.stringify(getBabelResolveConfigData(projectType, scriptType, src), null, 2));
 
-  cp('-f', join(__dirname, `../../templates/root/${projectType}.${scriptType}.eslint.js`), '.eslintrc.js');
+  cp('-f', join(__dirname, `../../templates/root/${projectType}.${scriptType}.eslint.js`), '..eslintrc.js');
   // await cp('-f', join(__dirname, `../../templates/root/${projectType}.${projectLanguageType}.babel.config.js`), 'babel.config.js');
   const babelConfigData = readFileSync(join(__dirname, `../../templates/root/${projectType}.${scriptType}.babel.config.js`), 'utf-8');
   writeFileSync('babel.config.js', babelConfigData.replace(/<smart_path>/g, SMART_ROOT_PATH).replace('<rootPath>', src));

@@ -25,7 +25,7 @@ export default function intProject(option: SmartProjectOption): void {
   // package
   const packageData = getPackageData(option, 'src');
   writeFileSync('package.json', JSON.stringify(packageData, null, 2));
-  cp('-f', join(__dirname, `../../templates/root/${projectType}.${scriptType}.eslint.js`), '.eslintrc.js');
+  cp('-f', join(__dirname, `../../templates/root/${projectType}.${scriptType}.eslint.js`), '..eslintrc.js');
 
   writeFileSync('.prettierrc.json', JSON.stringify(getPrettierConfigData(projectType), null, 2));
   parseJsonFileToJsFile('.prettierrc');

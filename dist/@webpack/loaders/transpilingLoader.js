@@ -63,12 +63,13 @@ function getTranspilingLoader({
   presets.unshift([// https://github.com/babel/babel/issues/10008
   // https://github.com/babel/babel/issues/9853
   (0, _projectHelper.getDynamicModule)('@babel/preset-env'), envOptions]);
+  console.log(presets);
   return [{
     test: /\.(ts|js)x?$/,
     use: {
       loader: (0, _projectHelper.getDynamicModule)('babel-loader'),
       options: {
-        // extends: PROJECT_ROOT_PATH + '/babel.config.js',
+        babelrc: false,
         cacheDirectory: true,
         presets,
         plugins

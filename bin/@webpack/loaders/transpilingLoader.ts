@@ -3,6 +3,7 @@ import { Options } from '@babel/preset-env';
 import { isDevEnv } from 'share/env';
 import { getDynamicModule } from 'share/projectHelper';
 import { SmartProjectOption } from 'types/Smart';
+import { join } from 'path';
 
 
 export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOption): RuleSetRule[] {
@@ -18,9 +19,9 @@ export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOp
     bugfixes: devMode,
   };
 
-  const presets: any[] = [];
+  const presets = [];
 
-  const plugins: string | any[] = [
+  const plugins = [
     getDynamicModule('@babel/plugin-transform-runtime'),
     [getDynamicModule('@babel/plugin-proposal-decorators'), { legacy: true }],
     [getDynamicModule('@babel/plugin-proposal-class-properties'), { loose: true }],
@@ -65,13 +66,14 @@ export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOp
     getDynamicModule('@babel/preset-env'), envOptions
   ]);
 
+  console.log(presets);
   return [
     {
       test: /\.(ts|js)x?$/,
       use: {
         loader: getDynamicModule('babel-loader'),
         options: {
-          // extends: PROJECT_ROOT_PATH + '/babel.config.js',
+          babelrc: false,
           cacheDirectory: true,
           presets,
           plugins,

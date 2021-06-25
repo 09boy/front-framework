@@ -46,7 +46,7 @@ function intProject(option) {
 
   const packageData = (0, _package.default)(option, 'src');
   (0, _fs.writeFileSync)('package.json', JSON.stringify(packageData, null, 2));
-  (0, _shelljs.cp)('-f', (0, _path.join)(__dirname, `../../templates/root/${projectType}.${scriptType}.eslint.js`), '.eslintrc.js');
+  (0, _shelljs.cp)('-f', (0, _path.join)(__dirname, `../../templates/root/${projectType}.${scriptType}.eslint.js`), '..eslintrc.js');
   (0, _fs.writeFileSync)('.prettierrc.json', JSON.stringify((0, _getPrettierrc.getPrettierConfigData)(projectType), null, 2));
   (0, _fsHelper.parseJsonFileToJsFile)('.prettierrc');
   (0, _fs.writeFileSync)('jest.config.json', JSON.stringify((0, _jestConfig.getJestConfigData)(projectType), null, 2));
