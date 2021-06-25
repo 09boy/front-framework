@@ -60,11 +60,11 @@ function PrintLog(logType, message = '', endMessage) {
       break;
 
     case _LogType.LogType.cliNotExist:
-      log(error(`Error: unknown command '${message}', to run 'smart --help'`));
+      log(error(`Error: unknown command '${warning(message)}', to run 'smart --help'`));
       break;
 
     case _LogType.LogType.cliArgTypeError:
-      log(error(`Command Arg Error: ${message} not a valid value.
+      log(error(`Command Arg Error: ${warning(warning(message))} not a valid value.
          ${endMessage ? endMessage : 'to run \'smart --help\''}`));
       break;
 
@@ -72,6 +72,7 @@ function PrintLog(logType, message = '', endMessage) {
       break;
 
     case _LogType.LogType.projectExist:
+      log(error(`Unexpected Error: The '${warning(message)}' project is already exist.`));
       break;
   }
 }

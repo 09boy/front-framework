@@ -93,7 +93,7 @@ const commonNode = [
 ];
 
 const commonNodeDev = [
-  '@babel/node\n',
+  '@babel/node',
   'mongodb-memory-server',
   'nodemon',
   'ts-node',
@@ -110,6 +110,12 @@ const commonNodeTsDev = [
   '@types/node-fetch',
   '@typescript-eslint/eslint-plugin',
   '@typescript-eslint/parser'
+];
+
+const commonVue = [
+  'vue@3',
+  'vuex@4',
+  'vue-router@4'
 ];
 
 type DependenciesType = {
@@ -131,6 +137,8 @@ function getDependenciesName(projectType: ProjectType, isTs: boolean): Dependenc
       devDependencies = devDependencies.concat(isTs ? [...commonReactDev, ...commonReactTsDev] : commonReactDev);
       break;
     case 'vue':
+      dependencies = dependencies.concat(commonVue);
+      devDependencies.push(isTs ? '@typescript-eslint/parser' : '@babel/eslint-parser');
       break;
     case 'nodejs':
       dependencies = dependencies.concat(commonNode);
@@ -157,11 +165,16 @@ function getDependenciesVersion({ dependencies, devDependencies }: DependenciesT
   const devS: Record<string, string> = {};
 
   [...dependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(((p) => {
-    const version = exec(`npm view ${p.trim()} version`, { silent: true });
-    ds[p.trim()] = `^${version.replace('\n', '')}`;
+    const versions: string[] = exec(`npm view ${p.trim()} version`, { silent: true }).stdout.split('\n').filter(s => !!s);
+    const version = (versions.pop() as string).split(' ').pop() as string;
+
+    if (p.includes('vue') && p.includes('@')) {
+      p = p.split('@')[0];
+    }
+    ds[p.trim()] = `^${version.replace(/'/g, '')}`;
   }));
   [...devDependencies].sort((a, b) => (a + '').localeCompare(b + '')).map((p) => {
-    const version = exec(`npm view ${p.trim()} version`, { silent: true });
+    const version = exec(`npm view ${p.trim()} version`, { silent: true }).stdout;
     devS[p.trim()] = `^${version.replace('\n', '')}`;
   });
 

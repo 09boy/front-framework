@@ -1,12 +1,27 @@
 import { existsSync } from 'fs';
 import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
-import { ScriptType, SmartStructureOption } from 'types/SmartProjectConfig';
-import { SmartCreateDirArg } from 'types/Smart';
+import { ScriptType } from 'types/SmartProjectConfig';
+import { SmartCliType, SmartCreateDirArg } from 'types/Smart';
+import { createProjectCli, developProjectCli } from "share/env";
 
 export function isSmartProject(): boolean {
   const hastPackageFile = existsSync('package.json');
   const hasSmartConfigFile = existsSync('smart.config.yml');
   return hastPackageFile && hasSmartConfigFile;
+}
+
+export function initSmart(): {
+  isNewProject: boolean;
+  smartCli: SmartCliType[];
+} {
+  const isNewProject = !isSmartProject();
+  const smartCli: SmartCliType[] = isNewProject
+      ? createProjectCli
+      : developProjectCli;
+  return {
+    isNewProject,
+    smartCli,
+  };
 }
 
 export function isValidProjectName(name: string): boolean {
@@ -54,22 +69,4 @@ export function getCreateNames(option: SmartCreateDirArg): string[] {
 
 export function getDynamicModule(name: string): string {
   return `${SMART_ROOT_PATH}/node_modules/${name.trim()}`;
-}
-
-export function getProjectStructurePath({ src, app, assets, components, pages }: SmartStructureOption): {
-  appPath: string;
-  assetsPath: string;
-  pagesPath: string;
-  componentsPath: string;
-} {
-  const appPath = `${src}/${app || 'app'}`;
-  const assetsPath = `${src}/${assets}`;
-  const pagesPath = `${src}/${pages}`;
-  const componentsPath = `${src}/${components || 'components'}`;
-  return {
-    appPath,
-    assetsPath,
-    pagesPath,
-    componentsPath,
-  };
 }

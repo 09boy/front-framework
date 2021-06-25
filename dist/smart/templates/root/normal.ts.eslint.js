@@ -3,11 +3,19 @@
 * */
 module.exports = {
   root: true,
-  parser: 'typescript-eslint/parser',
+  parser: '@typescript-eslint/parser',
   extends: [
     'eslint:recommended',
     'prettier',
   ],
+  env: {
+    browser: true,
+    node: true,
+    es2021: true,
+    commonjs: true,
+    jest: true,
+    'shared-node-browser': true
+  },
   settings: {
     'import/resolver': {
       'babel-module': {

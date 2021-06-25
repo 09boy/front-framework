@@ -38,8 +38,9 @@ const commonReact = ['react', 'react-dom', 'redux', 'react-redux', 'redux-saga',
 const commonReactDev = ['eslint-plugin-react', 'react-test-renderer', 'prop-types'];
 const commonReactTsDev = ['@types/react', '@types/react-redux', '@types/react-router-dom', '@types/redux-logger', '@react-native-community/eslint-config', '@types/react-test-renderer'];
 const commonNode = ['bcrypt', 'connect-mongo', 'body-parser', 'express', 'cookie-parser', 'cors', 'cos-nodejs-sdk-v5', 'express', 'express-fileupload', 'express-session', 'mongoose', 'mongoose-paginate-v2', 'node-fetch', 'jsonwebtoken'];
-const commonNodeDev = ['@babel/node\n', 'mongodb-memory-server', 'nodemon', 'ts-node'];
+const commonNodeDev = ['@babel/node', 'mongodb-memory-server', 'nodemon', 'ts-node'];
 const commonNodeTsDev = ['@types/cookie-parser', '@types/express', '@types/express-fileupload', '@types/express-session', '@types/jsonwebtoken', '@types/mongoose-paginate-v2', '@types/node', '@types/node-fetch', '@typescript-eslint/eslint-plugin', '@typescript-eslint/parser'];
+const commonVue = ['vue@3', 'vuex@4', 'vue-router@4'];
 
 function getDependenciesName(projectType, isTs) {
   let dependencies = [...commondev];
@@ -56,6 +57,8 @@ function getDependenciesName(projectType, isTs) {
       break;
 
     case 'vue':
+      dependencies = dependencies.concat(commonVue);
+      devDependencies.push(isTs ? '@typescript-eslint/parser' : '@babel/eslint-parser');
       break;
 
     case 'nodejs':
@@ -85,15 +88,21 @@ function getDependenciesVersion({
   const ds = {};
   const devS = {};
   [...dependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(p => {
-    const version = (0, _shelljs.exec)(`npm view ${p.trim()} version`, {
+    const versions = (0, _shelljs.exec)(`npm view ${p.trim()} version`, {
       silent: true
-    });
-    ds[p.trim()] = `^${version.replace('\n', '')}`;
+    }).stdout.split('\n').filter(s => !!s);
+    const version = versions.pop().split(' ').pop();
+
+    if (p.includes('vue') && p.includes('@')) {
+      p = p.split('@')[0];
+    }
+
+    ds[p.trim()] = `^${version.replace(/'/g, '')}`;
   });
   [...devDependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(p => {
     const version = (0, _shelljs.exec)(`npm view ${p.trim()} version`, {
       silent: true
-    });
+    }).stdout;
     devS[p.trim()] = `^${version.replace('\n', '')}`;
   });
   return {

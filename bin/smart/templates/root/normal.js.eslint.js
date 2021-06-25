@@ -8,6 +8,14 @@ module.exports = {
     'eslint:recommended',
     'prettier',
   ],
+  env: {
+    browser: true,
+    node: true,
+    es2021: true,
+    commonjs: true,
+    jest: true,
+    'shared-node-browser': true
+  },
   settings: {
     'import/resolver': {
       'babel-module': {

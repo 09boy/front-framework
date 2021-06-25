@@ -25,7 +25,7 @@ module.exports = {
         'prettier',
     ],
     rules: {
-       /* '@typescript-eslint/interface-name-prefix': 'off',
+        '@typescript-eslint/interface-name-prefix': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
@@ -38,7 +38,7 @@ module.exports = {
             'ObjectPattern': { "consistent": true },
             'ImportDeclaration': 'never',
             'ExportDeclaration': 'never',
-        }],*/
+        }],
     },
     env: {
         node: true,

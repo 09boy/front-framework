@@ -1,15 +1,24 @@
 import { cd, mkdir, touch, rm } from 'shelljs';
-import { isSmartProject, getClassName, getComponentDirName, getProjectName, getScriptType, getCreateNames } from 'share/projectHelper';
+import {
+  isSmartProject,
+  getClassName,
+  getComponentDirName,
+  getProjectName,
+  getScriptType,
+  getCreateNames,
+  initSmart
+} from 'share/projectHelper';
+import {createProjectCli, developProjectCli} from "share/env";
 
 describe('Test share/projectHelper functions', () => {
   describe.each([
     [
       { title: 'Exist smart project', dir: __dirname + '/test' },
-      { return: true }
+      { return: true, cli: developProjectCli }
     ],
     [
       { title: 'Exist smart project', dir: __dirname + '/test' },
-      { return: false }
+      { return: false,  cli: createProjectCli }
     ],
   ])('Test isSmartProject Function', (input, expected) => {
     beforeAll(() => {
@@ -26,6 +35,9 @@ describe('Test share/projectHelper functions', () => {
 
     it(input.title, () => {
       expect(isSmartProject()).toBe(expected.return);
+      const { isNewProject, smartCli } = initSmart();
+      expect(isNewProject).toBe(expected.return);
+      expect(smartCli).toBe(expected.cli);
     });
   });
 

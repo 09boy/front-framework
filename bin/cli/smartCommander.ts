@@ -59,6 +59,7 @@ export default async function smartCommand(data: SmartCommandsOption[]): Promise
          .on('command:*', (operands: any[]) => {
            if (operands[0]) {
              PrintLog(LogType.cliNotExist, operands[0]);
+             process.exit(0);
            }
            process.exitCode = 1;
          });

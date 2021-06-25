@@ -19,15 +19,14 @@ function getLoaders({
   maxSize
 }, include) {
   const {
-    assets,
     src
   } = structure;
-  const staticPath = assets + '/';
+  const staticPath = 'assets/';
   include = include ? include.map(s => _path.PROJECT_ROOT_PATH + '/' + s) : [];
-  return [...(0, _transpilingLoader.getTranspilingLoader)(projectOption), ...(0, _styleLoader.getStyleLoader)(), ...(0, _fileLoader.getFileLoader)(staticPath, maxSize)].map(rule => ({ ...rule,
+  return [...(0, _transpilingLoader.getTranspilingLoader)(projectOption), ...(0, _styleLoader.getStyleLoader)(projectOption.projectType), ...(0, _fileLoader.getFileLoader)(staticPath, maxSize)].map(rule => ({ ...rule,
     exclude: [// \\ for Windows, / for macOS and Linux
     /node_modules[\\/]core-js/, /node_modules[\\/]webpack[\\/]buildin/, /bower_components/],
-    include: [_path.PROJECT_ROOT_PATH + '/' + src, _path.PROJECT_ROOT_PATH + '/index.js', _path.PROJECT_ROOT_PATH + '/index.ts', ...include]
+    include: [_path.PROJECT_ROOT_PATH + '/' + src, _path.PROJECT_ROOT_PATH + '/index.ts', _path.PROJECT_ROOT_PATH + '/index.ts', ...include]
   }));
 }
 

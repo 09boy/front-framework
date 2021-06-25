@@ -30,6 +30,7 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
   const publicPath = configOption.publicPath || '/';
   const buildDir = PROJECT_ROOT_PATH + '/' + (configOption.buildDir || 'dist');
 
+
   if (vendors && typeof vendors === 'object' && Array.isArray(vendors)) {
     throw new Error(getLogErrorStr('"vendors" is not valid object.'));
   }
@@ -39,22 +40,23 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
   }
 
   const resolveAlias = { ...configOption.resolveAlias };
-  const copyStructure: Record<string, string> = { ...structure };
+  const copyStructure: Record<string, string | any[]> = { ...structure };
   for (const key in copyStructure) {
     if (Object.hasOwnProperty.call(copyStructure, key)) {
       const value = copyStructure[key];
       if (key !== 'src' && value) {
-        resolveAlias[key] = `${PROJECT_ROOT_PATH}/${copyStructure.src}/${value}`;
+        resolveAlias[key] = `${PROJECT_ROOT_PATH}/${structure.src}/${typeof value === 'string' ? value : key}`;
       }
     }
   }
 
   const htmlEntryFiles: SmartEntryOption = {};
+  const imagePath = typeof structure.assets === 'string' ? structure.assets : 'assets';
   for (const key in entry) {
     if (Object.hasOwnProperty.call(entry, key)) {
       htmlEntryFiles[key] = {
         ...entry[key],
-        favicon: entry[key]?.favicon ? `${structure.src}/${structure.assets}/${entry[key].favicon as string}` : undefined,
+        favicon: entry[key]?.favicon ? `${structure.src}/${imagePath}/${entry[key].favicon as string}` : undefined,
       };
     }
   }
@@ -91,6 +93,25 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
     assetFilter: (filename: string) => !(/\.(mp4|mov|wmv|flv)$/i.test(filename)),
   };
 
+  const alias = {
+    '@babel/runtime-corejs3': getDynamicModule('@babel/runtime-corejs3'),
+    ...resolveAlias,
+  };
+
+  if (projectType === 'react') {
+    Object.assign(alias, {
+      'react': PROJECT_ROOT_PATH + '/node_modules/react',
+      'react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
+      '@hot-loader/react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
+    });
+  }
+
+  if (projectType === 'vue') {
+    Object.assign(alias, {
+      vue: PROJECT_ROOT_PATH + '/node_modules/vue/dist/vue.esm-bundler.js',
+    });
+  }
+
   return {
     devMode,
     name,
@@ -101,12 +122,6 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
     pluginsProps,
     loadersProps,
     performance,
-    resolveAlias: {
-      '@babel/runtime-corejs3': getDynamicModule('@babel/runtime-corejs3'),
-      'react': PROJECT_ROOT_PATH + '/node_modules/react',
-      '@hot-loader/react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
-      'react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
-      ...resolveAlias,
-    },
+    resolveAlias: alias,
   };
 }

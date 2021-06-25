@@ -63,7 +63,7 @@ function getTranspilingLoader({
   presets.unshift([// https://github.com/babel/babel/issues/10008
   // https://github.com/babel/babel/issues/9853
   (0, _projectHelper.getDynamicModule)('@babel/preset-env'), envOptions]);
-  return [{
+  const loaders = [{
     test: /\.(ts|js)x?$/,
     use: {
       loader: (0, _projectHelper.getDynamicModule)('babel-loader'),
@@ -75,4 +75,17 @@ function getTranspilingLoader({
       }
     }
   }];
+
+  if (projectType === 'vue') {
+    loaders.push({
+      test: /\.vue$/,
+      loader: (0, _projectHelper.getDynamicModule)('vue-loader')
+    });
+    loaders.push({
+      test: /\.pug$/,
+      loader: (0, _projectHelper.getDynamicModule)('pug-plain-loader')
+    });
+  }
+
+  return loaders;
 }

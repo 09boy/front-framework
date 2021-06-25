@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.isSmartProject = isSmartProject;
+exports.initSmart = initSmart;
 exports.isValidProjectName = isValidProjectName;
 exports.getProjectName = getProjectName;
 exports.getComponentDirName = getComponentDirName;
@@ -11,16 +12,26 @@ exports.getClassName = getClassName;
 exports.getScriptType = getScriptType;
 exports.getCreateNames = getCreateNames;
 exports.getDynamicModule = getDynamicModule;
-exports.getProjectStructurePath = getProjectStructurePath;
 
 var _fs = require("fs");
 
 var _path = require("./path");
 
+var _env = require("./env");
+
 function isSmartProject() {
   const hastPackageFile = (0, _fs.existsSync)('package.json');
   const hasSmartConfigFile = (0, _fs.existsSync)('smart.config.yml');
   return hastPackageFile && hasSmartConfigFile;
+}
+
+function initSmart() {
+  const isNewProject = !isSmartProject();
+  const smartCli = isNewProject ? _env.createProjectCli : _env.developProjectCli;
+  return {
+    isNewProject,
+    smartCli
+  };
 }
 
 function isValidProjectName(name) {
@@ -71,23 +82,4 @@ function getCreateNames(option) {
 
 function getDynamicModule(name) {
   return `${_path.SMART_ROOT_PATH}/node_modules/${name.trim()}`;
-}
-
-function getProjectStructurePath({
-  src,
-  app,
-  assets,
-  components,
-  pages
-}) {
-  const appPath = `${src}/${app || 'app'}`;
-  const assetsPath = `${src}/${assets}`;
-  const pagesPath = `${src}/${pages}`;
-  const componentsPath = `${src}/${components || 'components'}`;
-  return {
-    appPath,
-    assetsPath,
-    pagesPath,
-    componentsPath
-  };
 }

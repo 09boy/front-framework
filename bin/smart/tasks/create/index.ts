@@ -1,13 +1,6 @@
 import { cd, mkdir, cp } from 'shelljs';
-import { join } from 'path';
-import { writeFileSync, readFileSync } from 'fs';
-import { parseJsonFileToJsFile } from 'share/fsHelper';
-import { getJestConfigData } from '../init/jestConfig';
-import { getBabelResolveConfigData } from '../init/babelResolveConfig';
-import { getBrowserslistrcConfigData } from './browserslistrc';
 import { SMART_ROOT_PATH } from 'share/path';
-import { ProjectType, SmartConfigOption, SmartStructureOption } from 'types/SmartProjectConfig';
-import { SmartProjectOption } from 'types/Smart';
+import { ProjectType, SmartStructureOption } from 'types/SmartProjectConfig';
 
 function parseData(obj: Record<string, any>, parentPath: string): string[] {
   const paths: string[] = [];
@@ -33,30 +26,12 @@ function parseData(obj: Record<string, any>, parentPath: string): string[] {
 export function createProjectStructure(projectType: ProjectType, projectName: string, structure: SmartStructureOption): void {
   const copyStructure: Record<string, any> = { ...structure };
   delete copyStructure.src;
-  const paths: string[] = [structure.src, '__test__', ...parseData(copyStructure, structure.src), `${structure.src}/${structure.assets}/images`];
+  const paths: string[] = [structure.src, '__test__', ...parseData(copyStructure, structure.src)];
 
-  mkdir(projectName);
   cd(projectName);
   mkdir(paths);
-}
 
-export function createProjectConfigurationFiles( projectOption :SmartProjectOption, { structure }: SmartConfigOption): void {
-  const { projectType, scriptType } = projectOption;
-  const { src, assets } = structure;
-
-  writeFileSync('.browserslistrc', getBrowserslistrcConfigData(projectType).join('\n'));
-  writeFileSync(`${scriptType}config.json`, JSON.stringify(getBabelResolveConfigData(projectType, scriptType, src), null, 2));
-
-  cp('-f', join(__dirname, `../../templates/root/${projectType}.${scriptType}.eslint.js`), '.eslintrc.js');
-  // await cp('-f', join(__dirname, `../../templates/root/${projectType}.${projectLanguageType}.babel.config.js`), 'babel.config.js');
-  const babelConfigData = readFileSync(join(__dirname, `../../templates/root/${projectType}.${scriptType}.babel.config.js`), 'utf-8');
-  writeFileSync('babel.config.js', babelConfigData.replace(/<smart_path>/g, SMART_ROOT_PATH).replace('<rootPath>', src));
-
-
-  writeFileSync('jest.config.json', JSON.stringify(getJestConfigData(projectType), null, 2));
-  parseJsonFileToJsFile('jest.config');
-
-  const imagesPath = `${src}/${assets}/images/`;
+  const imagesPath = `${structure.src}/assets/images/`;
   cp('-f', SMART_ROOT_PATH + '/smart.favicon.ico', imagesPath + 'favicon.ico');
   cp('-f', SMART_ROOT_PATH + '/smart.logo.png', imagesPath + 'smart.logo.png');
 }

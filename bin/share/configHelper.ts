@@ -6,31 +6,41 @@ import { PROJECT_ROOT_PATH } from 'share/path';
 import { SmartOption,
   SmartTaskOption,
   SmartCreatePage,
-  SmartServerOptionType,
-  SmartProjectOption, SmartServerParamsType } from 'types/Smart';
+  SmartProjectOption,
+  SmartCliArgs } from 'types/Smart';
 import { LogType } from 'types/LogType';
-import { ProjectType, ScriptType, SmartConfigOption, PackageData } from 'types/SmartProjectConfig';
-import { getCreateNames, getProjectStructurePath } from 'share/projectHelper';
+import { SmartConfigOption, PackageData, SmartStructureOption } from 'types/SmartProjectConfig';
+import { getCreateNames, isValidProjectName } from 'share/projectHelper';
 
 
-export async function getSmartConfigureData(isSTProject: boolean, option: SmartOption): Promise<SmartTaskOption> {
-  const { cli, args: { projectType, port, host, htmlPath }  } = option;
+export async function getSmartConfigureData(isNewProject: boolean, { cli, args }: SmartOption): Promise<SmartTaskOption> {
   if (cli === 'upgrade') {
     return { cli };
   }
 
-  if (!isSTProject && cli === 'server') {
-    return getServerTaskOption({ port, host, htmlPath });
+  // if only start server
+  if (isNewProject && cli === 'server') {
+    return getServerTaskOption(args);
+  }
+
+  if (isNewProject && args?.projectDir) {
+    if (!isValidProjectName(args.projectDir)) {
+      PrintLog(LogType.projectExist, args.projectDir);
+      process.exit(0);
+    }
   }
 
   try {
-    const packageData: PackageData | undefined = cli !== 'server' && isSTProject  ? await import(`${PROJECT_ROOT_PATH}/package.json`) as PackageData : undefined;
-    const path = isSTProject ? `${PROJECT_ROOT_PATH}/smart.config.yml` : join(__dirname, '..', `smart/templates/smart-config/${projectType || 'normal'}.smart.config.yml`);
-    const smartConfigData =  jsYaml.load(readFileSync(path, 'utf8')) as SmartConfigOption;
-    if (cli === 'server') {
-      return getServerTaskOption({ port, host, htmlPath: htmlPath || smartConfigData.buildDir });
+    let packageData: PackageData | undefined = undefined;
+    let smartConfigPath: string = join(__dirname, '..', `smart/templates/smart-config/${args?.projectType || 'normal'}.smart.config.yml`);
+
+    if (!isNewProject) {
+      smartConfigPath = `${PROJECT_ROOT_PATH}/smart.config.yml`;
+      packageData = await import(`${PROJECT_ROOT_PATH}/package.json`) as PackageData;
     }
-    return parseSmartOption(option, smartConfigData, packageData);
+
+    const smartConfigData =  jsYaml.load(readFileSync(smartConfigPath, 'utf8')) as SmartConfigOption;
+    return parseSmartOption({ cli, args }, smartConfigData, packageData);
   } catch (e) {
     PrintLog(LogType.configFileLoadFailed, (e as TypeError).message);
   }
@@ -40,58 +50,84 @@ export async function getSmartConfigureData(isSTProject: boolean, option: SmartO
   };
 }
 
-export function parseSmartOption(option: SmartOption, defaultData: SmartConfigOption, packageData?: PackageData): SmartTaskOption {
-  const { cli, args: { port, host, projectType, components, pages, projectDir, modeType, scriptType, htmlPath } } = option;
-  const { structure, buildDir } = defaultData;
-  // if structure value is null to use key
-  const copyStructure: Record<string, string | null | undefined> = { ...structure };
-  for (const key in copyStructure) {
-    if (Object.hasOwnProperty.call(copyStructure, key)) {
-      const value = copyStructure[key];
-      if (!value) {
-        Object.assign(structure, { [key] : key });
-      }
-    }
+/*
+* @packageData if value is undefined, it is a new project will to create;
+* */
+export function parseSmartOption({ cli, args }: SmartOption, defaultData: SmartConfigOption, packageData?: PackageData): SmartTaskOption {
+
+  if (cli === 'server') {
+    return getServerTaskOption({ ...args, htmlPath: args?.htmlPath || defaultData.buildDir });
   }
-
-  const { componentsPath, pagesPath  } = getProjectStructurePath(structure);
-
-  const st: ScriptType = scriptType || packageData?.smart.scriptType as ScriptType || 'js';
 
   const projectOption: SmartProjectOption = {
-    scriptType: st,
-    projectType: projectType || packageData?.smart.projectType as ProjectType || 'normal',
-    modeType: modeType || 'start',
-    dirName: projectDir || PROJECT_ROOT_PATH.split('/').pop() as string,
-    name: packageData?.name as unknown as string || 'Smart App',
+    scriptType: args?.scriptType || 'js',
+    projectType: args?.projectType || 'normal',
+    modeType: args?.modeType || 'start',
+    dirName: args?.projectDir || PROJECT_ROOT_PATH.split('/').pop() as string,
+    name: packageData?.name || args?.projectDir || 'Smart Project',
   };
 
-  const serverOption: SmartServerOptionType = getServerOption({ port: port || defaultData.port, host: host || defaultData.host, htmlPath: htmlPath || buildDir });
+  const configOption: SmartConfigOption = {
+    ...defaultData,
+    structure: parseStructure(defaultData.structure),
+    host: args?.host || defaultData.host,
+    port: args?.port || defaultData.port,
+  };
 
-  let smartPages: SmartCreatePage | undefined;
-  let smartComponents: SmartCreatePage | undefined;
+  if (packageData) {
+    let smartPages: SmartCreatePage | undefined;
+    let smartComponents: SmartCreatePage | undefined;
 
-  if (pages) {
-    smartPages = { dirPath: pagesPath, scriptType: st, names: getCreateNames(pages) };
+    if (cli === 'page' || cli === 'component') {
+      const { pages, components, src  } = configOption.structure;
+      if (args?.pages) {
+        smartPages = { dirPath: `${src}/${pages}`, scriptType: packageData.smart.scriptType, names: getCreateNames(args.pages) };
+      }
+
+      if (args?.components && components) {
+        smartComponents = { dirPath: `${src}/${components}`, scriptType: packageData.smart.scriptType, names: getCreateNames(args.components) };
+      }
+    }
+
+    return {
+      cli,
+      projectOption: {
+        ...projectOption,
+        scriptType: packageData.smart.scriptType,
+        projectType: packageData.smart.projectType,
+      },
+      configOption,
+      serverOption: getServerTaskOption({ ...args, htmlPath: args?.htmlPath || defaultData.buildDir }).serverOption,
+      pages: smartPages,
+      components: smartComponents,
+    };
   }
 
-  if (components && projectDir) {
-    smartComponents = { dirPath: componentsPath, scriptType: st, names: getCreateNames(components) };
+  // new project
+  if (!args) {
+    PrintLog(LogType.cliArgTypeError);
+    process.exit(0);
   }
-
   return {
     cli,
     projectOption,
-    serverOption,
-    pages: smartPages,
-    components: smartComponents,
-    configOption: { ...defaultData, port: serverOption.port, host: serverOption.host },
+    configOption,
   };
 }
 
-function getHtmlPath(htmlPath: string | undefined): string {
+function parseStructure(structr: SmartStructureOption): SmartStructureOption {
+  const copyStruct: Record<string, any> = { ...structr };
+  for (const k in copyStruct) {
+    if (Object.hasOwnProperty.call(copyStruct, k) && !copyStruct[k]) {
+      copyStruct[k] = k;
+    }
+  }
+  return copyStruct as SmartStructureOption;
+}
+
+function getHtmlPath(htmlPath?: string): string {
   if (!htmlPath) {
-    return PROJECT_ROOT_PATH + '/index.html';
+    return PROJECT_ROOT_PATH + '/dist/index.html';
   }
   htmlPath = htmlPath.startsWith('/') ? htmlPath.substr(1, htmlPath.length) : htmlPath;
   htmlPath = htmlPath.endsWith('.html') ? htmlPath : htmlPath.endsWith('/') ? htmlPath + 'index.html' : htmlPath + '/index.html';
@@ -99,17 +135,13 @@ function getHtmlPath(htmlPath: string | undefined): string {
   return PROJECT_ROOT_PATH + '/' + htmlPath;
 }
 
-function getServerOption({ port, host, htmlPath }: SmartServerParamsType): SmartServerOptionType {
-  return {
-    port: Number(port) || 3000,
-    host: host || '127.0.0.1',
-    htmlPath: getHtmlPath(htmlPath),
-  };
-}
-
-function getServerTaskOption(serverParam: SmartServerParamsType): SmartTaskOption {
+function getServerTaskOption(args?: SmartCliArgs): SmartTaskOption {
   return {
     cli: 'server',
-    serverOption: getServerOption(serverParam),
+    serverOption: {
+      port: args?.port || 4001,
+      host: args?.host || '127.0.0.1',
+      htmlPath:  getHtmlPath(args?.htmlPath),
+    },
   };
 }

@@ -65,7 +65,7 @@ export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOp
     getDynamicModule('@babel/preset-env'), envOptions
   ]);
 
-  return [
+  const loaders: RuleSetRule[] = [
     {
       test: /\.(ts|js)x?$/,
       use: {
@@ -77,6 +77,20 @@ export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOp
           plugins,
         }
       }
-    }
+    },
   ];
+
+  if (projectType === 'vue') {
+    loaders.push({
+      test: /\.vue$/,
+      loader: getDynamicModule('vue-loader'),
+    });
+
+    loaders.push({
+      test: /\.pug$/,
+      loader: getDynamicModule('pug-plain-loader'),
+    });
+  }
+
+  return loaders;
 }

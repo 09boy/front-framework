@@ -11,8 +11,6 @@ var _path = require("path");
 
 var _shelljs = require("shelljs");
 
-var _projectHelper = require("../../../share/projectHelper");
-
 var _getAppTemplateData = require("./getAppTemplateData");
 
 function initFiles({
@@ -20,31 +18,34 @@ function initFiles({
   scriptType
 }, structure) {
   const {
-    pagesPath,
-    appPath
-  } = (0, _projectHelper.getProjectStructurePath)(structure);
-  const isTs = scriptType === 'ts';
+    src,
+    pages
+  } = structure;
+  const pagesPath = `${src}/${pages}`;
   let fileSuffixName = scriptType;
 
-  if (projectType === 'react') {
-    fileSuffixName = fileSuffixName + 'x';
+  if (projectType === 'react' || projectType === 'vue') {
+    const appPath = `${src}/app`;
+
+    if (projectType === 'react') {
+      fileSuffixName = fileSuffixName + 'x';
+    }
+
     (0, _shelljs.cp)('-R', (0, _path.join)(__dirname, '..', '..', '/templates/', projectType, '/', scriptType, '/app/*'), appPath);
     (0, _shelljs.cp)('-R', (0, _path.join)(__dirname, '..', '..', '/templates/', projectType, '/', scriptType, '/home'), pagesPath);
     (0, _shelljs.cp)('-R', (0, _path.join)(__dirname, '..', '..', '/templates/', projectType, '/', scriptType, '/route.config.' + fileSuffixName), pagesPath);
-
-    if (isTs) {
-      (0, _shelljs.cp)('-R', (0, _path.join)(__dirname, '..', '..', '/templates/', projectType, '/', scriptType, '/typings.d.ts'), 'typings.d.ts');
-    }
   }
 
-  (0, _shelljs.cp)((0, _path.join)(__dirname, '..', '..', '..', '/config/template/index.template.html'), 'index.template.html');
-  (0, _shelljs.cp)((0, _path.join)(__dirname, '..', '..', '..', `/config/template/${projectType}.smart.config.yml`), 'smart.config.yml');
+  if (projectType === 'normal') {
+    (0, _shelljs.cp)('-R', (0, _path.join)(__dirname, '..', '..', '/templates/', projectType, 'common.scss'), `${src}/assets/styles`);
+  }
+
   let {
     indexData,
     appData
   } = (0, _getAppTemplateData.getTemplateData)(projectType, scriptType);
-  indexData = indexData.replace(/<pagesPath>/g, structure.pages || 'pages');
-  appData = appData.replace(/<appPath>/g, structure.app || 'app');
-  (0, _fs.writeFileSync)('index.js', indexData, 'utf-8');
+  indexData = indexData.replace(/<pagesPath>/g, pages);
+  appData = appData.replace(/<appPath>/g, 'app');
+  (0, _fs.writeFileSync)(`index.${scriptType}`, indexData, 'utf-8');
   (0, _fs.writeFileSync)(pagesPath + '/app.' + fileSuffixName, appData, 'utf-8');
 }
