@@ -136,6 +136,7 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
             title: 'Checking remote git history',
             task: async () => {
               await new Promise<void>(resolve => {
+                cd(`${SMART_ROOT_PATH}`);
                 exec('git rev-list --count --left-only @{u}...HEAD', (code, stdout) => {
                   console.log(code, stdout, '=====');
                   resolve();
