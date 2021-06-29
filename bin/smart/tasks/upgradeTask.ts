@@ -36,7 +36,7 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
 
           // git diff --name-only master origin/master
           exec('git diff --name-only master origin/master ', (code, stdout) => {
-            console.log(code, stdout, '=====');
+            console.log(code, typeof stdout, '=====');
             if (stdout) {
               resolve();
             }
