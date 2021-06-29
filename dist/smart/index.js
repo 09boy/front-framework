@@ -19,7 +19,9 @@ var _createComponent = _interopRequireDefault(require("./tasks/create/createComp
 
 var _createPage = _interopRequireDefault(require("./tasks/create/createPage"));
 
-var _init = require("./tasks/init");
+var _init = _interopRequireDefault(require("./tasks/init"));
+
+var _upgradeTask = _interopRequireDefault(require("./tasks/upgradeTask"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -61,7 +63,7 @@ async function Smart({
           }
         }, {
           title: 'Generate the project configuration files',
-          task: (ctx, task) => task.newListr((0, _init.initProjectTasks)(projectOption, structure.src, buildDir), {
+          task: (ctx, task) => task.newListr((0, _init.default)(projectOption, structure.src, buildDir), {
             concurrent: true,
             rendererOptions: {
               collapse: false,
@@ -155,62 +157,11 @@ async function Smart({
       {
         tasks.push({
           title: 'Start Upgrading',
-          task: (ctx, task) => task.newListr([{
-            title: 'Checking local git status',
-            task: async (_, task) => {
-              await new Promise(resolve => {
-                (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
-                const branch = (0, _shelljs.exec)('git branch', {
-                  silent: true
-                }).stdout.trim();
-                console.log(branch, 'branch');
-                task.title = branch;
-                (0, _shelljs.exec)('git status --porcelain', (code, stdout) => {
-                  if (stdout !== '') {
-                    // throw new Error('Unclean working tree. Commit or stash changes first.');
-                    (0, _shelljs.exec)('git add .');
-                    (0, _shelljs.exec)('git commit -m "save by smart cli"');
-                  }
-
-                  resolve();
-                });
-              });
-            }
-          }, {
-            title: 'Checking remote git history',
-            task: async () => {
-              await new Promise(resolve => {
-                (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
-                (0, _shelljs.exec)('git rev-list --count --left-only @{u}...HEAD', (code, stdout) => {
-                  console.log(code, stdout === '', '====='); // throw new Error('Remote history differ. Please pull changes.');
-
-                  resolve();
-                });
-              });
-              /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
-              if (result !== 0) {
-                throw new Error('Remote history differ. Please pull changes.');
-              }*/
-              // console.log('ok');
-            }
-          }, {
-            title: 'Upgrading Smart',
-            task: async (_, task) => {
-              await new Promise(resolve => {
-                resolve();
-                /*cd(`${SMART_ROOT_PATH}`);
-                exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
-                  task.title = 'Upgrade success';
-                  resolve();
-                });*/
-              });
-            }
-          }], {
+          task: (ctx, task) => task.newListr((0, _upgradeTask.default)(), {
             concurrent: false,
             rendererOptions: {
               collapse: false
-            },
-            exitOnError: false
+            }
           })
         });
       }

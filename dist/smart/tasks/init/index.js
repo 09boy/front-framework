@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initProjectTasks = initProjectTasks;
+exports.default = initProjectTasks;
 
 var _shelljs = require("shelljs");
 
@@ -103,3 +103,5 @@ function initProjectTasks(option, src, buildDir) {
     }
   }];
 }
+
+module.exports = exports.default;

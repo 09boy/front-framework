@@ -13,7 +13,7 @@ import { SMART_ROOT_PATH } from 'share/path';
 import { ListrTask } from "listr2";
 import { TaskContext } from "share/logProgress";
 
-export function initProjectTasks(option: SmartProjectOption, src: string, buildDir: string): ListrTask<TaskContext>[] {
+export default function initProjectTasks(option: SmartProjectOption, src: string, buildDir: string): ListrTask<TaskContext>[] {
   const { projectType, scriptType, dirName } = option;
   const isTs = scriptType === 'ts';
 
