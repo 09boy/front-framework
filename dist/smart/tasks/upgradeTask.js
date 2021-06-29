@@ -41,10 +41,11 @@ function upgradeTask() {
         // git diff --name-only master origin/master
 
         (0, _shelljs.exec)('git diff --name-only master origin/master ', (code, stdout) => {
-          console.log(code, typeof stdout, '=====');
+          console.log(code, stdout, '=====');
 
           if (stdout) {
             resolve();
+            return;
           }
 
           throw new Error('Remote history differ. Please pull changes.');
