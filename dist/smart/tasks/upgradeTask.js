@@ -39,7 +39,9 @@ function upgradeTask() {
       await new Promise(resolve => {
         (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`); // git diff --name-only master origin/master
 
-        (0, _shelljs.exec)('git diff --name-only master origin/master ', (code, stdout) => {
+        (0, _shelljs.exec)('git diff --name-only master origin/master', {
+          silent: true
+        }, (code, stdout) => {
           // console.log(code, stdout, '=====');
           ctx.isNeedUpdateSmart = !!stdout;
           resolve(); // throw new Error('Remote history differ. Please pull changes.');

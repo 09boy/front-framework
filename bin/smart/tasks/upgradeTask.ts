@@ -33,7 +33,7 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
         await new Promise<void>(resolve => {
           cd(`${SMART_ROOT_PATH}`);
           // git diff --name-only master origin/master
-          exec('git diff --name-only master origin/master ', (code, stdout) => {
+          exec('git diff --name-only master origin/master', { silent: true }, (code, stdout) => {
             // console.log(code, stdout, '=====');
             ctx.isNeedUpdateSmart = !!stdout;
             resolve();
