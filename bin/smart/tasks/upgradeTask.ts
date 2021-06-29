@@ -37,8 +37,10 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
           // git diff --name-only master origin/master
           exec('git diff --name-only master origin/master ', (code, stdout) => {
             console.log(code, stdout, '=====');
+            if (stdout) {
+              resolve();
+            }
             throw new Error('Remote history differ. Please pull changes.');
-            resolve();
           });
         });
         /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
