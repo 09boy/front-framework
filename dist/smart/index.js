@@ -177,8 +177,9 @@ async function Smart({
               await new Promise(resolve => {
                 (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
                 (0, _shelljs.exec)('git rev-list --count --left-only @{u}...HEAD', (code, stdout) => {
-                  console.log(code, stdout, '=====');
-                  throw new Error('Remote history differ. Please pull changes.'); // resolve();
+                  console.log(code, stdout === '', '====='); // throw new Error('Remote history differ. Please pull changes.');
+
+                  resolve();
                 });
               });
               /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
