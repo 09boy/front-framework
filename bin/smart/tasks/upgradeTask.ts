@@ -32,11 +32,9 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
       task: async (ctx) => {
         await new Promise<void>(resolve => {
           cd(`${SMART_ROOT_PATH}`);
-          // const remoteBranch = exec('git branch -r', { silent: true }).stdout;
-
           // git diff --name-only master origin/master
           exec('git diff --name-only master origin/master ', (code, stdout) => {
-            console.log(code, stdout, '=====');
+            // console.log(code, stdout, '=====');
             ctx.isNeedUpdateSmart = !!stdout;
             resolve();
             // throw new Error('Remote history differ. Please pull changes.');

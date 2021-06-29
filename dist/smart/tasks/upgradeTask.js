@@ -37,11 +37,10 @@ function upgradeTask() {
     title: 'Checking remote git history',
     task: async ctx => {
       await new Promise(resolve => {
-        (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`); // const remoteBranch = exec('git branch -r', { silent: true }).stdout;
-        // git diff --name-only master origin/master
+        (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`); // git diff --name-only master origin/master
 
         (0, _shelljs.exec)('git diff --name-only master origin/master ', (code, stdout) => {
-          console.log(code, stdout, '=====');
+          // console.log(code, stdout, '=====');
           ctx.isNeedUpdateSmart = !!stdout;
           resolve(); // throw new Error('Remote history differ. Please pull changes.');
         });
