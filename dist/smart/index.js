@@ -167,27 +167,26 @@ async function Smart({
                     (0, _shelljs.exec)('git commit -m "save by smart cli"');
                   }
 
-                  task.title = `${code}`;
                   resolve();
                 });
               });
-              /* if (result !== '') {
-                 throw new Error('Unclean working tree. Commit or stash changes first.');
-               }*/
-              // exec('git init');
             }
-          }, // {
-          //   title: 'Checking remote history',
-          //   // eslint-disable-next-line @typescript-eslint/require-await
-          //   task: async () => {
-          //     /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
-          //     if (result !== 0) {
-          //       throw new Error('Remote history differ. Please pull changes.');
-          //     }*/
-          //     console.log('ok');
-          //   }
-          // }
-          {
+          }, {
+            title: 'Checking remote history',
+            task: async () => {
+              await new Promise(resolve => {
+                const result = (0, _shelljs.exec)('git rev-list --count --left-only @{u}...HEAD', (code, stdout) => {
+                  console.log(code, stdout, '=====');
+                  resolve();
+                });
+              });
+              /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
+              if (result !== 0) {
+                throw new Error('Remote history differ. Please pull changes.');
+              }*/
+              // console.log('ok');
+            }
+          }, {
             title: 'Upgrading Smart',
             task: async (_, task) => {
               await new Promise(resolve => {

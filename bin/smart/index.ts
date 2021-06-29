@@ -113,55 +113,54 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
     case "upgrade":
     {
       tasks.push(
-        {
-          title: 'Start Upgrading',
-          task: (ctx, task) => task.newListr([
-              {
-                title: 'Checking git status',
-                task: async (_, task): Promise<void> => {
-                  await new Promise<void>(resolve => {
-                    cd(`${SMART_ROOT_PATH}`);
-                    exec('git status --porcelain', (code, stdout) => {
-                      if (stdout !== '') {
-                        // throw new Error('Unclean working tree. Commit or stash changes first.');
-                        exec('git add .');
-                        exec('git commit -m "save by smart cli"');
-                      }
-                      task.title = `${code}`;
-                      resolve();
-                    });
-                  })
-                 /* if (result !== '') {
-                    throw new Error('Unclean working tree. Commit or stash changes first.');
-                  }*/
-
-                  // exec('git init');
-                }
-              },
-              // {
-              //   title: 'Checking remote history',
-              //   // eslint-disable-next-line @typescript-eslint/require-await
-              //   task: async () => {
-              //     /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
-              //     if (result !== 0) {
-              //       throw new Error('Remote history differ. Please pull changes.');
-              //     }*/
-              //     console.log('ok');
-              //   }
-              // }
-            {
-              title: 'Upgrading Smart',
-              task: async (_, task) => {
-                await new Promise<void>(resolve => {
+      {
+        title: 'Start Upgrading',
+        task: (ctx, task) => task.newListr([
+          {
+            title: 'Checking git status',
+            task: async (_, task): Promise<void> => {
+              await new Promise<void>(resolve => {
+                cd(`${SMART_ROOT_PATH}`);
+                exec('git status --porcelain', (code, stdout) => {
+                  if (stdout !== '') {
+                    // throw new Error('Unclean working tree. Commit or stash changes first.');
+                    exec('git add .');
+                    exec('git commit -m "save by smart cli"');
+                  }
                   resolve();
-                  /*cd(`${SMART_ROOT_PATH}`);
-                  exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
-                    task.title = 'Upgrade success';
-                    resolve();
-                  });*/
-                })
-              }
-            },
+                });
+              })
+            }
+          },
+          {
+            title: 'Checking remote history',
+            task: async () => {
+              await new Promise<void>(resolve => {
+                const result = exec('git rev-list --count --left-only @{u}...HEAD', (code, stdout) => {
+                  console.log(code, stdout, '=====');
+                  resolve();
+                });
+              });
+              /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
+              if (result !== 0) {
+                throw new Error('Remote history differ. Please pull changes.');
+              }*/
+              // console.log('ok');
+            }
+          },
+          {
+            title: 'Upgrading Smart',
+            task: async (_, task) => {
+              await new Promise<void>(resolve => {
+                resolve();
+                /*cd(`${SMART_ROOT_PATH}`);
+                exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
+                  task.title = 'Upgrade success';
+                  resolve();
+                });*/
+              })
+            }
+          },
           ], { concurrent: false, rendererOptions: { collapse: false }, exitOnError: false })
         }
       );
