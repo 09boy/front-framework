@@ -156,7 +156,7 @@ async function Smart({
         tasks.push({
           title: 'Start Upgrading',
           task: (ctx, task) => task.newListr([{
-            title: 'Checking git status',
+            title: 'Checking local git status',
             task: async (_, task) => {
               await new Promise(resolve => {
                 (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
@@ -172,10 +172,10 @@ async function Smart({
               });
             }
           }, {
-            title: 'Checking remote history',
+            title: 'Checking remote git history',
             task: async () => {
               await new Promise(resolve => {
-                const result = (0, _shelljs.exec)('git rev-list --count --left-only @{u}...HEAD', (code, stdout) => {
+                (0, _shelljs.exec)('git rev-list --count --left-only @{u}...HEAD', (code, stdout) => {
                   console.log(code, stdout, '=====');
                   resolve();
                 });
