@@ -164,6 +164,7 @@ async function Smart({
                   silent: true
                 }).stdout.trim();
                 console.log(branch, 'branch');
+                task.title = branch;
                 (0, _shelljs.exec)('git status --porcelain', (code, stdout) => {
                   if (stdout !== '') {
                     // throw new Error('Unclean working tree. Commit or stash changes first.');

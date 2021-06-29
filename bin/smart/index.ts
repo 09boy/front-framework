@@ -123,6 +123,7 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
                 cd(`${SMART_ROOT_PATH}`);
                 const branch = exec('git branch', { silent: true }).stdout.trim();
                 console.log(branch, 'branch');
+                task.title = branch;
                 exec('git status --porcelain', (code, stdout) => {
                   if (stdout !== '') {
                     // throw new Error('Unclean working tree. Commit or stash changes first.');
