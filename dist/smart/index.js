@@ -160,6 +160,10 @@ async function Smart({
             task: async (_, task) => {
               await new Promise(resolve => {
                 (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
+                const branch = (0, _shelljs.exec)('git branch', {
+                  silent: true
+                }).stdout.trim();
+                console.log(branch, 'branch');
                 (0, _shelljs.exec)('git status --porcelain', (code, stdout) => {
                   if (stdout !== '') {
                     // throw new Error('Unclean working tree. Commit or stash changes first.');
