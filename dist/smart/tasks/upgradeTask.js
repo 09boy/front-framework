@@ -18,7 +18,9 @@ function upgradeTask() {
         const branch = (0, _shelljs.exec)('git branch', {
           silent: true
         }).stdout.trim();
-        (0, _shelljs.exec)('git status --porcelain', (code, stdout) => {
+        (0, _shelljs.exec)('git status --porcelain', {
+          silent: true
+        }, (code, stdout) => {
           if (stdout !== '') {
             // throw new Error('Unclean working tree. Commit or stash changes first.');
             (0, _shelljs.exec)('git add .');

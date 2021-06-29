@@ -12,7 +12,7 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
           cd(`${SMART_ROOT_PATH}`);
           const branch = exec('git branch', { silent: true }).stdout.trim();
 
-          exec('git status --porcelain', (code, stdout) => {
+          exec('git status --porcelain', { silent: true }, (code, stdout) => {
             if (stdout !== '') {
               // throw new Error('Unclean working tree. Commit or stash changes first.');
               exec('git add .');
