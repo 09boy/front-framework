@@ -1,4 +1,4 @@
-import { cd, cp, exec, mkdir, touch } from 'shelljs';
+import { cd, exec } from 'shelljs';
 import { ListrTask } from "listr2";
 import { TaskContext } from "share/logProgress";
 import { SMART_ROOT_PATH } from "share/path";
@@ -7,7 +7,7 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
   return [
     {
       title: 'Checking local git status',
-      task: async (_, task): Promise<void> => {
+      task: async (): Promise<void> => {
         await new Promise<void>(resolve => {
           cd(`${SMART_ROOT_PATH}`);
           const branch = exec('git branch', { silent: true }).stdout.trim();
@@ -29,7 +29,7 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
     },
     {
       title: 'Checking remote git history',
-      task: async () => {
+      task: async (ctx) => {
         await new Promise<void>(resolve => {
           cd(`${SMART_ROOT_PATH}`);
           // const remoteBranch = exec('git branch -r', { silent: true }).stdout;
@@ -37,25 +37,30 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
           // git diff --name-only master origin/master
           exec('git diff --name-only master origin/master ', (code, stdout) => {
             console.log(code, stdout, '=====');
-            if (stdout) {
-              resolve();
-              return;
-            }
-            throw new Error('Remote history differ. Please pull changes.');
+            ctx.isNeedUpdateSmart = !!stdout;
+            resolve();
+            // throw new Error('Remote history differ. Please pull changes.');
           });
         });
-        /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
-        if (result !== 0) {
-          throw new Error('Remote history differ. Please pull changes.');
-        }*/
-        // console.log('ok');
       }
     },
     {
-      title: 'Upgrading Smart',
-      task: async (_, task) => {
+      // title: 'Upgrading Smart',
+      task: async (ctx, task) => {
         await new Promise<void>(resolve => {
-          resolve();
+          if (ctx.isNeedUpdateSmart) {
+            task.title = 'Upgrading Smart';
+            cd(`${SMART_ROOT_PATH}`);
+            /*exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
+              task.title = 'Upgrade success';
+              resolve();
+            })*/
+            resolve();
+          } else {
+            task.title = 'Already the latest version';
+            resolve();
+          }
+
           /*cd(`${SMART_ROOT_PATH}`);
           exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
             task.title = 'Upgrade success';

@@ -12,7 +12,7 @@ var _path = require("../../share/path");
 function upgradeTask() {
   return [{
     title: 'Checking local git status',
-    task: async (_, task) => {
+    task: async () => {
       await new Promise(resolve => {
         (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
         const branch = (0, _shelljs.exec)('git branch', {
@@ -35,38 +35,41 @@ function upgradeTask() {
     }
   }, {
     title: 'Checking remote git history',
-    task: async () => {
+    task: async ctx => {
       await new Promise(resolve => {
         (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`); // const remoteBranch = exec('git branch -r', { silent: true }).stdout;
         // git diff --name-only master origin/master
 
         (0, _shelljs.exec)('git diff --name-only master origin/master ', (code, stdout) => {
           console.log(code, stdout, '=====');
-
-          if (stdout) {
-            resolve();
-            return;
-          }
-
-          throw new Error('Remote history differ. Please pull changes.');
+          ctx.isNeedUpdateSmart = !!stdout;
+          resolve(); // throw new Error('Remote history differ. Please pull changes.');
         });
       });
-      /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
-      if (result !== 0) {
-        throw new Error('Remote history differ. Please pull changes.');
-      }*/
-      // console.log('ok');
     }
   }, {
-    title: 'Upgrading Smart',
-    task: async (_, task) => {
+    // title: 'Upgrading Smart',
+    task: async (ctx, task) => {
       await new Promise(resolve => {
-        resolve();
+        if (ctx.isNeedUpdateSmart) {
+          task.title = 'Upgrading Smart';
+          (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
+          /*exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
+            task.title = 'Upgrade success';
+            resolve();
+          })*/
+
+          resolve();
+        } else {
+          task.title = 'Already the latest version';
+          resolve();
+        }
         /*cd(`${SMART_ROOT_PATH}`);
         exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
           task.title = 'Upgrade success';
           resolve();
         });*/
+
       });
     }
   }];

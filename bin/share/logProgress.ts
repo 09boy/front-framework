@@ -12,6 +12,7 @@ export async function delay(ms = 5000) {
 
 export interface TaskContext {
   isCreateHtmlTemplate: boolean;
+  isNeedUpdateSmart: boolean;
 }
 
 export default async function runProgressTask(tasks: ListrTask<TaskContext>[]): Promise<void> {
