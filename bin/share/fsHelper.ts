@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { promises } from 'fs';
 import { rm } from 'shelljs';
 import { ScriptType } from 'types/SmartProjectConfig';
 
@@ -56,9 +56,9 @@ export function getFileContent(data: ContentItemType[], parentIndent = 0, type: 
   return content;
 }
 
-export function parseJsonFileToJsFile(fileName: string): void {
+export async function parseJsonFileToJsFile(fileName: string): Promise<void> {
   const jsonName = `${fileName}.json`;
-  const data = readFileSync(jsonName, 'utf-8');
+  const data = await promises.readFile(jsonName, 'utf-8');
   rm(jsonName);
 
   let content = 'module.exports = ';
@@ -70,5 +70,5 @@ export function parseJsonFileToJsFile(fileName: string): void {
   });
 
   content = content.substring(0, content.length -1) + ';';
-  writeFileSync(`${fileName}.js`, content);
+  await promises.writeFile(`${fileName}.js`, content);
 }

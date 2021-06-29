@@ -62,73 +62,73 @@ Commands:
           name: htmlPath
           message: Entry the service index.html path
           default: dist/index.html
-  init:
-    name: init <project-name>
-    alias: i
-    desc: Init a Smart Project, you can change value in smart.config.yml file
-    options:
-      - scriptType:
-        name: -st, --script-type <type>
-        desc: Specify a scripting language for the project
-        callback: parseScriptType
-      - projectType:
-        name: -t, --projectType <type>
-        desc: Specify the project type with 'normal' | 'react' | 'vue' | 'nodejs' | 'miniProgram';
-        callback: parseProjectType
-
-    interactive:
-      type: input
-      name: Init Project
-      value: init
-      message: Entry The Project Name
-      key: projectDir
-      callback: parseProjectName
-      children:
-        name: Project Type
-        type: checkbox
-        message: Select Project Type
-        key: projectType
-        default:
-          - normal
-        choices:
-          - name: Normal
-            value: normal
-          - name: React
-            value: react
-          - name: Vue
-            value: vue
-          - name: Nodejs
-            value: nodejs
-          - name: Mini Program
-            value: miniProgram
-        children: *ScriptingLan
+#  init:
+#    name: init <project-name>
+#    alias: i
+#    desc: Init a Smart Project, you can change value in smart.config.yml file
+#    options:
+#      - scriptType:
+#        name: -st, --script-type <type>
+#        desc: Specify a scripting language for the project
+#        callback: parseScriptType
+#      - projectType:
+#        name: -t, --projectType <type>
+#        desc: Specify the project type with 'normal' | 'react' | 'vue' | 'nodejs' | 'miniProgram';
+#        callback: parseProjectType
+#
+#    interactive:
+#      type: input
+#      name: Init Project
+#      value: init
+#      message: Entry The Project Name
+#      key: projectDir
+#      callback: parseProjectName
+#      children:
+#        name: Project Type
+#        type: checkbox
+#        message: Select Project Type
+#        key: projectType
+#        default:
+#          - normal
+#        choices:
+#          - name: Normal
+#            value: normal
+#          - name: React
+#            value: react
+#          - name: Vue
+#            value: vue
+#          - name: Nodejs
+#            value: nodejs
+#          - name: Mini Program
+#            value: miniProgram
+#        children: *ScriptingLan
 
   create:
     children:
       -
         name: create <project-name>
-        alias: csa
+        alias: c
         desc: Create a new normal project by default javascript
         options: *ScriptingLanOption
       -
         name: create-react <project-name>
-        alias: csr
+        alias: c-r
         desc: Create a new project with react & redux, by default javascript
         options: *ScriptingLanOption
       -
         name: create-vue <project-name>
-        alias: csv
+        alias: c-v
         desc: Create a new project with vue, by default javascript
         options: *ScriptingLanOption
 
       - name: create-nodejs <project-name>
-        alias: cna
+        alias: c-n
         desc: Create a new node project by default javascript
         options: *ScriptingLanOption
 
       -
         name: create-miniprogram <project-name>
-        alias: cmpa
+        alias: c-mini
         desc: Create a new create-miniprogram by default javascript
         options: *ScriptingLanOption
 

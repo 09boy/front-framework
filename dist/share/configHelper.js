@@ -94,7 +94,7 @@ function parseSmartOption({
     name: (packageData === null || packageData === void 0 ? void 0 : packageData.name) || (args === null || args === void 0 ? void 0 : args.projectDir) || 'Smart Project'
   };
   const configOption = { ...defaultData,
-    structure: parseStructure(defaultData.structure),
+    structure: getStructure(projectOption.projectType),
     host: (args === null || args === void 0 ? void 0 : args.host) || defaultData.host,
     port: (args === null || args === void 0 ? void 0 : args.port) || defaultData.port
   };
@@ -134,7 +134,9 @@ function parseSmartOption({
         projectType: packageData.smart.projectType
       },
       configOption,
-      serverOption: getServerTaskOption({ ...args,
+      serverOption: getServerTaskOption({
+        host: (args === null || args === void 0 ? void 0 : args.host) || defaultData.host,
+        port: (args === null || args === void 0 ? void 0 : args.port) || defaultData.port,
         htmlPath: (args === null || args === void 0 ? void 0 : args.htmlPath) || defaultData.buildDir
       }).serverOption,
       pages: smartPages,
@@ -155,17 +157,46 @@ function parseSmartOption({
   };
 }
 
-function parseStructure(structr) {
-  const copyStruct = { ...structr
-  };
+function getStructure(projectType) {
+  switch (projectType) {
+    case "react":
+    case "vue":
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: {
+          images: 'images',
+          styles: 'styles'
+        },
+        components: 'components',
+        app: 'app'
+      };
 
-  for (const k in copyStruct) {
-    if (Object.hasOwnProperty.call(copyStruct, k) && !copyStruct[k]) {
-      copyStruct[k] = k;
-    }
+    case "nodejs":
+      return {
+        src: 'src',
+        pages: '',
+        assets: 'assets'
+      };
+
+    case "miniProgram":
+      return {
+        src: 'src',
+        pages: '',
+        assets: 'assets'
+      };
+
+    case "normal":
+    default:
+      return {
+        src: 'src',
+        pages: '',
+        assets: {
+          images: 'images',
+          styles: 'styles'
+        }
+      };
   }
-
-  return copyStruct;
 }
 
 function getHtmlPath(htmlPath) {

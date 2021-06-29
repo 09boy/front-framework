@@ -18,8 +18,7 @@ async function App() {
   } = (0, _projectHelper.initSmart)();
   const smartCommandValue = await (0, _cli.default)(smartCli);
   const smartTaskOption = await (0, _configHelper.getSmartConfigureData)(isNewProject, smartCommandValue);
-  await (0, _smart.default)(smartTaskOption);
-  console.log('smartTaskOption: =', smartTaskOption);
+  await (0, _smart.default)(smartTaskOption); // console.log('smartTaskOption: =', smartTaskOption);
 }
 
 App().finally(() => {

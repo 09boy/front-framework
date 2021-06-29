@@ -30,25 +30,24 @@ vendors:
 base64Limit: 8192
 
 # Object { [key]: { start, test, staging, release } }
-# mode value start with //
+# [start] for development evn
+# [test] for testing env
+# [staging] for staging env
+# [release] production env
+# @@ the value can be contains 'http', also not.
+# example: start: yourdomain.com or http://yourdomain.com
+
 mode:
   API_HTTP:
-    start: //
-    test:  //
-    staging:  //
-    release: //
-
-structure:
-  # development directory
-  src:
-  pages:
-  components:
-  app:
-    - actions
-    - modules
-    - mutations
-    - store
-  assets:
-    - images
-    - styles
-    - fonts
+    start:
+    test:
+    staging:
+    release:
+#    ...custom define if needed
+#    example add API_HTTPS and CDN_PATH
+#  API_HTTPS:
+#    start:
+#    ...modeType
+#  CDN_PATH:
+#    start:
+#    ...modeType

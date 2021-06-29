@@ -9,7 +9,7 @@ import { SmartOption,
   SmartProjectOption,
   SmartCliArgs } from 'types/Smart';
 import { LogType } from 'types/LogType';
-import { SmartConfigOption, PackageData, SmartStructureOption } from 'types/SmartProjectConfig';
+import { SmartConfigOption, PackageData, SmartStructureOption, ProjectType } from 'types/SmartProjectConfig';
 import { getCreateNames, isValidProjectName } from 'share/projectHelper';
 
 
@@ -69,7 +69,7 @@ export function parseSmartOption({ cli, args }: SmartOption, defaultData: SmartC
 
   const configOption: SmartConfigOption = {
     ...defaultData,
-    structure: parseStructure(defaultData.structure),
+    structure: getStructure(projectOption.projectType),
     host: args?.host || defaultData.host,
     port: args?.port || defaultData.port,
   };
@@ -97,7 +97,7 @@ export function parseSmartOption({ cli, args }: SmartOption, defaultData: SmartC
         projectType: packageData.smart.projectType,
       },
       configOption,
-      serverOption: getServerTaskOption({ ...args, htmlPath: args?.htmlPath || defaultData.buildDir }).serverOption,
+      serverOption: getServerTaskOption({ host: args?.host || defaultData.host, port: args?.port || defaultData.port, htmlPath: args?.htmlPath || defaultData.buildDir }).serverOption,
       pages: smartPages,
       components: smartComponents,
     };
@@ -115,14 +115,43 @@ export function parseSmartOption({ cli, args }: SmartOption, defaultData: SmartC
   };
 }
 
-function parseStructure(structr: SmartStructureOption): SmartStructureOption {
-  const copyStruct: Record<string, any> = { ...structr };
-  for (const k in copyStruct) {
-    if (Object.hasOwnProperty.call(copyStruct, k) && !copyStruct[k]) {
-      copyStruct[k] = k;
-    }
+function getStructure(projectType: ProjectType): SmartStructureOption {
+  switch (projectType) {
+    case "react":
+    case "vue":
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: {
+          images: 'images',
+          styles: 'styles',
+        },
+        components: 'components',
+        app: 'app',
+      };
+    case "nodejs":
+      return {
+        src: 'src',
+        pages: '',
+        assets: 'assets',
+      };
+    case "miniProgram":
+      return {
+        src: 'src',
+        pages: '',
+        assets: 'assets',
+      };
+    case "normal":
+    default:
+      return {
+        src: 'src',
+        pages: '',
+        assets: {
+          images: 'images',
+          styles: 'styles',
+        },
+      };
   }
-  return copyStruct as SmartStructureOption;
 }
 
 function getHtmlPath(htmlPath?: string): string {

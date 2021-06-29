@@ -40,7 +40,7 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
   }
 
   const resolveAlias = { ...configOption.resolveAlias };
-  const copyStructure: Record<string, string | any[]> = { ...structure };
+  const copyStructure: Record<string, string | any> = { ...structure };
   for (const key in copyStructure) {
     if (Object.hasOwnProperty.call(copyStructure, key)) {
       const value = copyStructure[key];

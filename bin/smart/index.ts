@@ -1,6 +1,6 @@
 import { exec, cd, which, rm } from 'shelljs';
 import { RequestHandler } from 'express';
-import LogProgressTask from 'share/logProgress';
+import runProgressTask, { TaskContext } from "share/logProgress";
 import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
 import { SmartTaskOption } from 'types/Smart';
 import { Server, createProjectStructure, } from './tasks';
@@ -9,68 +9,63 @@ import { initFiles } from './tasks/create/initFiles';
 import createComponents from './tasks/create/createComponent';
 import createPages from './tasks/create/createPage';
 
-import intProject from './tasks/init';
-import { ListrTask } from "listr2";
+import { initProjectTasks } from './tasks/init';
+import { Listr, ListrTask } from "listr2";
+import { resolve } from "url";
+
 
 export default async function Smart({ cli, projectOption, serverOption, configOption, pages, components } : SmartTaskOption): Promise<void> {
-  const tasks: ListrTask[] = [];
+  const tasks: ListrTask<TaskContext>[] = [];
 
   switch (cli) {
-    case 'init':
     case 'create':
     {
-      if (!projectOption) {
-        return;
+      if (!projectOption || !configOption) {
+        break;
       }
-
+      const { structure, buildDir } = configOption;
       const { dirName,  projectType } = projectOption;
-      tasks.push(
-        {
-          title: `Smart Init ${projectType} Project`,
-          task: () => intProject(projectOption),
-        }
-      );
-
-      if (cli !== 'create' || !configOption) {
-        return;
-      }
-
-      tasks.pop();
 
       tasks.push(
         {
           title: 'Smart',
-          task: (ctx, task) => {
-            return task.newListr([
-              {
-                title: 'Check Git',
-                task: () => {
-                  if (!which('git')) {
-                    throw new Error('Sorry, this script requires git!');
-                  }
-                }
-              },
-            ], { concurrent: true });
+          task: async (): Promise<void> =>
+          {
+            await new Promise<void>(resolve => {
+              if (!which('git')) {
+                throw new Error('Sorry, this script requires git!');
+              }
+              resolve();
+            });
           },
         },
         {
           title: 'Generate the project configuration files',
-          task: () => intProject(projectOption, configOption.structure.src),
+          task: (ctx, task) => task.newListr(initProjectTasks(
+            projectOption, structure.src, buildDir
+          ), { concurrent: true, rendererOptions: { collapse: false, showSkipMessage: false } }),
         },
-        {
+        /*{
           title: 'Create the project directory structure',
-          task: () => {
-            createProjectStructure(projectType, dirName, configOption.structure);
+          // eslint-disable-next-line @typescript-eslint/require-await
+          task: async () => {
+            createProjectStructure(projectType, dirName, structure)
           },
         },
         {
           title: 'Write the configuration entry file',
-          task: () => initFiles(projectOption, configOption.structure),
+          // eslint-disable-next-line @typescript-eslint/require-await
+          task: async () => {
+            initFiles(projectOption, structure)
+          },
         },
         {
           title: 'Install package dependencies with npm',
-          task: () => exec('npm install', { silent: true }),
-        },
+          // eslint-disable-next-line @typescript-eslint/require-await
+          task: async () => {
+            exec('npm install', { silent: true });
+          },
+        },*/
       );
     }
     break;
@@ -78,7 +73,7 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
     case "server":
     {
       if (!serverOption) {
-        return;
+        break;
       }
       const server = new Server(serverOption);
       if (cli === 'start' && projectOption && configOption) {
@@ -92,7 +87,7 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
     case "build":
     {
       if (!projectOption || !configOption) {
-        return;
+       break;
       }
       process.env.NODE_ENV = 'production';
       process.env.BuildConfig = JSON.stringify({ projectOption, configOption });
@@ -102,7 +97,7 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
     case "page":
     {
       if (!pages || !projectOption) {
-        return;
+        break;
       }
       createPages(projectOption.projectType, pages);
     }
@@ -110,7 +105,7 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
     case "component":
     {
       if (!components || !projectOption) {
-        return;
+        break;
       }
       createComponents(projectOption.projectType, components);
     }
@@ -119,39 +114,54 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
     {
       tasks.push(
         {
-          title: 'Git',
-          task: (ctx, task) => {
-            return task.newListr([
+          title: 'Start Upgrading',
+          task: (ctx, task) => task.newListr([
               {
                 title: 'Checking git status',
-                task: () => {
-                  const result = exec('git status --porcelain', { silent: true });
-                  if (result !== '') {
+                task: async (_, task): Promise<void> => {
+                  await new Promise<void>(resolve => {
+                    exec('git status --porcelain', (code) => {
+                      // console.log('这个是', code, stdout);
+                      if (code !== 0) {
+                        throw new Error('Unclean working tree. Commit or stash changes first.');
+                      }
+                      task.title = `${code}`;
+                      resolve();
+                    });
+                  })
+                 /* if (result !== '') {
                     throw new Error('Unclean working tree. Commit or stash changes first.');
-                  }
+                  }*/
 
-                  exec('git init');
+                  // exec('git init');
                 }
               },
-              {
-                title: 'Checking remote history',
-                task: () => {
-                  const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true });
-                  if (result !== '0') {
-                    throw new Error('Remote history differ. Please pull changes.');
-                  }
-                }
+              // {
+              //   title: 'Checking remote history',
+              //   // eslint-disable-next-line @typescript-eslint/require-await
+              //   task: async () => {
+              //     /*const result = exec('git rev-list --count --left-only @{u}...HEAD', { silent: true }).code;
+              //     if (result !== 0) {
+              //       throw new Error('Remote history differ. Please pull changes.');
+              //     }*/
+              //     console.log('ok');
+              //   }
+              // }
+            {
+              title: 'Upgrading Smart',
+              task: async (_, task) => {
+                await new Promise<void>(resolve => {
+                  resolve();
+                  /*cd(`${SMART_ROOT_PATH}`);
+                  exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
+                    task.title = 'Upgrade success';
+                    resolve();
+                  });*/
+                })
               }
-            ], { concurrent: true });
-          }
-        },
-        {
-          title: 'Start Upgrading',
-          task: () => {
-            cd(`${SMART_ROOT_PATH}`);
-            exec('git pull origin master', { silent: true });
-          }
-        },
+            },
+          ], { concurrent: false, rendererOptions: { collapse: false }, exitOnError: true })
+        }
       );
     }
     break;
@@ -159,13 +169,14 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
 
   if (tasks.length) {
     tasks.push({
-      title: 'Finished',
-      task: () => 'done',
+      // title: 'Finished',
+      task: async (_, task) => {
+        await new Promise<void>(resolve => {
+          task.title = 'Finished';
+          resolve();
+        })
+      }
     });
-
-    const logTask = new LogProgressTask();
-    logTask.add(tasks);
-    await logTask.run();
-    process.exit(0);
+    await runProgressTask(tasks);
   }
 }

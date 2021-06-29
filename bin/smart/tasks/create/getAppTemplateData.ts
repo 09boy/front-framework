@@ -16,3 +16,5 @@ export function getTemplateData(projectType: ProjectType, scriptType: ScriptType
     appData,
   };
 }
+
+

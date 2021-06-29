@@ -43,33 +43,26 @@ loaderIncludes:
 # Object
 resolveAlias:
 
-globals:
-  API_HTTPS:
-    start: //
-    test: //
-    staging: //
-    release: //
 
+# Object { [key]: { start, test, staging, release } }
+# [start] for development evn
+# [test] for testing env
+# [staging] for staging env
+# [release] production env
+# @@ the value can be contains 'http', also not.
+# example: start: yourdomain.com or http://yourdomain.com
+
+mode:
   API_HTTP:
-    start: //
-    test:  //
-    staging:  //
-    release: //
-
-structure:
-  # development directory
-  # use key when value is undefined
-  src:
-  pages:
-  components:
-  assets:
-    - images
-    - styles
-    - fonts
-  app:
-    - actions
-    - selectors
-    - reducers
-    - sagas
-    - constants
-    - store
+    start:
+    test:
+    staging:
+    release:
+#    ...custom define if needed
+#    example add API_HTTPS and CDN_PATH
+#  API_HTTPS:
+#    start:
+#    ...modeType
+#  CDN_PATH:
+#    start:
+#    ...modeType

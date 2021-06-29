@@ -10,7 +10,7 @@ async function App(): Promise<void> {
   const smartCommandValue = await SmartCli(smartCli);
   const smartTaskOption = await getSmartConfigureData(isNewProject, smartCommandValue);
   await Smart(smartTaskOption);
-  console.log('smartTaskOption: =', smartTaskOption);
+  // console.log('smartTaskOption: =', smartTaskOption);
 }
 
 App().finally(() => {
