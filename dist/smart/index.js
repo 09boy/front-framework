@@ -159,10 +159,12 @@ async function Smart({
             title: 'Checking git status',
             task: async (_, task) => {
               await new Promise(resolve => {
-                (0, _shelljs.exec)('git status --porcelain', code => {
-                  // console.log('这个是', code, stdout);
-                  if (code !== 0) {
-                    throw new Error('Unclean working tree. Commit or stash changes first.');
+                (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
+                (0, _shelljs.exec)('git status --porcelain', (code, stdout) => {
+                  if (stdout !== '') {
+                    // throw new Error('Unclean working tree. Commit or stash changes first.');
+                    (0, _shelljs.exec)('git add .');
+                    (0, _shelljs.exec)('git commit -m "save by smart cli"');
                   }
 
                   task.title = `${code}`;
@@ -202,7 +204,7 @@ async function Smart({
             rendererOptions: {
               collapse: false
             },
-            exitOnError: true
+            exitOnError: false
           })
         });
       }
