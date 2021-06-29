@@ -23,12 +23,18 @@ function upgradeTask() {
         }, (code, stdout) => {
           if (stdout !== '') {
             // throw new Error('Unclean working tree. Commit or stash changes first.');
-            (0, _shelljs.exec)('git add .');
-            (0, _shelljs.exec)('git commit -m "save by smart cli"');
+            (0, _shelljs.exec)('git add .', {
+              silent: true
+            });
+            (0, _shelljs.exec)('git commit -m "save by smart cli"', {
+              silent: true
+            });
           }
 
           if (!branch.includes('master')) {
-            (0, _shelljs.exec)('git checkout master');
+            (0, _shelljs.exec)('git checkout master', {
+              silent: true
+            });
           }
 
           resolve();

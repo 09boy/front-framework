@@ -15,12 +15,12 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
           exec('git status --porcelain', { silent: true }, (code, stdout) => {
             if (stdout !== '') {
               // throw new Error('Unclean working tree. Commit or stash changes first.');
-              exec('git add .');
-              exec('git commit -m "save by smart cli"');
+              exec('git add .', { silent: true });
+              exec('git commit -m "save by smart cli"', { silent: true });
             }
 
             if (!branch.includes('master')) {
-              exec('git checkout master');
+              exec('git checkout master', { silent: true });
             }
             resolve();
           });
