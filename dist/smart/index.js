@@ -15,6 +15,8 @@ var _tasks = require("./tasks");
 
 var _webpackMiddleware = require("../@webpack/webpackMiddleware");
 
+var _initFiles = require("./tasks/create/initFiles");
+
 var _createComponent = _interopRequireDefault(require("./tasks/create/createComponent"));
 
 var _createPage = _interopRequireDefault(require("./tasks/create/createPage"));
@@ -66,33 +68,29 @@ async function Smart({
           task: (ctx, task) => task.newListr((0, _init.default)(projectOption, structure.src, buildDir), {
             concurrent: true,
             rendererOptions: {
-              collapse: false,
+              collapse: true,
               showSkipMessage: false
             }
           })
-        }
-        /*{
+        }, {
           title: 'Create the project directory structure',
-          // eslint-disable-next-line @typescript-eslint/require-await
-          task: async () => {
-            createProjectStructure(projectType, dirName, structure)
-          },
-        },
-        {
-          title: 'Write the configuration entry file',
-          // eslint-disable-next-line @typescript-eslint/require-await
-          task: async () => {
-            initFiles(projectOption, structure)
-          },
-        },
-        {
+          task: async () => (0, _tasks.createProjectStructure)(projectType, dirName, structure)
+        }, {
+          title: 'Write the application entry file',
+          task: async () => (0, _initFiles.initFiles)(projectOption, structure)
+        }, {
           title: 'Install package dependencies with npm',
-          // eslint-disable-next-line @typescript-eslint/require-await
           task: async () => {
-            exec('npm install', { silent: true });
-          },
-        },*/
-        );
+            await new Promise(resolve => {
+              var _exec$stdout;
+
+              (_exec$stdout = (0, _shelljs.exec)('npm install', {
+                silent: true,
+                async: true
+              }).stdout) === null || _exec$stdout === void 0 ? void 0 : _exec$stdout.on('end', resolve);
+            });
+          }
+        });
       }
       break;
 
@@ -178,7 +176,7 @@ async function Smart({
         });
       }
     });
-    await (0, _logProgress.default)(tasks);
+    await (0, _logProgress.default)(tasks); // process.exit();
   }
 }
 

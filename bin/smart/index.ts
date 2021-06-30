@@ -1,6 +1,7 @@
-import { exec, cd, which, rm } from 'shelljs';
+import { exec, which, rm } from 'shelljs';
 import { RequestHandler } from 'express';
-import runProgressTask, { TaskContext } from "share/logProgress";
+import { ListrTask } from 'listr2';
+import runProgressTask, { TaskContext } from 'share/logProgress';
 import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
 import { SmartTaskOption } from 'types/Smart';
 import { Server, createProjectStructure, } from './tasks';
@@ -11,8 +12,7 @@ import createPages from './tasks/create/createPage';
 
 import initProjectTasks  from './tasks/init';
 import upgradeTask from './tasks/upgradeTask';
-import { Listr, ListrTask } from "listr2";
-import { resolve } from "url";
+
 
 
 export default async function Smart({ cli, projectOption, serverOption, configOption, pages, components } : SmartTaskOption): Promise<void> {
@@ -44,29 +44,24 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
           title: 'Generate the project configuration files',
           task: (ctx, task) => task.newListr(initProjectTasks(
             projectOption, structure.src, buildDir
-          ), { concurrent: true, rendererOptions: { collapse: false, showSkipMessage: false } }),
+          ), { concurrent: true, rendererOptions: { collapse: true, showSkipMessage: false } }),
         },
-        /*{
+        {
           title: 'Create the project directory structure',
-          // eslint-disable-next-line @typescript-eslint/require-await
-          task: async () => {
-            createProjectStructure(projectType, dirName, structure)
-          },
+          task: async () => createProjectStructure(projectType, dirName, structure),
         },
         {
-          title: 'Write the configuration entry file',
-          // eslint-disable-next-line @typescript-eslint/require-await
-          task: async () => {
-            initFiles(projectOption, structure)
-          },
+          title: 'Write the application entry file',
+          task: async () => initFiles(projectOption, structure),
         },
         {
-          title: 'Install package dependencies with npm',
-          // eslint-disable-next-line @typescript-eslint/require-await
-          task: async () => {
-            exec('npm install', { silent: true });
-          },
-        },*/
+         title: 'Install package dependencies with npm',
+         task: async () => {
+           await new Promise<void>(resolve => {
+             exec('npm install', { silent: true, async: true }).stdout?.on('end', resolve);
+           });
+         },
+        },
       );
     }
     break;
@@ -134,5 +129,6 @@ export default async function Smart({ cli, projectOption, serverOption, configOp
       }
     });
     await runProgressTask(tasks);
+    // process.exit();
   }
 }

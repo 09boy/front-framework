@@ -132,20 +132,20 @@ function getStructure(projectType: ProjectType): SmartStructureOption {
     case "nodejs":
       return {
         src: 'src',
-        pages: '',
+        pages: 'routers',
         assets: 'assets',
       };
     case "miniProgram":
       return {
         src: 'src',
-        pages: '',
+        pages: 'pages',
         assets: 'assets',
       };
     case "normal":
     default:
       return {
         src: 'src',
-        pages: '',
+        pages: 'pages',
         assets: {
           images: 'images',
           styles: 'styles',

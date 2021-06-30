@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { promises } from 'fs';
 import { join } from 'path';
 import { cp } from 'shelljs';
 import { SmartProjectOption } from 'types/Smart';
@@ -6,7 +6,7 @@ import { SmartStructureOption } from 'types/SmartProjectConfig';
 import { getTemplateData } from './getAppTemplateData';
 
 
-export function initFiles({ projectType, scriptType }: SmartProjectOption, structure: SmartStructureOption): void {
+export async function initFiles({ projectType, scriptType }: SmartProjectOption, structure: SmartStructureOption): Promise<void> {
   const { src, pages } = structure;
   const pagesPath = `${src}/${pages}`;
   let fileSuffixName: string = scriptType;
@@ -30,6 +30,6 @@ export function initFiles({ projectType, scriptType }: SmartProjectOption, struc
   indexData = indexData.replace(/<pagesPath>/g, pages);
   appData = appData.replace(/<appPath>/g, 'app');
 
-  writeFileSync(`index.${scriptType}`, indexData, 'utf-8');
-  writeFileSync(pagesPath + '/app.' + fileSuffixName, appData, 'utf-8');
+  await promises.writeFile(`index.${scriptType}`, indexData, 'utf-8');
+  await promises.writeFile(pagesPath + '/app.' + fileSuffixName, appData, 'utf-8');
 }

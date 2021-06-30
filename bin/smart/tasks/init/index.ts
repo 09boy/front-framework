@@ -85,9 +85,9 @@ export default function initProjectTasks(option: SmartProjectOption, src: string
     {
       title: 'Create the jest files.',
       task: async (): Promise<void> => {
+        // cp('-f', join(__dirname, `../../templates/root/${projectType}.${scriptType}.jest.setup.js`), '.jest.setup.js');
         await promises.writeFile('jest.config.json', JSON.stringify(getJestConfigData(projectType), null, 2));
         await parseJsonFileToJsFile('jest.config');
-        cp('-f', join(__dirname, `../../templates/root/${projectType}.${scriptType}.jest.setup.js`), '.jest.setup.js');
       },
     },
   ];

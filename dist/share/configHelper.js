@@ -175,14 +175,14 @@ function getStructure(projectType) {
     case "nodejs":
       return {
         src: 'src',
-        pages: '',
+        pages: 'routers',
         assets: 'assets'
       };
 
     case "miniProgram":
       return {
         src: 'src',
-        pages: '',
+        pages: 'pages',
         assets: 'assets'
       };
 
@@ -190,7 +190,7 @@ function getStructure(projectType) {
     default:
       return {
         src: 'src',
-        pages: '',
+        pages: 'pages',
         assets: {
           images: 'images',
           styles: 'styles'

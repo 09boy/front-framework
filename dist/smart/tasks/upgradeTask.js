@@ -61,24 +61,21 @@ function upgradeTask() {
     task: async (ctx, task) => {
       await new Promise(resolve => {
         if (ctx.isNeedUpdateSmart) {
+          var _exec$stdout;
+
           task.title = 'Upgrading Smart';
           (0, _shelljs.cd)(`${_path.SMART_ROOT_PATH}`);
-          /*exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
+          (_exec$stdout = (0, _shelljs.exec)('git pull origin master', {
+            silent: true,
+            async: true
+          }).stdout) === null || _exec$stdout === void 0 ? void 0 : _exec$stdout.on('data', () => {
             task.title = 'Upgrade success';
             resolve();
-          })*/
-
-          resolve();
+          });
         } else {
           task.title = 'Already the latest version';
           resolve();
         }
-        /*cd(`${SMART_ROOT_PATH}`);
-        exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
-          task.title = 'Upgrade success';
-          resolve();
-        });*/
-
       });
     }
   }];

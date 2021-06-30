@@ -13,7 +13,7 @@ var _shelljs = require("shelljs");
 
 var _getAppTemplateData = require("./getAppTemplateData");
 
-function initFiles({
+async function initFiles({
   projectType,
   scriptType
 }, structure) {
@@ -46,6 +46,6 @@ function initFiles({
   } = (0, _getAppTemplateData.getTemplateData)(projectType, scriptType);
   indexData = indexData.replace(/<pagesPath>/g, pages);
   appData = appData.replace(/<appPath>/g, 'app');
-  (0, _fs.writeFileSync)(`index.${scriptType}`, indexData, 'utf-8');
-  (0, _fs.writeFileSync)(pagesPath + '/app.' + fileSuffixName, appData, 'utf-8');
+  await _fs.promises.writeFile(`index.${scriptType}`, indexData, 'utf-8');
+  await _fs.promises.writeFile(pagesPath + '/app.' + fileSuffixName, appData, 'utf-8');
 }

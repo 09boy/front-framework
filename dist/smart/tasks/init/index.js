@@ -97,9 +97,9 @@ function initProjectTasks(option, src, buildDir) {
   }, {
     title: 'Create the jest files.',
     task: async () => {
+      // cp('-f', join(__dirname, `../../templates/root/${projectType}.${scriptType}.jest.setup.js`), '.jest.setup.js');
       await _fs.promises.writeFile('jest.config.json', JSON.stringify((0, _jestConfig.getJestConfigData)(projectType), null, 2));
       await (0, _fsHelper.parseJsonFileToJsFile)('jest.config');
-      (0, _shelljs.cp)('-f', (0, _path.join)(__dirname, `../../templates/root/${projectType}.${scriptType}.jest.setup.js`), '.jest.setup.js');
     }
   }];
 }

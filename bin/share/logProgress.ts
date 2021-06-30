@@ -1,15 +1,6 @@
 import { Listr, ListrTask } from 'listr2';
 import { LogError } from './log';
 
-
-/*
-export async function delay(ms = 5000) {
-  return new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  })
-}
-*/
-
 export interface TaskContext {
   isCreateHtmlTemplate: boolean;
   isNeedUpdateSmart: boolean;

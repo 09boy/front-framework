@@ -49,21 +49,14 @@ export default function upgradeTask(): ListrTask<TaskContext>[] {
           if (ctx.isNeedUpdateSmart) {
             task.title = 'Upgrading Smart';
             cd(`${SMART_ROOT_PATH}`);
-            /*exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
+            exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
               task.title = 'Upgrade success';
               resolve();
-            })*/
-            resolve();
+            })
           } else {
             task.title = 'Already the latest version';
             resolve();
           }
-
-          /*cd(`${SMART_ROOT_PATH}`);
-          exec('git pull origin master', { silent: true, async: true }).stdout?.on('data', () => {
-            task.title = 'Upgrade success';
-            resolve();
-          });*/
         })
       }
     },
