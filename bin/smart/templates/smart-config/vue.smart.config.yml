@@ -17,14 +17,15 @@ publicPath: /
 # Object { [key]: { path, favicon, title } }
 entry:
   app:
-    path: index.ts
+    path: index
     favicon: images/favicon.ico
     title: smart vue application
 
 # https://webpack.js.org/configuration/devtool/
 devtool: eval-source-map
 
-# Object <key: []>
+# @Object {key: <module-name>[]}
+# @Array module-name[]
 vendors:
 
 base64Limit: 8192

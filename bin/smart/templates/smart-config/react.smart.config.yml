@@ -16,13 +16,14 @@ publicPath: /
 
 entry:
   app:
-    path: index.ts
+    path: index
     favicon: images/favicon.ico
     title: smart react application
 
 devtool: eval-source-map
 
-# Object <key: []>
+# @Object {key: <module-name>[]}
+# @Array module-name[]
 vendors:
   react-vendor:
     - react
@@ -39,10 +40,6 @@ base64Limit: 8192
 # right -> node_modules/xxx/xx.js
 # error => /node_modules/xxx/xx.js
 loaderIncludes:
-
-# Object
-resolveAlias:
-
 
 # Object { [key]: { start, test, staging, release } }
 # [start] for development evn

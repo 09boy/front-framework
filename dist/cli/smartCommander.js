@@ -57,7 +57,7 @@ function commandAction(commandArg, options, command) {
   if (options && command) {
     Object.assign(args, options);
 
-    if (cli === 'init' || cli === 'create') {
+    if (cli === 'create') {
       args.projectDir = commandArg;
     } else if (Array.isArray(commandArg)) {
       if (cli === 'page') {

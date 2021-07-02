@@ -16,18 +16,18 @@ import { TaskContext } from "share/logProgress";
 export default function initProjectTasks(option: SmartProjectOption, src: string, buildDir: string): ListrTask<TaskContext>[] {
   const { projectType, scriptType, dirName } = option;
   const isTs = scriptType === 'ts';
+  const isCreateHtmlTemplate = projectType !== 'miniProgram' && projectType !== 'nodejs';
 
   return [
     {
       title: `Create ${dirName} directory.`,
-      task: async (ctx): Promise<void> => {
+      task: async (): Promise<void> => {
        await new Promise<void>(resolve => {
          mkdir(dirName);
          cd(dirName);
          if (isTs) {
            touch('typings.d.ts');
          }
-         ctx.isCreateHtmlTemplate = projectType !== 'miniProgram' && projectType !== 'nodejs';
          resolve();
        });
       },
@@ -62,7 +62,7 @@ export default function initProjectTasks(option: SmartProjectOption, src: string
       title: 'Create the prettier file.',
       task: async (): Promise<void> => {
         await promises.writeFile('.prettierrc.json', JSON.stringify(getPrettierConfigData(projectType), null, 2));
-        await parseJsonFileToJsFile('.prettierrc');
+        await parseJsonFileToJsFile('prettier.config');
       },
     },
     {
@@ -75,11 +75,12 @@ export default function initProjectTasks(option: SmartProjectOption, src: string
       },
     },
     {
-      title: 'Create the html.template file.',
-      skip: (ctx): boolean => !ctx.isCreateHtmlTemplate,
-      task: async (): Promise<void> => {
+      // title: 'Create the html.template file.',
+      skip: (): boolean => !isCreateHtmlTemplate,
+      task: async (ctx, task): Promise<void> => {
+        task.title = 'Create the html.template file.';
         cp(join(__dirname, '..', '..', 'templates/smart-config/index.template.html'), 'index.template.html');
-        await promises.writeFile('.browserslistrc', getBrowserslistrcConfigData(projectType).join('\n'));
+        await promises.writeFile('.browserslistrc', getBrowserslistrcConfigData().join('\n'));
       },
     },
     {

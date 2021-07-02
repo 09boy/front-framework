@@ -12,7 +12,7 @@ export default function configuration(option: SmartWebpackOption):Configuration 
   if (process.env.BuildConfig) {
     option = JSON.parse(process.env.BuildConfig) as SmartWebpackOption;
   }
-  const { devMode, name, target, devtool, entryOutOption, pluginsProps, loadersProps, resolveAlias, performance } = parseConfigData(option);
+  const { devMode, name, target, devtool, entryOutOption, pluginsProps, loadersProps, resolveAlias, performance, optimization, resolveExtensions } = parseConfigData(option);
 
   return {
     name,
@@ -39,13 +39,13 @@ export default function configuration(option: SmartWebpackOption):Configuration 
       preferRelative: true,
       symlinks: true,
       roots: [PROJECT_ROOT_PATH],
-      extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.css', '.scss', '.vue', '.less', '.mjs'],
+      extensions: resolveExtensions,
     },
     resolveLoader: { //
       modules: [`${SMART_ROOT_PATH}/node_modules`],
       extensions: ['.js', '.json'],
     },
-    optimization: getOptimizationConfig(devMode, option.projectOption.modeType,  option.configOption.vendors),
+    optimization: getOptimizationConfig(optimization),
     stats: {
       cached: true,
       cachedAssets: true,

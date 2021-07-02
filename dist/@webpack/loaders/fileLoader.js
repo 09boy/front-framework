@@ -7,10 +7,18 @@ exports.getFileLoader = getFileLoader;
 
 var _env = require("../../share/env");
 
-const isJPGReg = /\.(jpe?g)$/i;
-const isPngRef = /\.(png)$/i;
+var _webpackHelper = require("../../share/webpackHelper");
 
-function getFileLoader(staticPath, maxSize) {
+/*const isJPGReg = /\.(jpe?g)$/i;
+const isPngRef = /\.(png)$/i;*/
+function getFileLoader(structure, maxSize) {
+  const {
+    assetsPath,
+    imagePath,
+    svgPath,
+    fontsPath,
+    mediasPath
+  } = (0, _webpackHelper.getAssetsPath)(structure);
   const devModel = (0, _env.isDevEnv)();
   const name = devModel ? '[name][ext][query]' : '[contenthash][ext][query]';
   const dataUrlCondition = {
@@ -18,30 +26,30 @@ function getFileLoader(staticPath, maxSize) {
   };
   const rules = [{
     test: /\.(png|jpe?g|gif|pdf)$/i,
-    type: 'asset',
+    type: 'asset/resource',
     generator: {
-      filename: `${staticPath}images/${name}`
+      filename: `${imagePath || assetsPath}/${name}`
     },
     parser: {
       dataUrlCondition
     }
   }, {
     test: /\.(mp4|mov|wmv|flv)$/i,
-    type: 'asset',
+    type: 'asset/resource',
     generator: {
-      filename: `${staticPath}media/${name}`
+      filename: `${mediasPath || assetsPath}/${name}`
     }
   }, {
     test: /\.(woff|woff2|eot|ttf|otf|tiff)$/i,
     type: 'asset/resource',
     generator: {
-      filename: `${staticPath}fonts/${name}`
+      filename: `${fontsPath || assetsPath}/${name}`
     }
   }, {
     test: /\.(svg)$/i,
-    type: 'asset',
+    type: 'asset/resource',
     generator: {
-      filename: `${staticPath}svgs/${name}`
+      filename: `${svgPath || assetsPath}/${name}`
     },
     parser: {
       dataUrlCondition

@@ -18,37 +18,10 @@ function getCssLoader(devMode: boolean, importLoaders = 1, loaderType: CssLoader
   const styleLoader = devMode
     ? {
       loader: getDynamicModule('style-loader'),
-      options: {
-       /* insert: (element: Element) => {
-          const parent = document.querySelector('body');
-          // eslint-disable-next-line no-underscore-dangle
-          // @ts-ignore
-          const lastInsertedElement = window['_lastElementInsertedByStyleLoader'];
-
-          if (!lastInsertedElement) {
-            // @ts-ignore
-            parent.insertBefore(element, parent.firstChild);
-          } else if (lastInsertedElement.nextSibling) {
-            // @ts-ignore
-            parent.insertBefore(element, lastInsertedElement.nextSibling);
-          } else {
-            // @ts-ignore
-            parent.appendChild(element);
-          }
-          // eslint-disable-next-line no-underscore-dangle
-          // @ts-ignore
-          window._lastElementInsertedByStyleLoader = element;
-        },*/
-        esModule: true,
-        modules: {
-          namedExport: true,
-        },
-      },
     }
     : {
       loader: MiniCssExtractPlugin.loader,
       options: {
-        esModule: true,
         modules: {
           namedExport: true,
         },
@@ -67,9 +40,6 @@ function getCssLoader(devMode: boolean, importLoaders = 1, loaderType: CssLoader
           options: {
             importLoaders,
             sourceMap: true,
-            esModule: true,
-            url: true,
-            import: true,
             modules: {
               compileType: 'module',
               mode: 'global',
@@ -78,8 +48,9 @@ function getCssLoader(devMode: boolean, importLoaders = 1, loaderType: CssLoader
               exportLocalsConvention: 'camelCase',
               exportOnlyLocals: false,
               exportGlobals: true,
+              // localIdentContext: PROJECT_ROOT_PATH + '/src',
               localIdentHashPrefix: 'hash',
-              localIdentName: devMode ? '[name]__[local]' : '[path][name]__[local]--[hash:base64:5]',
+              localIdentName: devMode ? '[name]' : '[path][name]__[local]--[hash:base64:5]',
             },
           },
         },
@@ -94,6 +65,7 @@ function getPostCss(): RuleSetRule {
     loader: getDynamicModule('postcss-loader'),
     options: {
       sourceMap: true,
+      // execute: true,
       postcssOptions: {
         /*parser: require('sugarss').parse,
         execute: true,
@@ -103,7 +75,7 @@ function getPostCss(): RuleSetRule {
             getDynamicModule('postcss-import'),
             [getDynamicModule('postcss-short'), { prefix: 'x' }],
             [getDynamicModule('postcss-preset-env'), {
-              stage: 3,
+              stage: 0,
               features: {
                 'nesting-rules': true,
                 'color-mod-function': { unresolved: 'warn' },
@@ -121,7 +93,7 @@ function getPostCss(): RuleSetRule {
 function getSassLoader(devMode: boolean): RuleSetRule {
   // Compiles Sass to CSS
   const sassOptions = devMode ? {
-    fiber: false,
+    // fiber: false,
   } : {
     outputStyle: 'compressed'
   };
@@ -129,7 +101,6 @@ function getSassLoader(devMode: boolean): RuleSetRule {
     loader: getDynamicModule('sass-loader'),
     options: {
       sourceMap: true,
-        // implementation: require('sass'),
         webpackImporter: false,
         sassOptions,
     },
@@ -164,7 +135,6 @@ export function getStyleLoader(projectType: ProjectType): RuleSetRule[] {
   if (projectType === 'nodejs') {
     return [];
   }
-  // const isVue = projectType === 'vue';
   const defaultCssImportCount = 1;
   const defaultStyleImportCount = 2;
   const devMode = isDevEnv();

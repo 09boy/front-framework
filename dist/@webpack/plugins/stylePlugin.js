@@ -25,6 +25,7 @@ function getStylePlugin() {
   return [new _miniCssExtractPlugin.default({
     filename,
     chunkFilename,
-    ignoreOrder: false
+    experimentalUseImportModule: true,
+    ignoreOrder: devMode
   }), ...plugins];
 }

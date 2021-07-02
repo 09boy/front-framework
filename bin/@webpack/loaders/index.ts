@@ -14,15 +14,12 @@ export type LoaderProps = {
 };
 
 export default function getLoaders({ projectOption, structure, maxSize }: LoaderProps, include?: string[]): RuleSetRule[] {
-  const { src } = structure;
-  const staticPath = 'assets/';
-
   include = include ? include.map(s => PROJECT_ROOT_PATH + '/' + s) : [];
 
   return [
     ...getTranspilingLoader(projectOption),
     ...getStyleLoader(projectOption.projectType),
-    ...getFileLoader(staticPath, maxSize),
+    ...getFileLoader(structure, maxSize),
   ].map(rule => ({
     ...rule,
     exclude: [
@@ -32,7 +29,7 @@ export default function getLoaders({ projectOption, structure, maxSize }: Loader
       /bower_components/
     ],
     include: [
-      PROJECT_ROOT_PATH + '/' + src,
+      PROJECT_ROOT_PATH + '/' + structure.src,
       PROJECT_ROOT_PATH + '/index.ts',
       PROJECT_ROOT_PATH + '/index.ts',
       ...(include as string[]),

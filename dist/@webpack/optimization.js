@@ -11,7 +11,11 @@ var _cssMinimizerWebpackPlugin = _interopRequireDefault(require("css-minimizer-w
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getOptimizationConfig(devMode, modeType, vendors) {
+function getOptimizationConfig({
+  devMode,
+  modeType,
+  vendors
+}) {
   let option = {
     chunkIds: 'named'
   };
@@ -47,17 +51,26 @@ function getOptimizationConfig(devMode, modeType, vendors) {
     if (vendors) {
       let priority = 10;
 
-      for (const key in vendors) {
-        if (Object.hasOwnProperty.call(vendors, key)) {
-          const value = vendors[key];
-          const reg = value.join('|');
-          cacheGroups[key] = {
-            name: key,
-            test: new RegExp(`[\\/]node_modules[\\/](${reg})`),
-            chunks: 'all',
-            priority
-          };
-          priority++;
+      if (Array.isArray(vendors)) {
+        cacheGroups['custom-vendor'] = {
+          name: 'custom-vendor',
+          test: new RegExp(`[\\/]node_modules[\\/](${vendors.join('|')})`),
+          chunks: 'all',
+          priority
+        };
+      } else {
+        for (const key in vendors) {
+          if (Object.hasOwnProperty.call(vendors, key)) {
+            const value = vendors[key];
+            const reg = value.join('|');
+            cacheGroups[key] = {
+              name: key,
+              test: new RegExp(`[\\/]node_modules[\\/](${reg})`),
+              chunks: 'all',
+              priority
+            };
+            priority++;
+          }
         }
       }
     }

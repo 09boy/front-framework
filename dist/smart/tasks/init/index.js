@@ -36,9 +36,10 @@ function initProjectTasks(option, src, buildDir) {
     dirName
   } = option;
   const isTs = scriptType === 'ts';
+  const isCreateHtmlTemplate = projectType !== 'miniProgram' && projectType !== 'nodejs';
   return [{
     title: `Create ${dirName} directory.`,
-    task: async ctx => {
+    task: async () => {
       await new Promise(resolve => {
         (0, _shelljs.mkdir)(dirName);
         (0, _shelljs.cd)(dirName);
@@ -47,7 +48,6 @@ function initProjectTasks(option, src, buildDir) {
           (0, _shelljs.touch)('typings.d.ts');
         }
 
-        ctx.isCreateHtmlTemplate = projectType !== 'miniProgram' && projectType !== 'nodejs';
         resolve();
       });
     }
@@ -78,7 +78,7 @@ function initProjectTasks(option, src, buildDir) {
     title: 'Create the prettier file.',
     task: async () => {
       await _fs.promises.writeFile('.prettierrc.json', JSON.stringify((0, _getPrettierrc.getPrettierConfigData)(projectType), null, 2));
-      await (0, _fsHelper.parseJsonFileToJsFile)('.prettierrc');
+      await (0, _fsHelper.parseJsonFileToJsFile)('prettier.config');
     }
   }, {
     title: 'Create the babel files.',
@@ -88,11 +88,12 @@ function initProjectTasks(option, src, buildDir) {
       await _fs.promises.writeFile('babel.config.js', babelConfigData.replace(/<smart_path>/g, _path2.SMART_ROOT_PATH).replace('<rootPath>', src));
     }
   }, {
-    title: 'Create the html.template file.',
-    skip: ctx => !ctx.isCreateHtmlTemplate,
-    task: async () => {
+    // title: 'Create the html.template file.',
+    skip: () => !isCreateHtmlTemplate,
+    task: async (ctx, task) => {
+      task.title = 'Create the html.template file.';
       (0, _shelljs.cp)((0, _path.join)(__dirname, '..', '..', 'templates/smart-config/index.template.html'), 'index.template.html');
-      await _fs.promises.writeFile('.browserslistrc', (0, _browserslistrc.getBrowserslistrcConfigData)(projectType).join('\n'));
+      await _fs.promises.writeFile('.browserslistrc', (0, _browserslistrc.getBrowserslistrcConfigData)().join('\n'));
     }
   }, {
     title: 'Create the jest files.',

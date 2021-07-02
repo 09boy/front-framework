@@ -38,7 +38,7 @@ function commandAction(commandArg: any, options?:OptionValues | Command , comman
 
   if(options && command) {
     Object.assign(args, options);
-    if (cli === 'init' || cli === 'create') {
+    if (cli === 'create') {
       args.projectDir = commandArg as string;
     } else if (Array.isArray(commandArg)){
       if (cli === 'page') {
