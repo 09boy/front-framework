@@ -79,6 +79,7 @@ async function smartCommand(data) {
   program.version(_version.SMART_VERSION).name('smart').on('command:*', operands => {
     if (operands[0]) {
       (0, _log.PrintLog)(_LogType.LogType.cliNotExist, operands[0]);
+      process.exit(0);
     }
 
     process.exitCode = 1;

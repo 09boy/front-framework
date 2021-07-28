@@ -6,15 +6,10 @@ export function getTemplateData(projectType: ProjectType, scriptType: ScriptType
   indexData: string;
   appData: string;
 } {
-  let indexData = '';
-  let appData = '';
+  const suffixName = projectType === 'react' ? `${scriptType}x` : `${scriptType}`;
 
-  if (projectType === 'normal') {
-    console.log('');
-  } else if (projectType === 'react') {
-    indexData = readFileSync(join(__dirname, '..', '..', `templates/react/${scriptType}/index.${scriptType}`), 'utf-8');
-    appData = readFileSync(join(__dirname, '..', '..', `templates/react/${scriptType}/app.${scriptType}x`), 'utf-8');
-  }
+  const indexData = readFileSync(join(__dirname, '..', '..', `templates/${projectType}/${scriptType}/index.${scriptType}`), 'utf-8');
+  const appData = readFileSync(join(__dirname, '..', '..', `templates/${projectType}/${scriptType}/app.${suffixName}`), 'utf-8');
 
   return {
     indexData,

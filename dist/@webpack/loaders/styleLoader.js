@@ -14,18 +14,12 @@ var _miniCssExtractPlugin = _interopRequireDefault(require("mini-css-extract-plu
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function getCssLoader(devMode, importLoaders = 1, loaderType) {
-  // let test = !isLessLoader ? /\.(sa|sc)ss$/ : /\.less$/;
-  // let lazyTest = !isLessLoader ?/\.lazy\.(sa|sc)ss$/ : /\.lazy\.less$/;
   let test = /\.css$/;
 
   if (loaderType === 'scss') {
     test = /\.(sa|sc)ss$/;
   } else if (loaderType === 'less') {
     test = /\.less$/;
-  }
-
-  if (importLoaders === 1 && devMode) {
-    test = /\.css$/; // lazyTest = /\.css$/;
   }
 
   const styleLoader = devMode ? {
@@ -88,43 +82,7 @@ function getCssLoader(devMode, importLoaders = 1, loaderType) {
         }
       }
     }, postLoader]
-  }
-  /*{
-    test: lazyTest,
-    use: [
-      {
-        loader: getDynamicModule('style-loader'),
-        options: {
-          sourceMap: true,
-          insert: 'body',
-          injectType: 'lazySingletonStyleTag',
-        },
-      },
-      {
-        loader: getDynamicModule('css-loader'),
-        options: {
-          importLoaders,
-          sourceMap: true,
-          esModule: true,
-          url: true,
-          import: true,
-          modules: {
-            compileType: 'module',
-            mode: 'global',
-            auto: true,
-            namedExport: true,
-            exportLocalsConvention: 'camelCase',
-            exportOnlyLocals: false,
-            exportGlobals: true,
-            localIdentHashPrefix: 'hash',
-            localIdentName: devMode ? '[name]__[local]' : '[path][name]__[local]--[hash:base64:5]',
-          },
-        },
-      },
-      postLoader,
-    ],
-  },*/
-  ];
+  }];
 }
 
 function getPostCss() {
@@ -198,9 +156,16 @@ function getLessLoader() {
 }*/
 
 
-function getStyleLoader() {
+function getStyleLoader(projectType) {
+  if (projectType === 'nodejs') {
+    return [];
+  } // const isVue = projectType === 'vue';
+
+
+  const defaultCssImportCount = 1;
+  const defaultStyleImportCount = 2;
   const devMode = (0, _env.isDevEnv)();
-  const sLoaders = getCssLoader(devMode, 2, 'scss').map(item => {
+  const sLoaders = getCssLoader(devMode, defaultStyleImportCount, 'scss').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item,
         use: [...item.use, getSassLoader(devMode)]
@@ -209,7 +174,7 @@ function getStyleLoader() {
 
     return item;
   });
-  const lessLoaders = getCssLoader(devMode, 2, 'less').map(item => {
+  const lessLoaders = getCssLoader(devMode, defaultStyleImportCount, 'less').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item,
         use: [...item.use, getLessLoader()]
@@ -218,5 +183,5 @@ function getStyleLoader() {
 
     return item;
   });
-  return [...getCssLoader(devMode, 1, 'css'), ...sLoaders, ...lessLoaders];
+  return [...getCssLoader(devMode, defaultCssImportCount, 'css'), ...sLoaders, ...lessLoaders];
 }

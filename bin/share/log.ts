@@ -45,18 +45,21 @@ export function PrintLog(logType: LogType, message = '', endMessage?: string): v
       break;
     case LogType.cliNotExist:
       log(error(
-        `Error: unknown command '${message}', to run 'smart --help'`)
+        `Error: unknown command '${warning(message)}', to run 'smart --help'`)
       );
       break;
     case LogType.cliArgTypeError:
       log(error(
-        `Command Arg Error: ${message} not a valid value.
+        `Command Arg Error: ${warning(warning(message))} not a valid value.
          ${ endMessage? endMessage : 'to run \'smart --help\'' }`)
       );
       break;
     case LogType.projectNotExist:
       break;
     case LogType.projectExist:
+      log(error(
+          `Unexpected Error: The '${warning(message)}' project is already exist.`)
+      );
       break;
   }
 }

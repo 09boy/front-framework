@@ -20,7 +20,8 @@ function parseConfigData({
   const devMode = (0, _env.isDevEnv)();
   const {
     projectType,
-    name
+    name,
+    scriptType
   } = projectOption;
   const {
     port,
@@ -54,19 +55,21 @@ function parseConfigData({
       const value = copyStructure[key];
 
       if (key !== 'src' && value) {
-        resolveAlias[key] = `${_path.PROJECT_ROOT_PATH}/${copyStructure.src}/${value}`;
+        resolveAlias[key] = `${_path.PROJECT_ROOT_PATH}/${structure.src}/${typeof value === 'string' ? value : key}`;
       }
     }
   }
 
   const htmlEntryFiles = {};
+  const imagePath = typeof structure.assets === 'string' ? structure.assets : 'assets';
 
   for (const key in entry) {
     if (Object.hasOwnProperty.call(entry, key)) {
-      var _entry$key;
+      var _entry$key, _entry$key2, _entry$key3, _entry$key4;
 
       htmlEntryFiles[key] = { ...entry[key],
-        favicon: (_entry$key = entry[key]) !== null && _entry$key !== void 0 && _entry$key.favicon ? `${structure.src}/${structure.assets}/${entry[key].favicon}` : undefined
+        path: (_entry$key = entry[key]) !== null && _entry$key !== void 0 && _entry$key.path.includes('.') ? (_entry$key2 = entry[key]) === null || _entry$key2 === void 0 ? void 0 : _entry$key2.path : ((_entry$key3 = entry[key]) === null || _entry$key3 === void 0 ? void 0 : _entry$key3.path) + '.' + scriptType,
+        favicon: (_entry$key4 = entry[key]) !== null && _entry$key4 !== void 0 && _entry$key4.favicon ? `${structure.src}/${imagePath}/${entry[key].favicon}` : undefined
       };
     }
   }
@@ -99,6 +102,25 @@ function parseConfigData({
     maxAssetSize: 307200,
     assetFilter: filename => !/\.(mp4|mov|wmv|flv)$/i.test(filename)
   };
+  const alias = {
+    '@babel/runtime-corejs3': (0, _projectHelper.getDynamicModule)('@babel/runtime-corejs3'),
+    ...resolveAlias
+  };
+
+  if (projectType === 'react') {
+    Object.assign(alias, {
+      'react': _path.PROJECT_ROOT_PATH + '/node_modules/react',
+      'react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
+      '@hot-loader/react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom'
+    });
+  }
+
+  if (projectType === 'vue') {
+    Object.assign(alias, {
+      vue: _path.PROJECT_ROOT_PATH + '/node_modules/vue/dist/vue.esm-bundler.js'
+    });
+  }
+
   return {
     devMode,
     name,
@@ -109,12 +131,6 @@ function parseConfigData({
     pluginsProps,
     loadersProps,
     performance,
-    resolveAlias: {
-      '@babel/runtime-corejs3': (0, _projectHelper.getDynamicModule)('@babel/runtime-corejs3'),
-      'react': _path.PROJECT_ROOT_PATH + '/node_modules/react',
-      '@hot-loader/react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
-      'react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
-      ...resolveAlias
-    }
+    resolveAlias: alias
   };
 }

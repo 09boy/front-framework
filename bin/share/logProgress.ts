@@ -4,7 +4,7 @@ import { LogError } from './log';
 
 interface Ctx extends ListrContext{
   /* some variables for internal use */
-  k?: any;
+  k?: string;
 }
 
 const ctx: Ctx = {};

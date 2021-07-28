@@ -2,23 +2,17 @@ import { RuleSetRule } from 'webpack';
 import { getDynamicModule } from 'share/projectHelper';
 import { isDevEnv } from 'share/env';
 import  MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { ProjectType } from "types/SmartProjectConfig";
 
 type CssLoaderType = 'css' | 'scss' | 'less';
 
 function getCssLoader(devMode: boolean, importLoaders = 1, loaderType: CssLoaderType):RuleSetRule[] {
 
-  // let test = !isLessLoader ? /\.(sa|sc)ss$/ : /\.less$/;
-  // let lazyTest = !isLessLoader ?/\.lazy\.(sa|sc)ss$/ : /\.lazy\.less$/;
   let test = /\.css$/;
   if (loaderType === 'scss') {
     test = /\.(sa|sc)ss$/;
   } else if (loaderType === 'less') {
     test = /\.less$/;
-  }
-
-  if (importLoaders === 1 && devMode) {
-    test = /\.css$/;
-    // lazyTest = /\.css$/;
   }
 
   const styleLoader = devMode
@@ -92,41 +86,6 @@ function getCssLoader(devMode: boolean, importLoaders = 1, loaderType: CssLoader
         postLoader,
       ],
     },
-    /*{
-      test: lazyTest,
-      use: [
-        {
-          loader: getDynamicModule('style-loader'),
-          options: {
-            sourceMap: true,
-            insert: 'body',
-            injectType: 'lazySingletonStyleTag',
-          },
-        },
-        {
-          loader: getDynamicModule('css-loader'),
-          options: {
-            importLoaders,
-            sourceMap: true,
-            esModule: true,
-            url: true,
-            import: true,
-            modules: {
-              compileType: 'module',
-              mode: 'global',
-              auto: true,
-              namedExport: true,
-              exportLocalsConvention: 'camelCase',
-              exportOnlyLocals: false,
-              exportGlobals: true,
-              localIdentHashPrefix: 'hash',
-              localIdentName: devMode ? '[name]__[local]' : '[path][name]__[local]--[hash:base64:5]',
-            },
-          },
-        },
-        postLoader,
-      ],
-    },*/
   ];
 }
 
@@ -201,17 +160,23 @@ function getLessLoader(): RuleSetRule {
   ];
 }*/
 
-export function getStyleLoader(): RuleSetRule[] {
+export function getStyleLoader(projectType: ProjectType): RuleSetRule[] {
+  if (projectType === 'nodejs') {
+    return [];
+  }
+  // const isVue = projectType === 'vue';
+  const defaultCssImportCount = 1;
+  const defaultStyleImportCount = 2;
   const devMode = isDevEnv();
 
-  const sLoaders: RuleSetRule[] = getCssLoader(devMode, 2, 'scss').map(item => {
+  const sLoaders: RuleSetRule[] = getCssLoader(devMode, defaultStyleImportCount, 'scss').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item, use: [...item.use, getSassLoader(devMode)] };
     }
     return item;
   });
 
-  const lessLoaders: RuleSetRule[] = getCssLoader(devMode, 2, 'less').map(item => {
+  const lessLoaders: RuleSetRule[] = getCssLoader(devMode, defaultStyleImportCount, 'less').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item, use: [...item.use, getLessLoader()] };
     }
@@ -219,7 +184,7 @@ export function getStyleLoader(): RuleSetRule[] {
   });
 
   return [
-    ...getCssLoader(devMode, 1, 'css'),
+    ...getCssLoader(devMode, defaultCssImportCount, 'css'),
     ...sLoaders,
     ...lessLoaders,
   ];

@@ -39,7 +39,7 @@ export default function configuration(option: SmartWebpackOption):Configuration 
       preferRelative: true,
       symlinks: true,
       roots: [PROJECT_ROOT_PATH],
-      extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.css', '.scss', '.less', '.mjs'],
+      extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.css', '.scss', '.vue', '.less', '.mjs'],
     },
     resolveLoader: { //
       modules: [`${SMART_ROOT_PATH}/node_modules`],

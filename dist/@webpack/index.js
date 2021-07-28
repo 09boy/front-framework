@@ -62,7 +62,7 @@ function configuration(option) {
       preferRelative: true,
       symlinks: true,
       roots: [_path.PROJECT_ROOT_PATH],
-      extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.css', '.scss', '.less', '.mjs']
+      extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.css', '.scss', '.vue', '.less', '.mjs']
     },
     resolveLoader: {
       //

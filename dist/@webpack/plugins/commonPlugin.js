@@ -12,7 +12,9 @@ var _env = require("../../share/env");
 function getCommonPlugins(modeType, mode, provide) {
   const devMode = (0, _env.isDevEnv)();
   const items = [new _webpack.DefinePlugin({
-    'process.env.NODE_ENV': JSON.stringify(devMode ? 'development' : 'production')
+    'process.env.NODE_ENV': JSON.stringify(devMode ? 'development' : 'production'),
+    __VUE_OPTIONS_API__: false,
+    __VUE_PROD_DEVTOOLS__: false
   })];
 
   for (const key in mode) {

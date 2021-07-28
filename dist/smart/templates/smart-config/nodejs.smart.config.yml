@@ -1,0 +1,14 @@
+# server
+host: 127.0.0.1
+port: 4001
+
+# the directory that contains to build code for testing env or production env.
+# default directory name is 'dist'.
+buildDir: dist
+
+# for static path
+publicPath: /
+
+# for mongodb
+# boolean
+useMongodb: false

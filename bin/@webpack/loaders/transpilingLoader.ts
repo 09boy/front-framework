@@ -3,8 +3,6 @@ import { Options } from '@babel/preset-env';
 import { isDevEnv } from 'share/env';
 import { getDynamicModule } from 'share/projectHelper';
 import { SmartProjectOption } from 'types/Smart';
-import { join } from 'path';
-
 
 export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOption): RuleSetRule[] {
   const devMode = isDevEnv();
@@ -66,8 +64,7 @@ export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOp
     getDynamicModule('@babel/preset-env'), envOptions
   ]);
 
-  console.log(presets);
-  return [
+  const loaders: RuleSetRule[] = [
     {
       test: /\.(ts|js)x?$/,
       use: {
@@ -79,6 +76,20 @@ export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOp
           plugins,
         }
       }
-    }
+    },
   ];
+
+  if (projectType === 'vue') {
+    loaders.push({
+      test: /\.vue$/,
+      loader: getDynamicModule('vue-loader'),
+    });
+
+    loaders.push({
+      test: /\.pug$/,
+      loader: getDynamicModule('pug-plain-loader'),
+    });
+  }
+
+  return loaders;
 }

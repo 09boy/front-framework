@@ -8,6 +8,8 @@ export  function getCommonPlugins(modeType: EnvModeType, mode: SmartModeOption, 
   const items = [
     new DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(devMode ? 'development' : 'production'),
+      __VUE_OPTIONS_API__: false,
+      __VUE_PROD_DEVTOOLS__: false,
     }),
   ];
 

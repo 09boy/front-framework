@@ -2,6 +2,7 @@ import { EnvModeType } from './Smart';
 
 export type ProjectType = 'normal' | 'react' | 'vue' | 'nodejs' | 'miniProgram';
 export type ScriptType = 'js' | 'ts';
+export type AssetsType = 'images' | 'fonts' | 'videos' | 'styles';
 
 export interface SmartEntryOption {
   [key: string]: {
@@ -14,9 +15,11 @@ export interface SmartEntryOption {
 export interface SmartStructureOption {
   src: string;
   pages: string;
-  assets: string;
-  app?: string;
   components?: string;
+  assets: string | {[key in AssetsType]?: string};
+  app?: string | {[key: string]: string};
+  routes?: string;
+  server?: string;
 }
 
 export interface SmartModeOption {
@@ -41,10 +44,11 @@ export interface SmartConfigOption {
   mode: SmartModeOption;
 }
 
-export type PackageData = Record<string, {
+export type PackageData =  {
+  name: string;
+  version: string;
   smart: {
     projectType: ProjectType;
     scriptType: ScriptType;
   },
-  [key: string]: string | any[] | Record<string, any>;
-}>;
+};

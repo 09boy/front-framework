@@ -1,23 +1,16 @@
 #!/usr/bin/env node
 
-import {isSmartProject} from 'share/projectHelper';
-import {getSmartConfigureData} from 'share/configHelper';
-import {developProjectCli, createProjectCli} from 'share/env';
-import {SmartCliType} from 'types/Smart';
+import { initSmart } from 'share/projectHelper';
+import { getSmartConfigureData } from 'share/configHelper';
 import SmartCli from 'cli';
 import Smart from 'smart';
 
 async function App(): Promise<void> {
-  const isSTProject = isSmartProject();
-  const smartCli: SmartCliType[] = isSTProject
-    ? developProjectCli
-    : createProjectCli;
+  const { isNewProject, smartCli } = initSmart();
   const smartCommandValue = await SmartCli(smartCli);
-  const smartTaskValue = await getSmartConfigureData(
-    isSTProject,
-    smartCommandValue,
-  );
-  smartTaskValue && (await Smart(smartTaskValue));
+  const smartTaskOption = await getSmartConfigureData(isNewProject, smartCommandValue);
+  await Smart(smartTaskOption);
+  // console.log('smartTaskOption: =', smartTaskOption);
 }
 
 App().finally(() => {

@@ -1,6 +1,6 @@
 # server
 host: 127.0.0.1
-port: 3000
+port: 4001
 
 
 # the directory that contains to build code for testing env or production env.
@@ -17,9 +17,9 @@ publicPath: /
 # Object { [key]: { path, favicon, title } }
 entry:
   app:
-    path: index.js
+    path: index
     favicon: images/favicon.ico
-    title: normal smart application
+    title: smart normal application
 
 # https://webpack.js.org/configuration/devtool/
 devtool: eval-source-map
@@ -37,14 +37,3 @@ mode:
     test:  //
     staging:  //
     release: //
-
-structure:
-  # development directory
-  src:
-  pages:
-  components:
-  assets:
-    - images
-    - styles
-    - fonts
-

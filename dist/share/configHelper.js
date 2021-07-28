@@ -26,46 +26,43 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-async function getSmartConfigureData(isSTProject, option) {
-  const {
-    cli,
-    args: {
-      projectType,
-      port,
-      host,
-      htmlPath
-    }
-  } = option;
-
+async function getSmartConfigureData(isNewProject, {
+  cli,
+  args
+}) {
   if (cli === 'upgrade') {
     return {
       cli
     };
+  } // if only start server
+
+
+  if (isNewProject && cli === 'server') {
+    return getServerTaskOption(args);
   }
 
-  if (!isSTProject && cli === 'server') {
-    return getServerTaskOption({
-      port,
-      host,
-      htmlPath
-    });
+  if (isNewProject && args !== null && args !== void 0 && args.projectDir) {
+    if (!(0, _projectHelper.isValidProjectName)(args.projectDir)) {
+      (0, _log.PrintLog)(_LogType.LogType.projectExist, args.projectDir);
+      process.exit(0);
+    }
   }
 
   try {
-    const packageData = cli !== 'server' && isSTProject ? await Promise.resolve(`${_path2.PROJECT_ROOT_PATH}/package.json`).then(s => _interopRequireWildcard(require(s))) : undefined;
-    const path = isSTProject ? `${_path2.PROJECT_ROOT_PATH}/smart.config.yml` : (0, _path.join)(__dirname, '..', `smart/templates/smart-config/${projectType || 'normal'}.smart.config.yml`);
+    let packageData = undefined;
+    let smartConfigPath = (0, _path.join)(__dirname, '..', `smart/templates/smart-config/${(args === null || args === void 0 ? void 0 : args.projectType) || 'normal'}.smart.config.yml`);
 
-    const smartConfigData = _jsYaml.default.load((0, _fs.readFileSync)(path, 'utf8'));
-
-    if (cli === 'server') {
-      return getServerTaskOption({
-        port,
-        host,
-        htmlPath: htmlPath || smartConfigData.buildDir
-      });
+    if (!isNewProject) {
+      smartConfigPath = `${_path2.PROJECT_ROOT_PATH}/smart.config.yml`;
+      packageData = await Promise.resolve(`${_path2.PROJECT_ROOT_PATH}/package.json`).then(s => _interopRequireWildcard(require(s)));
     }
 
-    return parseSmartOption(option, smartConfigData, packageData);
+    const smartConfigData = _jsYaml.default.load((0, _fs.readFileSync)(smartConfigPath, 'utf8'));
+
+    return parseSmartOption({
+      cli,
+      args
+    }, smartConfigData, packageData);
   } catch (e) {
     (0, _log.PrintLog)(_LogType.LogType.configFileLoadFailed, e.message);
   }
@@ -74,94 +71,93 @@ async function getSmartConfigureData(isSTProject, option) {
     cli
   };
 }
+/*
+* @packageData if value is undefined, it is a new project will to create;
+* */
 
-function parseSmartOption(option, defaultData, packageData) {
-  const {
-    cli,
-    args: {
-      port,
-      host,
-      projectType,
-      components,
-      pages,
-      projectDir,
-      modeType,
-      scriptType,
-      htmlPath
-    }
-  } = option;
-  const {
-    structure,
-    buildDir
-  } = defaultData; // if structure value is null to use key
 
-  const copyStructure = { ...structure
+function parseSmartOption({
+  cli,
+  args
+}, defaultData, packageData) {
+  if (cli === 'server') {
+    return getServerTaskOption({ ...args,
+      htmlPath: (args === null || args === void 0 ? void 0 : args.htmlPath) || defaultData.buildDir
+    }, defaultData.port, defaultData.host);
+  }
+
+  const projectOption = {
+    scriptType: (args === null || args === void 0 ? void 0 : args.scriptType) || 'js',
+    projectType: (args === null || args === void 0 ? void 0 : args.projectType) || 'normal',
+    modeType: (args === null || args === void 0 ? void 0 : args.modeType) || 'start',
+    dirName: (args === null || args === void 0 ? void 0 : args.projectDir) || _path2.PROJECT_ROOT_PATH.split('/').pop(),
+    name: (packageData === null || packageData === void 0 ? void 0 : packageData.name) || (args === null || args === void 0 ? void 0 : args.projectDir) || 'Smart Project'
+  };
+  const configOption = { ...defaultData,
+    structure: (0, _projectHelper.getProjectStructure)(projectOption.projectType),
+    host: (args === null || args === void 0 ? void 0 : args.host) || defaultData.host,
+    port: (args === null || args === void 0 ? void 0 : args.port) || defaultData.port
   };
 
-  for (const key in copyStructure) {
-    if (Object.hasOwnProperty.call(copyStructure, key)) {
-      const value = copyStructure[key];
+  if (packageData) {
+    let smartPages;
+    let smartComponents;
 
-      if (!value) {
-        Object.assign(structure, {
-          [key]: key
-        });
+    if (cli === 'page' || cli === 'component') {
+      const {
+        pages,
+        components,
+        src
+      } = configOption.structure;
+
+      if (args !== null && args !== void 0 && args.pages) {
+        smartPages = {
+          dirPath: `${src}/${pages}`,
+          scriptType: packageData.smart.scriptType,
+          names: (0, _projectHelper.getCreateNames)(args.pages)
+        };
+      }
+
+      if (args !== null && args !== void 0 && args.components && components) {
+        smartComponents = {
+          dirPath: `${src}/${components}`,
+          scriptType: packageData.smart.scriptType,
+          names: (0, _projectHelper.getCreateNames)(args.components)
+        };
       }
     }
-  }
 
-  const {
-    componentsPath,
-    pagesPath
-  } = (0, _projectHelper.getProjectStructurePath)(structure);
-  const st = scriptType || (packageData === null || packageData === void 0 ? void 0 : packageData.smart.scriptType) || 'js';
-  const projectOption = {
-    scriptType: st,
-    projectType: projectType || (packageData === null || packageData === void 0 ? void 0 : packageData.smart.projectType) || 'normal',
-    modeType: modeType || 'start',
-    dirName: projectDir || _path2.PROJECT_ROOT_PATH.split('/').pop(),
-    name: (packageData === null || packageData === void 0 ? void 0 : packageData.name) || 'Smart App'
-  };
-  const serverOption = getServerOption({
-    port: port || defaultData.port,
-    host: host || defaultData.host,
-    htmlPath: htmlPath || buildDir
-  });
-  let smartPages;
-  let smartComponents;
-
-  if (pages) {
-    smartPages = {
-      dirPath: pagesPath,
-      scriptType: st,
-      names: (0, _projectHelper.getCreateNames)(pages)
+    return {
+      cli,
+      projectOption: { ...projectOption,
+        scriptType: packageData.smart.scriptType,
+        projectType: packageData.smart.projectType
+      },
+      configOption,
+      serverOption: getServerTaskOption({ ...args,
+        htmlPath: (args === null || args === void 0 ? void 0 : args.htmlPath) || defaultData.buildDir
+      }, defaultData.port, defaultData.host).serverOption,
+      pages: smartPages,
+      components: smartComponents
     };
-  }
+  } // new project
 
-  if (components && projectDir) {
-    smartComponents = {
-      dirPath: componentsPath,
-      scriptType: st,
-      names: (0, _projectHelper.getCreateNames)(components)
-    };
+
+  if (!args) {
+    (0, _log.PrintLog)(_LogType.LogType.cliArgTypeError);
+    process.exit(0);
   }
 
   return {
     cli,
     projectOption,
-    serverOption,
-    pages: smartPages,
-    components: smartComponents,
-    configOption: { ...defaultData,
-      port: serverOption.port,
-      host: serverOption.host
-    }
+    configOption
   };
 }
 
 function getHtmlPath(htmlPath) {
   if (!htmlPath) {
-    return _path2.PROJECT_ROOT_PATH + '/index.html';
+    return _path2.PROJECT_ROOT_PATH + '/dist/index.html';
   }
 
   htmlPath = htmlPath.startsWith('/') ? htmlPath.substr(1, htmlPath.length) : htmlPath;
@@ -169,21 +165,13 @@ function getHtmlPath(htmlPath) {
   return _path2.PROJECT_ROOT_PATH + '/' + htmlPath;
 }
 
-function getServerOption({
-  port,
-  host,
-  htmlPath
-}) {
-  return {
-    port: Number(port) || 3000,
-    host: host || '127.0.0.1',
-    htmlPath: getHtmlPath(htmlPath)
-  };
-}
-
-function getServerTaskOption(serverParam) {
+function getServerTaskOption(args, port, host) {
   return {
     cli: 'server',
-    serverOption: getServerOption(serverParam)
+    serverOption: {
+      port: (args === null || args === void 0 ? void 0 : args.port) || port || 4001,
+      host: (args === null || args === void 0 ? void 0 : args.host) || host || '127.0.0.1',
+      htmlPath: getHtmlPath(args === null || args === void 0 ? void 0 : args.htmlPath)
+    }
   };
 }

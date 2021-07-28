@@ -7,7 +7,7 @@ export type SmartCreateDirArg = string | Record<string, string> | string[];
 
 export interface SmartCliArgs  {
   host?: string;
-  port?: string | number;
+  port?: number;
   modeType?: EnvModeType;
   pages?: SmartCreateDirArg;
   components?: SmartCreateDirArg;
@@ -19,7 +19,7 @@ export interface SmartCliArgs  {
 
 export interface SmartOption {
   cli: SmartCliType;
-  args: SmartCliArgs;
+  args?: SmartCliArgs;
 }
 
 export interface SmartTaskOption {
@@ -43,12 +43,6 @@ export interface SmartServerOptionType {
   port: number;
   host: string;
   htmlPath: string;
-}
-
-export interface SmartServerParamsType {
-  port: number | string | undefined;
-  host: string | undefined;
-  htmlPath: string | undefined;
 }
 
 export interface SmartCreatePage {

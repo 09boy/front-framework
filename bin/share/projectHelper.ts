@@ -1,12 +1,27 @@
 import { existsSync } from 'fs';
 import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
-import { ScriptType, SmartStructureOption } from 'types/SmartProjectConfig';
-import { SmartCreateDirArg } from 'types/Smart';
+import { ProjectType, ScriptType, SmartStructureOption } from 'types/SmartProjectConfig';
+import { SmartCliType, SmartCreateDirArg } from 'types/Smart';
+import { createProjectCli, developProjectCli } from "share/env";
 
 export function isSmartProject(): boolean {
   const hastPackageFile = existsSync('package.json');
   const hasSmartConfigFile = existsSync('smart.config.yml');
   return hastPackageFile && hasSmartConfigFile;
+}
+
+export function initSmart(): {
+  isNewProject: boolean;
+  smartCli: SmartCliType[];
+} {
+  const isNewProject = !isSmartProject();
+  const smartCli: SmartCliType[] = isNewProject
+      ? createProjectCli
+      : developProjectCli;
+  return {
+    isNewProject,
+    smartCli,
+  };
 }
 
 export function isValidProjectName(name: string): boolean {
@@ -56,20 +71,47 @@ export function getDynamicModule(name: string): string {
   return `${SMART_ROOT_PATH}/node_modules/${name.trim()}`;
 }
 
-export function getProjectStructurePath({ src, app, assets, components, pages }: SmartStructureOption): {
-  appPath: string;
-  assetsPath: string;
-  pagesPath: string;
-  componentsPath: string;
-} {
-  const appPath = `${src}/${app || 'app'}`;
-  const assetsPath = `${src}/${assets}`;
-  const pagesPath = `${src}/${pages}`;
-  const componentsPath = `${src}/${components || 'components'}`;
-  return {
-    appPath,
-    assetsPath,
-    pagesPath,
-    componentsPath,
-  };
+export function getProjectStructure(projectType: ProjectType): SmartStructureOption {
+  switch (projectType) {
+    case 'normal':
+      return {
+        src: 'src',
+        pages: 'pages',
+        components: 'components',
+        assets: {
+          images: 'images',
+          styles: 'styles'
+        },
+      };
+    case 'react':
+    case 'vue':
+      return {
+        src: 'src',
+        pages: 'pages',
+        components: 'components',
+        assets: {
+          images: 'images',
+          styles: 'styles'
+        },
+        app: 'app',
+      };
+    case 'nodejs':
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: 'assets',
+        routes: 'routes',
+        server: 'server',
+      };
+    case 'miniProgram':
+      return {
+        src: 'src',
+        pages: 'pages',
+        components: 'components',
+        assets: {
+          images: 'images',
+          styles: 'styles'
+        },
+      };
+  }
 }
