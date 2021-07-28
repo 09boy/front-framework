@@ -9,7 +9,6 @@ exports.isValidProjectName = isValidProjectName;
 exports.getProjectName = getProjectName;
 exports.getComponentDirName = getComponentDirName;
 exports.getClassName = getClassName;
-exports.getScriptType = getScriptType;
 exports.getCreateNames = getCreateNames;
 exports.getDynamicModule = getDynamicModule;
 exports.getProjectStructure = getProjectStructure;
@@ -54,15 +53,6 @@ function getComponentDirName(name) {
 function getClassName(name) {
   name = name.trim().toLocaleLowerCase().replace(FILE_Reg, '#');
   return name.split('#').map(s => s.replace(s.charAt(0), s.charAt(0).toUpperCase())).join('');
-} // default javascript
-
-
-function getScriptType(type) {
-  if (type === 'ts') {
-    return 'ts';
-  }
-
-  return 'js';
 } // for creating new pages or new components
 
 

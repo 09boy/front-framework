@@ -61,9 +61,9 @@ function getFileContent(data, parentIndent = 0, type = 'js') {
   return content;
 }
 
-function parseJsonFileToJsFile(fileName) {
+async function parseJsonFileToJsFile(fileName) {
   const jsonName = `${fileName}.json`;
-  const data = (0, _fs.readFileSync)(jsonName, 'utf-8');
+  const data = await _fs.promises.readFile(jsonName, 'utf-8');
   (0, _shelljs.rm)(jsonName);
   let content = 'module.exports = ';
   data.replace(/"/g, '\'').split('\n').forEach(line => {
@@ -74,5 +74,5 @@ function parseJsonFileToJsFile(fileName) {
     content += line + '\n';
   });
   content = content.substring(0, content.length - 1) + ';';
-  (0, _fs.writeFileSync)(`${fileName}.js`, content);
+  await _fs.promises.writeFile(`${fileName}.js`, content);
 }

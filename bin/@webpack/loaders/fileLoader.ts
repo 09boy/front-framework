@@ -1,11 +1,16 @@
 import { RuleSetRule } from 'webpack';
 import { isDevEnv } from 'share/env';
 import { getDynamicModule } from 'share/projectHelper';
+import { SmartStructureOption } from "types/SmartProjectConfig";
+import { getAssetsPath } from "share/webpackHelper";
 
-const isJPGReg = /\.(jpe?g)$/i;
-const isPngRef = /\.(png)$/i;
+/*const isJPGReg = /\.(jpe?g)$/i;
+const isPngRef = /\.(png)$/i;*/
 
-export function getFileLoader(staticPath: string, maxSize: number): RuleSetRule[] {
+export function getFileLoader(structure: SmartStructureOption, maxSize: number): RuleSetRule[] {
+  const { assetsPath, imagePath, svgPath, fontsPath, mediasPath } = getAssetsPath(structure);
+
+
   const devModel = isDevEnv();
   const name = devModel ? '[name][ext][query]' : '[contenthash][ext][query]';
   const dataUrlCondition = {
@@ -15,9 +20,9 @@ export function getFileLoader(staticPath: string, maxSize: number): RuleSetRule[
   const rules: RuleSetRule[] = [
     {
       test: /\.(png|jpe?g|gif|pdf)$/i,
-      type: 'asset',
+      type: 'asset/resource',
       generator: {
-        filename: `${staticPath}images/${name}`,
+        filename: `${imagePath || assetsPath}/${name}`,
       },
       parser: {
         dataUrlCondition,
@@ -25,23 +30,23 @@ export function getFileLoader(staticPath: string, maxSize: number): RuleSetRule[
     },
     {
       test: /\.(mp4|mov|wmv|flv)$/i,
-      type: 'asset',
+      type: 'asset/resource',
       generator: {
-        filename: `${staticPath}media/${name}`,
+        filename: `${mediasPath || assetsPath}/${name}`,
       }
     },
     {
       test: /\.(woff|woff2|eot|ttf|otf|tiff)$/i,
       type: 'asset/resource',
       generator: {
-        filename: `${staticPath}fonts/${name}`,
+        filename: `${fontsPath || assetsPath}/${name}`,
       }
     },
     {
       test: /\.(svg)$/i,
-      type: 'asset',
+      type: 'asset/resource',
       generator: {
-        filename: `${staticPath}svgs/${name}`,
+        filename: `${svgPath || assetsPath}/${name}`,
       },
       parser: {
         dataUrlCondition,

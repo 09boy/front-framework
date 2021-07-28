@@ -1,5 +1,3 @@
-import { ProjectType } from 'types/SmartProjectConfig';
-
 const browserslistrcData = [
   '# Browsers that we support',
   '',
@@ -12,6 +10,6 @@ const browserslistrcData = [
   'supports es6-module'
 ];
 
-export function getBrowserslistrcConfigData(projectType: ProjectType): string[] {
+export function getBrowserslistrcConfigData(): string[] {
   return [...browserslistrcData];
 }

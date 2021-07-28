@@ -10,7 +10,7 @@ function isDevEnv() {
   return process.env.NODE_ENV === 'development' || !process.env.BuildConfig;
 }
 
-const createProjectCli = ['init', 'create', 'server', 'upgrade'];
+const createProjectCli = ['create', 'server', 'upgrade'];
 exports.createProjectCli = createProjectCli;
 const developProjectCli = ['server', 'start', 'page', 'component', 'build', 'upgrade'];
 exports.developProjectCli = developProjectCli;

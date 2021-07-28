@@ -9,6 +9,31 @@ buildDir: dist
 # for static path
 publicPath: /
 
+<<<<<<< HEAD
 # for mongodb
 # boolean
 useMongodb: false
+=======
+# Object { [key]: { start, test, staging, release } }
+# [start] for development evn
+# [test] for testing env
+# [staging] for staging env
+# [release] production env
+# @@ the value can be contains 'http', also not.
+# example: start: yourdomain.com or http://yourdomain.com
+
+mode:
+  API_HTTP:
+    start:
+    test:
+    staging:
+    release:
+#    ...custom define if needed
+#    example add API_HTTPS and CDN_PATH
+#  API_HTTPS:
+#    start:
+#    ...modeType
+#  CDN_PATH:
+#    start:
+#    ...modeType
+>>>>>>> 8177936d0447d205518ef79b77c9757f8e72c141

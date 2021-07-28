@@ -4,7 +4,6 @@ import {
   getClassName,
   getComponentDirName,
   getProjectName,
-  getScriptType,
   getCreateNames,
   initSmart
 } from 'share/projectHelper';
@@ -57,37 +56,6 @@ describe('Test share/projectHelper functions', () => {
   ])('Test getProjectName function', (input, expected) => {
     it(input.title, () => {
       expect(getProjectName(input.dir)).toBe(expected.return);
-    });
-  });
-
-  describe.each([
-    [
-      { title: 'Input a invalid value', script: 'hello' },
-      { return: 'js' }
-    ],
-    [
-      { title: 'Input javascript', script: 'javascript' },
-      { return: 'js' }
-    ],
-    [
-      { title: 'Input Javascript', script: 'Javascript' },
-      { return: 'js' }
-    ],
-    [
-      { title: 'Input Ts', script: 'Ts' },
-      { return: 'js' }
-    ],
-    [
-      { title: 'Input typescript', script: 'typescript' },
-      { return: 'js' }
-    ],
-    [
-      { title: 'Input ts', script: 'ts' },
-      { return: 'ts' }
-    ],
-  ])('Test getScriptType function', (input, expected) => {
-    it (input.title, () => {
-      expect(getScriptType(input.script)).toBe(expected.return);
     });
   });
 

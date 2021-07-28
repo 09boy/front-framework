@@ -6,6 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.getBrowserslistrcConfigData = getBrowserslistrcConfigData;
 const browserslistrcData = ['# Browsers that we support', '', 'defaults', 'not IE 11', '> 0.25%', '# current node', 'supports es6-module'];
 
-function getBrowserslistrcConfigData(projectType) {
+function getBrowserslistrcConfigData() {
   return [...browserslistrcData];
 }

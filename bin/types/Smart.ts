@@ -2,7 +2,7 @@ import { ProjectType, ScriptType, SmartConfigOption } from './SmartProjectConfig
 
 export type EnvType = 'development' | 'production';
 export type EnvModeType = 'start' | 'test' | 'staging' | 'release';
-export type SmartCliType = 'init' | 'create' | 'start' | 'build' | 'page' | 'component' | 'server' | 'upgrade';
+export type SmartCliType = 'create' | 'start' | 'build' | 'page' | 'component' | 'server' | 'upgrade';
 export type SmartCreateDirArg = string | Record<string, string> | string[];
 
 export interface SmartCliArgs  {

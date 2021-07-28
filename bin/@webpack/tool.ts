@@ -3,10 +3,11 @@ import { SmartEntryOption } from 'types/SmartProjectConfig';
 import { EntryAndOutputOptionsType } from '@webpack/entryAndOutput';
 import { getLogErrorStr } from 'share/log';
 import { PROJECT_ROOT_PATH } from 'share/path';
-import { getDynamicModule } from 'share/projectHelper';
 import { isDevEnv } from 'share/env';
-import { PluginProps } from '@webpack/plugins';
-import { LoaderProps } from '@webpack/loaders';
+import { PluginProps } from './plugins';
+import { LoaderProps } from './loaders';
+import { OptimizationConfigType } from './optimization';
+import { getResolveAlias, getResolveExtensions } from "share/webpackHelper";
 
 type Value = {
   devMode: boolean;
@@ -19,35 +20,24 @@ type Value = {
   loadersProps: LoaderProps;
   performance: undefined | Record<string, any>;
   resolveAlias: Record<string, any>;
+  resolveExtensions: string[];
+  optimization: OptimizationConfigType;
 };
 
 export function parseConfigData({ projectOption, configOption }: SmartWebpackOption): Value {
-
   const devMode = isDevEnv();
-  const { projectType, name, scriptType } = projectOption;
+  const { projectType, name, scriptType, modeType } = projectOption;
 
   const { port, host, base64Limit, entry, devtool, vendors, provide, structure, mode } = configOption;
   const publicPath = configOption.publicPath || '/';
   const buildDir = PROJECT_ROOT_PATH + '/' + (configOption.buildDir || 'dist');
 
-
-  if (vendors && typeof vendors === 'object' && Array.isArray(vendors)) {
+  if (vendors && !(Object.prototype.toString.call(vendors) === '[object Object]' || Array.isArray(vendors))) {
     throw new Error(getLogErrorStr('"vendors" is not valid object.'));
   }
 
   if (!structure) {
     throw new Error(getLogErrorStr('"structure" is error.'));
-  }
-
-  const resolveAlias = { ...configOption.resolveAlias };
-  const copyStructure: Record<string, string | {[k: string]: any}> = { ...structure };
-  for (const key in copyStructure) {
-    if (Object.hasOwnProperty.call(copyStructure, key)) {
-      const value = copyStructure[key];
-      if (key !== 'src' && value) {
-        resolveAlias[key] = `${PROJECT_ROOT_PATH}/${structure.src}/${typeof value === 'string' ? value : key}`;
-      }
-    }
   }
 
   const htmlEntryFiles: SmartEntryOption = {};
@@ -56,11 +46,12 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
     if (Object.hasOwnProperty.call(entry, key)) {
       htmlEntryFiles[key] = {
         ...entry[key],
-        path: entry[key]?.path.includes('.') ? entry[key]?.path : entry[key]?.path + '.' + scriptType,
         favicon: entry[key]?.favicon ? `${structure.src}/${imagePath}/${entry[key].favicon as string}` : undefined,
       };
     }
   }
+
+  console.log('htmlEntryFiles::', htmlEntryFiles);
 
   const pluginsProps = {
     projectOption,
@@ -94,25 +85,6 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
     assetFilter: (filename: string) => !(/\.(mp4|mov|wmv|flv)$/i.test(filename)),
   };
 
-  const alias = {
-    '@babel/runtime-corejs3': getDynamicModule('@babel/runtime-corejs3'),
-    ...resolveAlias,
-  };
-
-  if (projectType === 'react') {
-    Object.assign(alias, {
-      'react': PROJECT_ROOT_PATH + '/node_modules/react',
-      'react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
-      '@hot-loader/react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
-    });
-  }
-
-  if (projectType === 'vue') {
-    Object.assign(alias, {
-      vue: PROJECT_ROOT_PATH + '/node_modules/vue/dist/vue.esm-bundler.js',
-    });
-  }
-
   return {
     devMode,
     name,
@@ -123,6 +95,12 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
     pluginsProps,
     loadersProps,
     performance,
-    resolveAlias: alias,
+    resolveAlias: getResolveAlias(projectType, structure.src),
+    resolveExtensions: getResolveExtensions(projectType, scriptType),
+    optimization: {
+      devMode,
+      modeType,
+      vendors,
+    },
   };
 }

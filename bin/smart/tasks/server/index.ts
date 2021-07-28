@@ -18,6 +18,7 @@ export class Server {
     this.host = host;
     this.htmlPath = htmlPath;
     this.app = express();
+
     this.app.use(express.static(PROJECT_ROOT_PATH + '/' + buildDir));
   }
 

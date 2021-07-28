@@ -22,7 +22,8 @@ entry:
 
 devtool: eval-source-map
 
-# Object <key: []>
+# @Object {key: <module-name>[]}
+# @Array module-name[]
 vendors:
   react-vendor:
     - react
@@ -40,18 +41,32 @@ base64Limit: 8192
 # error => /node_modules/xxx/xx.js
 loaderIncludes:
 
-# Object
-resolveAlias:
+# Object { [key]: { start, test, staging, release } }
+# [start] for development evn
+# [test] for testing env
+# [staging] for staging env
+# [release] production env
+# @@ the value can be contains 'http', also not.
+# example: start: yourdomain.com or http://yourdomain.com
 
-globals:
-  API_HTTPS:
-    start: //
-    test: //
-    staging: //
-    release: //
-
+mode:
   API_HTTP:
+<<<<<<< HEAD
     start: //
     test:  //
     staging:  //
     release: //
+=======
+    start:
+    test:
+    staging:
+    release:
+#    ...custom define if needed
+#    example add API_HTTPS and CDN_PATH
+#  API_HTTPS:
+#    start:
+#    ...modeType
+#  CDN_PATH:
+#    start:
+#    ...modeType
+>>>>>>> 8177936d0447d205518ef79b77c9757f8e72c141

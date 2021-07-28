@@ -9,8 +9,9 @@ import { SmartOption,
   SmartProjectOption,
   SmartCliArgs } from 'types/Smart';
 import { LogType } from 'types/LogType';
-import { SmartConfigOption, PackageData } from 'types/SmartProjectConfig';
-import { getCreateNames, getProjectStructure, isValidProjectName } from 'share/projectHelper';
+import { SmartConfigOption, PackageData, SmartStructureOption, ProjectType } from 'types/SmartProjectConfig';
+import { getCreateNames, isValidProjectName } from 'share/projectHelper';
+
 
 export async function getSmartConfigureData(isNewProject: boolean, { cli, args }: SmartOption): Promise<SmartTaskOption> {
   if (cli === 'upgrade') {
@@ -68,7 +69,7 @@ export function parseSmartOption({ cli, args }: SmartOption, defaultData: SmartC
 
   const configOption: SmartConfigOption = {
     ...defaultData,
-    structure: getProjectStructure(projectOption.projectType),
+    structure: getStructure(projectOption.projectType),
     host: args?.host || defaultData.host,
     port: args?.port || defaultData.port,
   };
@@ -96,7 +97,7 @@ export function parseSmartOption({ cli, args }: SmartOption, defaultData: SmartC
         projectType: packageData.smart.projectType,
       },
       configOption,
-      serverOption: getServerTaskOption({ ...args, htmlPath: args?.htmlPath || defaultData.buildDir }, defaultData.port, defaultData.host).serverOption,
+      serverOption: getServerTaskOption({ host: args?.host || defaultData.host, port: args?.port || defaultData.port, htmlPath: args?.htmlPath || defaultData.buildDir }).serverOption,
       pages: smartPages,
       components: smartComponents,
     };
@@ -112,6 +113,45 @@ export function parseSmartOption({ cli, args }: SmartOption, defaultData: SmartC
     projectOption,
     configOption,
   };
+}
+
+function getStructure(projectType: ProjectType): SmartStructureOption {
+  switch (projectType) {
+    case "react":
+    case "vue":
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: {
+          images: 'images',
+          styles: 'styles',
+        },
+        components: 'components',
+        app: 'app',
+      };
+    case "nodejs":
+      return {
+        src: 'src',
+        pages: 'routers',
+        assets: 'assets',
+      };
+    case "miniProgram":
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: 'assets',
+      };
+    case "normal":
+    default:
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: {
+          images: 'images',
+          styles: 'styles',
+        },
+      };
+  }
 }
 
 function getHtmlPath(htmlPath?: string): string {

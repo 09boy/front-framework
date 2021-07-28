@@ -24,6 +24,7 @@ const packageData = {
     type: 'git',
     url: 'https://github.com/09boy/front-framework.git'
   },
+  nodemonConfig: {},
   smart: {}
 };
 
@@ -63,11 +64,13 @@ const commonReact = [
 const commonReactDev = [
   'eslint-plugin-react',
   'react-test-renderer',
+  'react-hot-loader',
   'prop-types',
 ];
 
 const commonReactTsDev = [
   '@types/react',
+  '@types/react-dom',
   '@types/react-redux',
   '@types/react-router-dom',
   '@types/redux-logger',
@@ -76,13 +79,10 @@ const commonReactTsDev = [
 ];
 
 const commonNode = [
-  'bcrypt',
   'connect-mongo',
   'body-parser',
   'express',
   'cookie-parser',
-  'cors',
-  'cos-nodejs-sdk-v5',
   'express',
   'express-fileupload',
   'express-session',
@@ -141,7 +141,7 @@ function getDependenciesName(projectType: ProjectType, isTs: boolean): Dependenc
       devDependencies.push(isTs ? '@typescript-eslint/parser' : '@babel/eslint-parser');
       break;
     case 'nodejs':
-      dependencies = dependencies.concat(commonNode);
+      dependencies = dependencies.concat(commonNode).filter(s => s!== 'axios');
       devDependencies = devDependencies.concat(isTs ? [...commonNodeDev, ...commonNodeTsDev] : commonNodeDev);
       break;
     case 'miniProgram':
@@ -157,26 +157,30 @@ function getDependenciesName(projectType: ProjectType, isTs: boolean): Dependenc
   };
 }
 
-function getDependenciesVersion({ dependencies, devDependencies }: DependenciesType ): {
+async function getDependenciesVersion({ dependencies, devDependencies }: DependenciesType ): Promise<{
   dependencies: Record<string, string>,
   devDependencies: Record<string, string>
-} {
+}> {
   const ds: Record<string, string> = {};
   const devS: Record<string, string> = {};
 
-  [...dependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(((p) => {
-    const versions: string[] = exec(`npm view ${p.trim()} version`, { silent: true }).stdout.split('\n').filter(s => !!s);
-    const version = (versions.pop() as string).split(' ').pop() as string;
+  await Promise.all([...dependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(p => new Promise<void>(resolve => {
+    exec(`npm view ${p.trim()} version`, { silent: true, async: true }).stdout?.on('data', version => {
+      if (p.includes('vue') && p.includes('@')) {
+        p = p.split('@')[0];
+        version = (version as string).replace(/'/g, '');
+      }
+      ds[p.trim()] = `^${(version as string).trim()}`;
+      resolve();
+    });
+  })));
 
-    if (p.includes('vue') && p.includes('@')) {
-      p = p.split('@')[0];
-    }
-    ds[p.trim()] = `^${version.replace(/'/g, '')}`;
-  }));
-  [...devDependencies].sort((a, b) => (a + '').localeCompare(b + '')).map((p) => {
-    const version = exec(`npm view ${p.trim()} version`, { silent: true }).stdout;
-    devS[p.trim()] = `^${version.replace('\n', '')}`;
-  });
+  await Promise.all([...devDependencies].sort((a, b) => (a + '').localeCompare(b + '')).map(p => new Promise<void>(resolve => {
+    exec(`npm view ${p.trim()} version`, { silent: true, async: true }).stdout?.on('data', version => {
+      devS[p.trim()] = `^${(version as string).trim()}`;
+      resolve();
+    });
+  })));
 
   return {
     'dependencies': ds,
@@ -184,13 +188,40 @@ function getDependenciesVersion({ dependencies, devDependencies }: DependenciesT
   };
 }
 
-export default function getPackageData({ projectType, scriptType, dirName } :SmartProjectOption, src: string): Partial<typeof packageData> {
+export default async function getPackageData({ projectType, scriptType, dirName } :SmartProjectOption, src: string, buildDir?: string): Promise<Partial<typeof packageData>> {
   const isTs = scriptType === 'ts';
-  const dependenciesData = getDependenciesVersion(getDependenciesName(projectType, isTs));
+  const dependenciesData = await getDependenciesVersion(getDependenciesName(projectType, isTs));
+
+  console.log(projectType, scriptType, dirName, src, buildDir, '==== init');
 
   let lint = `tsc --noEmit && eslint --ext .js,.ts ./${src} --fix`; // normal and nodejs
   if (projectType === 'react') {
     lint = `tsc --noEmit && eslint --ext .js, .jsx, .ts, .tsx ./${src} --fix`;
+  }
+
+  const nodejsScripts = {};
+  const nodemonConfig = {};
+  if (projectType === 'nodejs') {
+    Object.assign(nodejsScripts, {
+      start: 'tsc --noEmit && nodemon',
+      transpile: `npx babel ${src} index.${scriptType} --out-dir ${buildDir || 'dist'} --extensions '.${scriptType}' --copy-files`,
+    });
+
+    Object.assign(nodemonConfig, {
+      "verbose": true,
+      "ignore": [
+        "node_modules/*",
+        `${buildDir || 'dist'}/!*`,
+        "__tests__/!*"
+      ],
+      "watch": [
+        "index.${scriptType}",
+        src,
+      ],
+      "ext": isTs ? "js, ts" : 'js',
+      "exec": "npm run transpile",
+      "delay": 2500
+    });
   }
 
   return {
@@ -199,8 +230,10 @@ export default function getPackageData({ projectType, scriptType, dirName } :Sma
     scripts: {
       ...packageData.scripts,
       lint,
+      ...nodejsScripts,
     },
     ...dependenciesData,
+    nodemonConfig,
     smart: {
       projectType,
       scriptType,

@@ -2,7 +2,7 @@ import { EnvModeType } from './Smart';
 
 export type ProjectType = 'normal' | 'react' | 'vue' | 'nodejs' | 'miniProgram';
 export type ScriptType = 'js' | 'ts';
-export type AssetsType = 'images' | 'fonts' | 'videos' | 'styles';
+export type AssetsType = 'images' | 'fonts' | 'styles' | 'media' | 'svg';
 
 export interface SmartEntryOption {
   [key: string]: {
@@ -37,10 +37,10 @@ export interface SmartConfigOption {
   devtool?: string;
   base64Limit?: number;
   loaderIncludes?: string[];
-  vendors?: Record<string, string[]>;
+  vendors?: Record<string, string[]> | string[];
   structure: SmartStructureOption;
   provide?: Record<string, any>;
-  resolveAlias?: Record<string, any>;
+  // resolveAlias?: Record<string, any>;
   mode: SmartModeOption;
 }
 

@@ -24,16 +24,40 @@ entry:
 # https://webpack.js.org/configuration/devtool/
 devtool: eval-source-map
 
-# Object <key: []>
+# @Object {key: <module-name>[]}
+# @Array module-name[]
 vendors:
+  - moment
+  - axios
 
 base64Limit: 8192
 
 # Object { [key]: { start, test, staging, release } }
-# mode value start with //
+# [start] for development evn
+# [test] for testing env
+# [staging] for staging env
+# [release] production env
+# @@ the value can be contains 'http', also not.
+# example: start: yourdomain.com or http://yourdomain.com
+
 mode:
   API_HTTP:
+<<<<<<< HEAD
     start: //
     test:  //
     staging:  //
     release: //
+=======
+    start:
+    test:
+    staging:
+    release:
+#    ...custom define if needed
+#    example add API_HTTPS and CDN_PATH
+#  API_HTTPS:
+#    start:
+#    ...modeType
+#  CDN_PATH:
+#    start:
+#    ...modeType
+>>>>>>> 8177936d0447d205518ef79b77c9757f8e72c141

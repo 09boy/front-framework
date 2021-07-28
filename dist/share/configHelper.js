@@ -94,7 +94,7 @@ function parseSmartOption({
     name: (packageData === null || packageData === void 0 ? void 0 : packageData.name) || (args === null || args === void 0 ? void 0 : args.projectDir) || 'Smart Project'
   };
   const configOption = { ...defaultData,
-    structure: (0, _projectHelper.getProjectStructure)(projectOption.projectType),
+    structure: getStructure(projectOption.projectType),
     host: (args === null || args === void 0 ? void 0 : args.host) || defaultData.host,
     port: (args === null || args === void 0 ? void 0 : args.port) || defaultData.port
   };
@@ -134,9 +134,11 @@ function parseSmartOption({
         projectType: packageData.smart.projectType
       },
       configOption,
-      serverOption: getServerTaskOption({ ...args,
+      serverOption: getServerTaskOption({
+        host: (args === null || args === void 0 ? void 0 : args.host) || defaultData.host,
+        port: (args === null || args === void 0 ? void 0 : args.port) || defaultData.port,
         htmlPath: (args === null || args === void 0 ? void 0 : args.htmlPath) || defaultData.buildDir
-      }, defaultData.port, defaultData.host).serverOption,
+      }).serverOption,
       pages: smartPages,
       components: smartComponents
     };
@@ -153,6 +155,48 @@ function parseSmartOption({
     projectOption,
     configOption
   };
+}
+
+function getStructure(projectType) {
+  switch (projectType) {
+    case "react":
+    case "vue":
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: {
+          images: 'images',
+          styles: 'styles'
+        },
+        components: 'components',
+        app: 'app'
+      };
+
+    case "nodejs":
+      return {
+        src: 'src',
+        pages: 'routers',
+        assets: 'assets'
+      };
+
+    case "miniProgram":
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: 'assets'
+      };
+
+    case "normal":
+    default:
+      return {
+        src: 'src',
+        pages: 'pages',
+        assets: {
+          images: 'images',
+          styles: 'styles'
+        }
+      };
+  }
 }
 
 function getHtmlPath(htmlPath) {

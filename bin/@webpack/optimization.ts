@@ -1,9 +1,15 @@
-import { EntryNormalized, Template } from 'webpack';
+import { /*EntryNormalized,*/ Template } from 'webpack';
 import TerserPlugin  from 'terser-webpack-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { EnvModeType } from 'types/Smart';
 
-export default function getOptimizationConfig(devMode: boolean, modeType: EnvModeType , vendors?: Record<string, string[]>): Template {
+export interface OptimizationConfigType {
+  devMode: boolean;
+  modeType: EnvModeType;
+  vendors?: Record<string, string[]> | string[];
+}
+
+export default function getOptimizationConfig({ devMode, modeType, vendors }: OptimizationConfigType): Template {
   let option: Template = {
     chunkIds: 'named',
   };
@@ -40,17 +46,27 @@ export default function getOptimizationConfig(devMode: boolean, modeType: EnvMod
 
     if (vendors) {
       let priority = 10;
-      for (const key in vendors) {
-        if (Object.hasOwnProperty.call(vendors, key)) {
-          const value: string[] = vendors[key];
-          const reg = value.join('|');
-          cacheGroups[key] = {
-            name: key,
-            test: new RegExp(`[\\/]node_modules[\\/](${reg})`),
-            chunks: 'all',
-            priority,
-          };
-          priority ++;
+
+      if (Array.isArray(vendors)) {
+        cacheGroups['custom-vendor'] = {
+          name: 'custom-vendor',
+          test: new RegExp(`[\\/]node_modules[\\/](${vendors.join('|')})`),
+          chunks: 'all',
+          priority,
+        };
+      } else {
+        for (const key in vendors) {
+          if (Object.hasOwnProperty.call(vendors, key)) {
+            const value: string[] = vendors[key];
+            const reg = value.join('|');
+            cacheGroups[key] = {
+              name: key,
+              test: new RegExp(`[\\/]node_modules[\\/](${reg})`),
+              chunks: 'all',
+              priority,
+            };
+            priority ++;
+          }
         }
       }
     }

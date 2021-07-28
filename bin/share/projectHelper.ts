@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
-import { ProjectType, ScriptType, SmartStructureOption } from 'types/SmartProjectConfig';
+import { ProjectType, SmartStructureOption } from 'types/SmartProjectConfig';
 import { SmartCliType, SmartCreateDirArg } from 'types/Smart';
 import { createProjectCli, developProjectCli } from "share/env";
 
@@ -43,14 +43,6 @@ export function getComponentDirName(name: string): string {
 export function getClassName(name: string): string {
   name = name.trim().toLocaleLowerCase().replace(FILE_Reg, '#');
   return name.split('#').map(s => s.replace(s.charAt(0), s.charAt(0).toUpperCase())).join('');
-}
-
-// default javascript
-export function getScriptType(type?: string): ScriptType {
-  if (type === 'ts') {
-    return 'ts';
-  }
-  return 'js';
 }
 
 // for creating new pages or new components

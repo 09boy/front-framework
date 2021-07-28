@@ -15,7 +15,7 @@ export function getStylePlugin(): WebpackPluginInstance[] {
   }
 
   return [
-    new MiniCssExtractPlugin({ filename, chunkFilename, ignoreOrder: false, }),
+    new MiniCssExtractPlugin({ filename, chunkFilename, experimentalUseImportModule: true, ignoreOrder: devMode }),
     ...plugins,
   ];
 }
