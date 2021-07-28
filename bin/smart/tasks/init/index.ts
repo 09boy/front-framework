@@ -58,13 +58,13 @@ export default function initProjectTasks(option: SmartProjectOption, src: string
         });
       },
     },
-    {
+    /*{
       title: 'Create the prettier file.',
       task: async (): Promise<void> => {
         await promises.writeFile('.prettierrc.json', JSON.stringify(getPrettierConfigData(projectType), null, 2));
         await parseJsonFileToJsFile('prettier.config');
       },
-    },
+    },*/
     {
       title: 'Create the babel files.',
       task: async (): Promise<void> => {

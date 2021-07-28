@@ -64,11 +64,13 @@ const commonReact = [
 const commonReactDev = [
   'eslint-plugin-react',
   'react-test-renderer',
+  'react-hot-loader',
   'prop-types',
 ];
 
 const commonReactTsDev = [
   '@types/react',
+  '@types/react-dom',
   '@types/react-redux',
   '@types/react-router-dom',
   '@types/redux-logger',
@@ -189,6 +191,8 @@ async function getDependenciesVersion({ dependencies, devDependencies }: Depende
 export default async function getPackageData({ projectType, scriptType, dirName } :SmartProjectOption, src: string, buildDir?: string): Promise<Partial<typeof packageData>> {
   const isTs = scriptType === 'ts';
   const dependenciesData = await getDependenciesVersion(getDependenciesName(projectType, isTs));
+
+  console.log(projectType, scriptType, dirName, src, buildDir, '==== init');
 
   let lint = `tsc --noEmit && eslint --ext .js,.ts ./${src} --fix`; // normal and nodejs
   if (projectType === 'react') {

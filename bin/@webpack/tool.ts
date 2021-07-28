@@ -46,11 +46,13 @@ export function parseConfigData({ projectOption, configOption }: SmartWebpackOpt
     if (Object.hasOwnProperty.call(entry, key)) {
       htmlEntryFiles[key] = {
         ...entry[key],
-        path: entry[key]?.path.includes(`.${scriptType}`) ? entry[key]?.path : `${entry[key]?.path}.${scriptType}`,
+        path:  entry[key]?.path.includes(`.${scriptType}`) ? entry[key]?.path : `${entry[key]?.path}.${scriptType}`,
         favicon: entry[key]?.favicon ? `${structure.src}/${imagePath}/${entry[key].favicon as string}` : undefined,
       };
     }
   }
+
+  console.log('htmlEntryFiles::', htmlEntryFiles);
 
   const pluginsProps = {
     projectOption,

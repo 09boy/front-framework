@@ -22,6 +22,6 @@ export function getDevelopmentPlugins({ projectType, scriptType }: SmartProjectO
     new HotModuleReplacementPlugin(),
     new NoEmitOnErrorsPlugin(),
     // new ESLintPlugin(options),
-    new FormatWebpackPlugin({ src: 'hello' }),
+    // new FormatWebpackPlugin({ src: 'hello' }),
 ];
 }

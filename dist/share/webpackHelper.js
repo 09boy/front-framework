@@ -92,8 +92,9 @@ function getResolveAlias(projectType, srcDir) {
   if (projectType === 'react') {
     Object.assign(alias, {
       'react': _path.PROJECT_ROOT_PATH + '/node_modules/react',
-      'react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
-      '@hot-loader/react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom'
+      'react-dom': _path.PROJECT_ROOT_PATH + '/node_modules/react-dom' // 'react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
+      // '@hot-loader/react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
+
     });
   }
 

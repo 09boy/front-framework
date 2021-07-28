@@ -15,8 +15,6 @@ var _ignore = require("./ignore");
 
 var _jestConfig = require("./jestConfig");
 
-var _getPrettierrc = require("./getPrettierrc");
-
 var _path = require("path");
 
 var _fsHelper = require("../../../share/fsHelper");
@@ -74,13 +72,15 @@ function initProjectTasks(option, src, buildDir) {
         resolve();
       });
     }
-  }, {
+  },
+  /*{
     title: 'Create the prettier file.',
-    task: async () => {
-      await _fs.promises.writeFile('.prettierrc.json', JSON.stringify((0, _getPrettierrc.getPrettierConfigData)(projectType), null, 2));
-      await (0, _fsHelper.parseJsonFileToJsFile)('prettier.config');
-    }
-  }, {
+    task: async (): Promise<void> => {
+      await promises.writeFile('.prettierrc.json', JSON.stringify(getPrettierConfigData(projectType), null, 2));
+      await parseJsonFileToJsFile('prettier.config');
+    },
+  },*/
+  {
     title: 'Create the babel files.',
     task: async () => {
       await _fs.promises.writeFile(`${scriptType}config.json`, JSON.stringify((0, _babelResolveConfig.getBabelResolveConfigData)(projectType, scriptType, src), null, 2));

@@ -36,8 +36,8 @@ const commondev = ['moment', 'axios'];
 const commonsDev = ['@babel/core', '@babel/runtime', 'eslint', 'eslint-config-prettier', 'eslint-plugin-import', 'eslint-import-resolver-babel-module', 'eslint', 'babel-plugin-module-resolver', 'babel-plugin-add-module-exports', 'prettier', 'pretty-quick'];
 const commonTsDev = ['@types/jest', '@typescript-eslint/eslint-plugin', 'eslint-config-airbnb-typescript', '@typescript-eslint/parser', 'typescript'];
 const commonReact = ['react', 'react-dom', 'redux', 'react-redux', 'redux-saga', 'react-router-dom', 'redux-logger'];
-const commonReactDev = ['eslint-plugin-react', 'react-test-renderer', 'prop-types'];
-const commonReactTsDev = ['@types/react', '@types/react-redux', '@types/react-router-dom', '@types/redux-logger', '@react-native-community/eslint-config', '@types/react-test-renderer'];
+const commonReactDev = ['eslint-plugin-react', 'react-test-renderer', 'react-hot-loader', 'prop-types'];
+const commonReactTsDev = ['@types/react', '@types/react-dom', '@types/react-redux', '@types/react-router-dom', '@types/redux-logger', '@react-native-community/eslint-config', '@types/react-test-renderer'];
 const commonNode = ['connect-mongo', 'body-parser', 'express', 'cookie-parser', 'express', 'express-fileupload', 'express-session', 'mongoose', 'mongoose-paginate-v2', 'node-fetch', 'jsonwebtoken'];
 const commonNodeDev = ['@babel/node', 'mongodb-memory-server', 'nodemon', 'ts-node'];
 const commonNodeTsDev = ['@types/cookie-parser', '@types/express', '@types/express-fileupload', '@types/express-session', '@types/jsonwebtoken', '@types/mongoose-paginate-v2', '@types/node', '@types/node-fetch', '@typescript-eslint/eslint-plugin', '@typescript-eslint/parser'];
@@ -128,6 +128,7 @@ async function getPackageData({
 }, src, buildDir) {
   const isTs = scriptType === 'ts';
   const dependenciesData = await getDependenciesVersion(getDependenciesName(projectType, isTs));
+  console.log(projectType, scriptType, dirName, src, buildDir, '==== init');
   let lint = `tsc --noEmit && eslint --ext .js,.ts ./${src} --fix`; // normal and nodejs
 
   if (projectType === 'react') {

@@ -60,6 +60,7 @@ function parseConfigData({
     }
   }
 
+  console.log('htmlEntryFiles::', htmlEntryFiles);
   const pluginsProps = {
     projectOption,
     publicPath,

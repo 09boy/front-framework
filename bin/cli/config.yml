@@ -80,13 +80,13 @@ Commands:
 #      type: input
 #      name: Init Project
 #      value: init
-#      message: Entry The Project Name
+#      notice: Entry The Project Name
 #      key: projectDir
 #      callback: parseProjectName
 #      children:
 #        name: Project Type
 #        type: checkbox
-#        message: Select Project Type
+#        notice: Select Project Type
 #        key: projectType
 #        default:
 #          - normal

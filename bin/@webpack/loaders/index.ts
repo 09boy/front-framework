@@ -30,8 +30,8 @@ export default function getLoaders({ projectOption, structure, maxSize }: Loader
     ],
     include: [
       PROJECT_ROOT_PATH + '/' + structure.src,
-      PROJECT_ROOT_PATH + '/index.ts',
-      PROJECT_ROOT_PATH + '/index.ts',
+      PROJECT_ROOT_PATH + '/index.tsx',
+      PROJECT_ROOT_PATH + '/index.tsx',
       ...(include as string[]),
     ],
   }));

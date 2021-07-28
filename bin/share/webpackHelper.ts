@@ -55,7 +55,7 @@ export function getResolveAlias(projectType: ProjectType, srcDir: string): { [ke
   const srcDirs: string[] = ls('-d', `${srcDir}/*`).stdout.trim().split('\n');
   srcDirs.map(p => {
     const dirKey = p.split('/')[1];
-    Object.assign(resolveAlias, { [dirKey]: `${PROJECT_ROOT_PATH}/${p}`});
+    Object.assign(resolveAlias, { [dirKey]: `${PROJECT_ROOT_PATH}/${p}` });
   });
 
   const alias = {
@@ -66,8 +66,9 @@ export function getResolveAlias(projectType: ProjectType, srcDir: string): { [ke
   if (projectType === 'react') {
     Object.assign(alias, {
       'react': PROJECT_ROOT_PATH + '/node_modules/react',
-      'react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
-      '@hot-loader/react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
+      'react-dom': PROJECT_ROOT_PATH + '/node_modules/react-dom',
+      // 'react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
+      // '@hot-loader/react-dom': PROJECT_ROOT_PATH + '/node_modules/@hot-loader/react-dom',
     });
   }
 
