@@ -1,13 +1,13 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Deploy development crm to Tencent Cloud
+name: Deploy front framework to Tencent Cloud
 
 # Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches:
-      - dev
+      - master
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
