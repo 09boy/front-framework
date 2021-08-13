@@ -48,11 +48,13 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - name: Copy files
+        run: mkdir src
+      - run: cp -R dist src/
+      - run: cp -R package.json src/ && cp -R smart.favicon.ico src/ && cp -R smart.logo.png src/
+
       - name: Install Dependencies
         run: npm install
-
-      - name: Transpile typescript
-        run: npm run build
 
       # Deploy
       - name: Deploy
