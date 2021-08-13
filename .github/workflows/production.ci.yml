@@ -74,6 +74,8 @@ jobs:
           script_stop: true
           script: |
             cd /home/front-framework/
+            nvm install v15
+            nvm use v15
             yarn config set ignore-engines true
             yarn install
             npm link
