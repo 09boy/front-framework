@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Checkout dev Branch
+      - name: Checkout master Branch
         uses: actions/checkout@v2
         with:
           ref: master
@@ -53,8 +53,6 @@ jobs:
       - run: cp -R dist src/
       - run: cp -R package.json src/ && cp -R smart.favicon.ico src/ && cp -R smart.logo.png src/
 
-      - name: Install Dependencies
-        run: npm install
 
       # Deploy
       - name: Deploy
@@ -62,7 +60,18 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.ACCESS_TOKEN }}
           ARGS: "-avzr --delete"
-          SOURCE: "dist/"
+          SOURCE: "src/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.REMOTE_TARGET }}
+
+      - name: Start application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.ACCESS_TOKEN }}
+          script_stop: true
+          script: |
+            cd /home/front-framework/
+            npm install
