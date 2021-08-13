@@ -11,16 +11,13 @@ var _prettier = _interopRequireDefault(require("prettier"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 const pluginName = 'FormatWebpackPlugin';
 let isChecking = true;
 
 class FormatWebpackPlugin {
-  // private _initDone = false;
-  constructor(option) {
-    _defineProperty(this, "_option", {});
+  _option = {}; // private _initDone = false;
 
+  constructor(option) {
     this._option = option;
   }
 

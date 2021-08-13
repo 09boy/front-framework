@@ -1,6 +1,6 @@
 {
   "name": "front-framework",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "bin": {
     "boy": "dist/index.js"
@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/09boy/front-framework.git",
   "engines": {
-    "node": ">=12.18.0",
-    "npm:": ">= 6.9.0"
+    "node": ">=15.0.0",
+    "npm:": ">= 7.0.0"
   },
   "settings": {
     "jest": {
