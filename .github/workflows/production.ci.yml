@@ -74,5 +74,6 @@ jobs:
           script_stop: true
           script: |
             cd /home/front-framework/
+            yarn config set ignore-engines true
             yarn install
             npm link
