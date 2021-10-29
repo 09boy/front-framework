@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isDevEnv = isDevEnv;
 exports.developProjectCli = exports.createProjectCli = void 0;
+exports.isDevEnv = isDevEnv;
 
 function isDevEnv() {
   return process.env.NODE_ENV === 'development' || !process.env.BuildConfig;

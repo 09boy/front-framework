@@ -40,12 +40,6 @@ base64Limit: 8192
 
 mode:
   API_HTTP:
-<<<<<<< HEAD
-    start: //
-    test:  //
-    staging:  //
-    release: //
-=======
     start:
     test:
     staging:
@@ -58,4 +52,3 @@ mode:
 #  CDN_PATH:
 #    start:
 #    ...modeType
->>>>>>> 8177936d0447d205518ef79b77c9757f8e72c141

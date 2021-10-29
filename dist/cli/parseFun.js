@@ -3,11 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.parseScriptTypeByCli = parseScriptTypeByCli;
-exports.parsePortByCli = parsePortByCli;
 exports.parseApiPathByCli = parseApiPathByCli;
 exports.parseBuildEnv = parseBuildEnv;
+exports.parsePortByCli = parsePortByCli;
 exports.parseProjectTypeByCli = parseProjectTypeByCli;
+exports.parseScriptTypeByCli = parseScriptTypeByCli;
 exports.parseSmartCliByCli = parseSmartCliByCli;
 
 var _commander = require("commander");

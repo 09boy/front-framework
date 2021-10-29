@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getResolveExtensions = getResolveExtensions;
-exports.getResolveAlias = getResolveAlias;
 exports.getAssetsPath = getAssetsPath;
+exports.getResolveAlias = getResolveAlias;
+exports.getResolveExtensions = getResolveExtensions;
 
 var _shelljs = require("shelljs");
 

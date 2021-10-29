@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = SmartCli;
 exports.loadCliData = loadCliData;
 exports.parseCliDocData = parseCliDocData;
-exports.default = SmartCli;
 
 var _jsYaml = _interopRequireDefault(require("js-yaml"));
 

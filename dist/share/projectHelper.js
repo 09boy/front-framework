@@ -3,15 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isSmartProject = isSmartProject;
-exports.initSmart = initSmart;
-exports.isValidProjectName = isValidProjectName;
-exports.getProjectName = getProjectName;
-exports.getComponentDirName = getComponentDirName;
 exports.getClassName = getClassName;
+exports.getComponentDirName = getComponentDirName;
 exports.getCreateNames = getCreateNames;
 exports.getDynamicModule = getDynamicModule;
+exports.getProjectName = getProjectName;
 exports.getProjectStructure = getProjectStructure;
+exports.initSmart = initSmart;
+exports.isSmartProject = isSmartProject;
+exports.isValidProjectName = isValidProjectName;
 
 var _fs = require("fs");
 

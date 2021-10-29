@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.parseProjectStructure = parseProjectStructure;
 exports.parseData = parseData;
+exports.parseProjectStructure = parseProjectStructure;
 
 /***
  * if value is null to use key

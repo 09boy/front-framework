@@ -4,11 +4,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Log = Log;
-exports.LogWarn = LogWarn;
 exports.LogError = LogError;
+exports.LogWarn = LogWarn;
+exports.PrintLog = PrintLog;
 exports.getLogErrorStr = getLogErrorStr;
 exports.getLogInfoStr = getLogInfoStr;
-exports.PrintLog = PrintLog;
 
 var _chalk = _interopRequireDefault(require("chalk"));
 
