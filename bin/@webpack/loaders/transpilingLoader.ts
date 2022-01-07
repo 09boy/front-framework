@@ -67,6 +67,7 @@ export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOp
   const loaders: RuleSetRule[] = [
     {
       test: /\.(ts|js)x?$/,
+      // test: /\.(js)x?$/,
       use: {
         loader: getDynamicModule('babel-loader'),
         options: {

@@ -65,6 +65,7 @@ function getTranspilingLoader({
   (0, _projectHelper.getDynamicModule)('@babel/preset-env'), envOptions]);
   const loaders = [{
     test: /\.(ts|js)x?$/,
+    // test: /\.(js)x?$/,
     use: {
       loader: (0, _projectHelper.getDynamicModule)('babel-loader'),
       options: {
