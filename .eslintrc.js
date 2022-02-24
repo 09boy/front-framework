@@ -3,17 +3,19 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     parserOptions: {
         globalReturn: true,
+        tsconfigRootDir: __dirname,
         include: [
             'bin/**/*.ts',
-            'bin/**/*.js',
+            'bin/**/*.js'
         ],
         exclude: [
-            'bin/smart/templates/*'
+            'bin/smart/templates'
         ],
-        project: './tsconfig.json',
+        project: 'tsconfig.json',
         sourceType: 'module',
         ecmaVersion: 12,
     },
+    ignorePatterns: ['babel.config.js'],
     plugins: [
         '@typescript-eslint',
     ],

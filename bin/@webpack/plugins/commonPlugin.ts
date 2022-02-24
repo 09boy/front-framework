@@ -1,32 +1,43 @@
-import { WebpackPluginInstance, DefinePlugin, ProvidePlugin } from 'webpack';
-import { SmartModeOption } from 'types/SmartProjectConfig';
-import { isDevEnv } from 'share/env';
-import { EnvModeType } from 'types/Smart';
+import { getGlobalEnvVar } from 'share/webpackHelper';
+import { DefinePlugin, ProvidePlugin, SourceMapDevToolPlugin, WebpackPluginInstance } from 'webpack';
 
-export  function getCommonPlugins(modeType: EnvModeType, mode: SmartModeOption, provide?: Record<string, any>): WebpackPluginInstance[] {
-  const devMode = isDevEnv();
-  const items = [
-    new DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(devMode ? 'development' : 'production'),
-      __VUE_OPTIONS_API__: false,
-      __VUE_PROD_DEVTOOLS__: false,
-    }),
-  ];
+export  function getCommonPlugins(isDevMode: boolean, mode?: Record<string, any>, provide?: Record<string, string>): WebpackPluginInstance[] {
+  const items = [];
 
-  for (const key in mode) {
-    if (Object.hasOwnProperty.call(mode, key)) {
-      const option = mode[key];
-      if (typeof option === 'object' && Object.hasOwnProperty.call(option, modeType)) {
-        const value: string = option[modeType];
-        items.push(new DefinePlugin({
-          [key]: JSON.stringify(value),
-        }));
-      }
+  items.push(new SourceMapDevToolPlugin({
+    // filename[error]: https://github.com/webpack/webpack/issues/9732
+    filename: isDevMode ? '[file].js.map[query]' : 'sourcemaps/[name].[contenthash].map',
+    exclude: ['node_modules'],
+  }),)
+
+  const defineVars: Record<string, any> = {
+    'process.env.NODE_ENV': isDevMode ? 'development' : 'production',
+    'process.env.DEBUG': isDevMode,
+    //   __VUE_OPTIONS_API__: false,
+    //   __VUE_PROD_DEVTOOLS__: false,
+    ...getGlobalEnvVar(mode),
+  };
+
+  const defineOption: Record<string, string | boolean> = {};
+
+  for (const key in defineVars) {
+    if (Object.hasOwnProperty.call(defineVars, key)) {
+      const value: unknown = defineVars[key];
+      defineOption[key] = typeof value === 'boolean' ? value : JSON.stringify(value) ;
     }
   }
 
+  items.push(new DefinePlugin(defineOption));
+
+
   if (provide) {
-    items.push(new ProvidePlugin(provide));
+    const provideData: Record<string, string> = {};
+    for (const key in provide) {
+      if (Object.hasOwnProperty.call(provide, key)) {
+        provideData[key] = provide[key];
+      }
+    }
+    items.push(new ProvidePlugin(provideData));
   }
   return items;
 }

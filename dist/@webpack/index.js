@@ -3,13 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = configuration;
+exports.default = webpackConfiguration;
+
+var _webpackHelper = require("../share/webpackHelper");
 
 var _path = require("../share/path");
 
-var _entryAndOutput = require("./entryAndOutput");
+var _smartHelper = require("../share/smartHelper");
 
-var _tool = require("./tool");
+var _entryAndOutput = require("./entryAndOutput");
 
 var _loaders = _interopRequireDefault(require("./loaders"));
 
@@ -19,65 +21,47 @@ var _optimization = _interopRequireDefault(require("./optimization"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function configuration(option) {
-  var _option$configOption;
-
-  if (process.env.BuildConfig) {
-    option = JSON.parse(process.env.BuildConfig);
+function webpackConfiguration(data) {
+  if (process.env.NODE_ENV === 'production' && process.env.buildData) {
+    data = JSON.parse(process.env.buildData);
   }
 
   const {
-    devMode,
-    name,
-    target,
-    devtool,
-    entryOutOption,
-    pluginsProps,
-    loadersProps,
-    resolveAlias,
-    performance,
-    optimization,
-    resolveExtensions
-  } = (0, _tool.parseConfigData)(option);
+    entryAndOutput,
+    plugins,
+    type,
+    scriptType
+  } = (0, _webpackHelper.parseConfigData)(data);
+  const isDev = (0, _smartHelper.isDevMode)();
+  const envMode = process.env.__MODE__;
   return {
-    name,
+    name: 'smart',
     context: _path.PROJECT_ROOT_PATH,
-    ...(0, _entryAndOutput.getWebpackEntryAndOutputConfiguration)(entryOutOption),
-    //issue: target HRM: https://github.com/webpack/webpack-dev-server/issues/2758
-    target,
-    mode: devMode ? 'development' : 'production',
-    devtool,
+    mode: isDev ? 'development' : 'production',
+    devtool: false,
+    // use SourceMapDevToolPlugin
+    target: 'web',
+    // default is web, you can set 'node'
+    plugins: (0, _plugins.default)(plugins),
     module: {
-      unsafeCache: true,
-      rules: (0, _loaders.default)(loadersProps, (_option$configOption = option.configOption) === null || _option$configOption === void 0 ? void 0 : _option$configOption.loaderIncludes)
-      /*parser: {
-        javascript: {
-          commonjsMagicComments: true,
-          url: 'relative'
-        },
-      },*/
-
+      rules: (0, _loaders.default)(type, scriptType, data.base64Limit)
     },
-    plugins: (0, _plugins.default)(pluginsProps),
     resolve: {
-      alias: resolveAlias,
-      preferRelative: true,
-      symlinks: true,
-      roots: [_path.PROJECT_ROOT_PATH],
-      extensions: resolveExtensions
+      alias: (0, _webpackHelper.getAlias)(data.alias),
+      extensions: (0, _webpackHelper.getExtensions)(type, scriptType)
     },
-    resolveLoader: {
-      //
-      modules: [`${_path.SMART_ROOT_PATH}/node_modules`],
-      extensions: ['.js', '.json']
-    },
-    optimization: (0, _optimization.default)(optimization),
-    stats: {
-      cached: true,
-      cachedAssets: true,
-      cachedModules: true
-    },
-    performance
+    ...(0, _entryAndOutput.getWebpackEntryAndOutputConfiguration)({ ...entryAndOutput,
+      isDevMode: isDev
+    }),
+    // in webpack 5
+    // experiments: {
+    //   futureDefaults: true,
+    // },
+    optimization: (0, _optimization.default)(envMode, type),
+    performance: {
+      maxAssetSize: type === 'normal' ? 100000 : 200000,
+      maxEntrypointSize: type === 'normal' ? 200000 : 300000
+    }
   };
 }
 

@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = getPlugins;
 
+var _smartHelper = require("../../share/smartHelper");
+
 var _htmlPlugin = require("./htmlPlugin");
 
 var _stylePlugin = require("./stylePlugin");
@@ -16,13 +18,16 @@ var _developmentPlugin = require("./developmentPlugin");
 var _productionPlugin = require("./productionPlugin");
 
 function getPlugins({
-  projectOption,
+  entryPath,
+  publicPath,
+  favicon,
+  title,
+  globalVar,
   provide,
-  modeOption,
-  entryFiles,
-  publicPath
+  eslintEnabled
 }) {
-  return [...(0, _stylePlugin.getStylePlugin)(), ...(0, _htmlPlugin.getHtmlPlugin)(publicPath, entryFiles), ...(0, _commonPlugin.getCommonPlugins)(projectOption.modeType, modeOption, provide), ...(0, _developmentPlugin.getDevelopmentPlugins)(projectOption), ...(0, _productionPlugin.getProductionPlugins)()];
+  const isDev = (0, _smartHelper.isDevMode)();
+  return [(0, _htmlPlugin.getHtmlPlugin)(publicPath, entryPath, isDev, title, favicon), ...(0, _stylePlugin.getStylePlugin)(isDev), ...(0, _commonPlugin.getCommonPlugins)(isDev, globalVar, provide), ...(0, _developmentPlugin.getDevelopmentPlugins)(isDev, eslintEnabled), ...(0, _productionPlugin.getProductionPlugins)(isDev)];
 }
 
 module.exports = exports.default;

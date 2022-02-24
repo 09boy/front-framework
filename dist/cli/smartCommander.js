@@ -9,10 +9,6 @@ var _commander = require("commander");
 
 var _version = require("../share/version");
 
-var _log = require("../share/log");
-
-var _LogType = require("../types/LogType");
-
 var _parseFun = require("./parseFun");
 
 function validationOptionParams(callback) {
@@ -34,43 +30,45 @@ function validationOptionParams(callback) {
   }
 }
 
-let commandValue;
+let smartCommandResult;
 
 function commandAction(commandArg, options, command) {
-  const cliName = (command === null || command === void 0 ? void 0 : command.name()) || (options === null || options === void 0 ? void 0 : options.name());
+  const cliName = command?.name() || options?.name();
   const {
-    cli,
+    commandName,
     projectType
-  } = (0, _parseFun.parseSmartCliByCli)(cliName);
-  const args = {
+  } = (0, _parseFun.parseSmartCommand)(cliName);
+  const option = {
     projectType
   };
 
-  if (cli === 'build') {
-    args.modeType = (0, _parseFun.parseBuildEnv)(commandArg, false);
+  if (commandName === 'build') {
+    option.buildModeType = (0, _parseFun.parseBuildEnv)(commandArg, false);
   }
 
   if (options && !command) {
-    Object.assign(args, commandArg);
+    Object.assign(option, commandArg);
   }
 
   if (options && command) {
-    Object.assign(args, options);
+    Object.assign(option, options);
 
-    if (cli === 'create') {
-      args.projectDir = commandArg;
-    } else if (Array.isArray(commandArg)) {
-      if (cli === 'page') {
-        args.pages = commandArg;
-      } else if (cli === 'component') {
-        args.components = commandArg;
-      }
+    if (commandName === 'create') {
+      option.projectName = commandArg;
     }
+    /* else if (Array.isArray(commandArg)){
+     if (commandName === 'page') {
+       option.pages = commandArg;
+     } else if (commandName === 'component') {
+       option.components = commandArg;
+     }
+    }*/
+
   }
 
-  commandValue = {
-    cli,
-    args
+  smartCommandResult = {
+    commandName,
+    option
   };
 }
 
@@ -78,7 +76,8 @@ async function smartCommand(data) {
   const program = new _commander.Command();
   program.version(_version.SMART_VERSION).name('smart').on('command:*', operands => {
     if (operands[0]) {
-      (0, _log.PrintLog)(_LogType.LogType.cliNotExist, operands[0]);
+      // PrintLog(LogType.cliNotExist, operands[0]);
+      console.log(operands[0]);
       process.exit(0);
     }
 
@@ -99,7 +98,7 @@ async function smartCommand(data) {
     }
   });
   await program.parseAsync(process.argv);
-  return commandValue;
+  return smartCommandResult;
 }
 
 module.exports = exports.default;

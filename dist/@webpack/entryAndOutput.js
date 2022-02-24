@@ -5,55 +5,48 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getWebpackEntryAndOutputConfiguration = getWebpackEntryAndOutputConfiguration;
 
-var _projectHelper = require("../share/projectHelper");
+var _smartHelper = require("../share/smartHelper");
 
-var _path = require("../share/path");
+function getEntryItem(isDevMode, type, host, port, name, entryPath) {
+  if (isDevMode) {
+    // path=http://${host}:${port}/__webpack_hmr&name=${name}&
+    const main = [// 'core-js/stable',
+    (0, _smartHelper.getDynamicModule)('regenerator-runtime/runtime'), `${(0, _smartHelper.getDynamicModule)('webpack-hot-middleware')}/client?reload=true&overlay=true&timeout=2000`];
+    const entry = {
+      main
+    };
 
-function getEntryItem(devMode, projectType, host, port, name, entryPath) {
-  if (devMode) {
-    const item = [`${(0, _projectHelper.getDynamicModule)('webpack-hot-middleware')}/client?path=http://${host}:${port}/__webpack_hmr&name=${name}&reload=true&overlay=true&timeout=3000`, entryPath];
-
-    if (projectType === 'react') {
-      item.splice(1, 0, (0, _projectHelper.getDynamicModule)('react-hot-loader/patch'));
+    if (type === 'react') {// main.push(getDynamicModule('react-hot-loader/patch'));
     }
 
-    return item;
+    main.push(entryPath);
+    return entry;
   }
 
-  return entryPath;
+  return [(0, _smartHelper.getDynamicModule)('regenerator-runtime/runtime'), entryPath];
 }
 
 function getWebpackEntryAndOutputConfiguration({
-  devMode,
-  entryFiles,
+  isDevMode,
   projectType,
   host,
   port,
   name,
   publicPath,
-  buildPath
+  buildPath,
+  entryPath
 }) {
-  const entry = {};
-
-  for (const key in entryFiles) {
-    if (Object.hasOwnProperty.call(entryFiles, key)) {
-      const entryPath = `${_path.PROJECT_ROOT_PATH}/${entryFiles[key].path}`;
-      entry[key] = {
-        import: getEntryItem(devMode, projectType, host, port, name, entryPath),
-        dependOn: entry.shared ? 'shared' : undefined
-      };
-    }
-  }
-
+  const entry = getEntryItem(isDevMode, projectType, host, port, name, entryPath);
   return {
-    entry,
-    output: getOutputConfiguration(devMode, publicPath, buildPath)
+    entry: entry,
+    output: getOutputConfiguration(isDevMode, publicPath, buildPath)
   };
 }
 
-function getOutputConfiguration(devMode, publicPath, path) {
-  const filename = devMode ? '[name].js' : 'js/[name].[contenthash].min.js';
-  const chunkFilename = devMode ? '[name].js' : 'js/[name].[chunkhash].min.js';
+function getOutputConfiguration(isDevMode, publicPath, path) {
+  const filename = isDevMode ? '[name].js' : 'scripts/[name].[contenthash].min.js';
+  const chunkFilename = isDevMode ? '[name].js' : 'scripts/chunks/[name].[chunkhash].min.js'; // const assetModuleFilename = isDevMode ? 'assets/[name][ext][query]' : 'assets/[hash][ext][query]';
+
   return {
     filename,
     chunkFilename,
@@ -65,8 +58,8 @@ function getOutputConfiguration(devMode, publicPath, path) {
      *  publicPath: '/assets/', // server-relative
      * */
     publicPath,
-    assetModuleFilename: 'assets/[hash][ext][query]',
-    pathinfo: devMode,
+    // assetModuleFilename,
+    pathinfo: isDevMode,
     //issues: [chunkLoading, wasmLoading]  https://github.com/webpack/webpack/issues/11660
 
     /* chunkLoading: false,
@@ -76,22 +69,22 @@ function getOutputConfiguration(devMode, publicPath, path) {
      crossOriginLoading: 'use-credentials',
      chunkFormat: 'commonjs',
      libraryTarget: 'umd',*/
-    clean: !devMode,
-    environment: {
-      // The environment supports arrow functions ('() => { ... }').
-      arrowFunction: true,
-      // The environment supports BigInt as literalf (123n).
-      bigIntLiteral: false,
-      // The environment supports const and let for variable declarations.
-      const: true,
-      // The environment supports destructuring ('{ a, b } = obj').
-      destructuring: true,
-      // The environment supports an async import() function to import EcmaScript modules.
-      dynamicImport: true,
-      // The environment supports 'for of' iteration ('for (const x of array) { ... }').
-      forOf: true,
-      // The environment supports ECMAScript Module syntax to import ECMAScript modules (import ... from '...').
-      module: true
-    }
+    clean: !isDevMode // environment: {
+    //   // The environment supports arrow functions ('() => { ... }').
+    //   arrowFunction: true,
+    //   // The environment supports BigInt as literalf (123n).
+    //   bigIntLiteral: false,
+    //   // The environment supports const and let for variable declarations.
+    //   const: true,
+    //   // The environment supports destructuring ('{ a, b } = obj').
+    //   destructuring: true,
+    //   // The environment supports an async import() function to import EcmaScript modules.
+    //   dynamicImport: true,
+    //   // The environment supports 'for of' iteration ('for (const x of array) { ... }').
+    //   forOf: true,
+    //   // The environment supports ECMAScript Module syntax to import ECMAScript modules (import ... from '...').
+    //   module: true,
+    // }
+
   };
 }

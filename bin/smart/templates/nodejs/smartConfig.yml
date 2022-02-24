@@ -1,0 +1,7 @@
+# local server
+host: 127.0.0.1
+port: 3002
+
+# only read properties
+type: nodejs
+scriptType: js

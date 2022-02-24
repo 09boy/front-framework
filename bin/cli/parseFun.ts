@@ -1,8 +1,7 @@
-import { ProjectType, ScriptType } from 'types/SmartProjectConfig';
+import { ProjectType, ScriptType } from 'types/SmartType';
 import { InvalidOptionArgumentError } from 'commander';
-import { getLogErrorStr, PrintLog } from 'share/log';
-import { EnvModeType, SmartCliType } from 'types/Smart';
-import { LogType } from 'types/LogType';
+import { EnvModeType } from 'types/SmartType';
+import { SmartCliCommandNameType } from 'types/SmartCliType';
 
 export function parseScriptTypeByCli(type: string | undefined): ScriptType {
   if (!type || type === 'js') {
@@ -12,20 +11,20 @@ export function parseScriptTypeByCli(type: string | undefined): ScriptType {
     return 'ts';
   }
 
-  throw new InvalidOptionArgumentError(getLogErrorStr('Not a valid value. expected value is js、ts'));
+  throw new InvalidOptionArgumentError('Not a valid value. expected value is js、ts');
 }
 
 export function parsePortByCli(port?: string | number): number {
   if (!port || isNaN(Number(port))) {
-    throw new InvalidOptionArgumentError(getLogErrorStr('Not a valid value.'));
+    throw new InvalidOptionArgumentError('Not a valid value.');
   }
 
   if (port.toString().length !== 4) {
-    throw new InvalidOptionArgumentError(getLogErrorStr('Port must be 4 digits.'));
+    throw new InvalidOptionArgumentError('Port must be 4 digits.');
   }
 
   if (port.toString().startsWith('0')) {
-    throw new InvalidOptionArgumentError(getLogErrorStr('Port Cannot start with 0.'));
+    throw new InvalidOptionArgumentError('Port Cannot start with 0.');
   }
 
   return Number(port);
@@ -42,10 +41,10 @@ export function parseBuildEnv(mode: string, isThrowError = true): EnvModeType | 
   }
 
   if (isThrowError) {
-    throw new InvalidOptionArgumentError(getLogErrorStr(`Arg Error: ${mode} not a valid value. you can input 'test' | 'staging' | 'release'`));
+    throw new InvalidOptionArgumentError(`Arg Error: ${mode} not a valid value. you can input 'test' | 'staging' | 'release'`);
   }
 
-  PrintLog(LogType.cliArgTypeError, mode, 'you can input one of \'test\' | \'staging\' | \'release\'');
+  console.warn(mode + ' you can input one of \'test\' | \'staging\' | \'release\'');
   return undefined;
 }
 
@@ -57,37 +56,37 @@ export function parseProjectTypeByCli(type?: string): ProjectType {
     return type as ProjectType;
   }
   // PrintLog(LogType.cliArgTypeError, type, 'you can input one of \'normal\' | \'react\' | \'vue\' | \'nodejs\' | \'miniProgram\'');
-  throw new InvalidOptionArgumentError(getLogErrorStr('you can input one of \'normal\' | \'react\' | \'vue\' | \'nodejs\' | \'miniProgram\''));
+  throw new InvalidOptionArgumentError('you can input one of \'normal\' | \'react\' | \'vue\' | \'nodejs\' | \'miniProgram\'');
 }
 
-export function parseSmartCliByCli(command: string): {
-  cli: SmartCliType;
+export function parseSmartCommand(command: string): {
+  commandName: SmartCliCommandNameType;
   projectType?: ProjectType;
 } {
-  let cli: SmartCliType | undefined;
+  let commandName: SmartCliCommandNameType | undefined;
   let projectType: ProjectType | undefined;
 
-  if (<SmartCliType>command) {
+  if (<SmartCliCommandNameType>command) {
     if(command.includes('-')) {
       const [_cli, _mode] = command.split('-');
       if (<ProjectType>_mode) {
         projectType = _mode as ProjectType;
-        cli = _cli as SmartCliType;
+        commandName = _cli as SmartCliCommandNameType;
       }
     } else {
-      cli = command as SmartCliType;
-      if (cli === 'create') {
+      commandName = command as SmartCliCommandNameType;
+      if (commandName === 'create') {
         projectType = 'normal';
       }
     }
   }
 
-  if (!cli) {
-    throw new InvalidOptionArgumentError(getLogErrorStr(`Arg Error: ${command} not a valid command. run 'smart --help'`));
+  if (!commandName) {
+    throw new InvalidOptionArgumentError(`Arg Error: ${command} not a valid command. run 'smart --help'`);
   }
 
   return {
-    cli,
+    commandName,
     projectType,
   };
 }

@@ -3,5 +3,5 @@ dist
 
 bin/smart/templates
 
-..eslintrc.js
+.eslintrc.js
 tsconfig.json

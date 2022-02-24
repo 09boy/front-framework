@@ -8,13 +8,9 @@ exports.parseBuildEnv = parseBuildEnv;
 exports.parsePortByCli = parsePortByCli;
 exports.parseProjectTypeByCli = parseProjectTypeByCli;
 exports.parseScriptTypeByCli = parseScriptTypeByCli;
-exports.parseSmartCliByCli = parseSmartCliByCli;
+exports.parseSmartCommand = parseSmartCommand;
 
 var _commander = require("commander");
-
-var _log = require("../share/log");
-
-var _LogType = require("../types/LogType");
 
 function parseScriptTypeByCli(type) {
   if (!type || type === 'js') {
@@ -25,20 +21,20 @@ function parseScriptTypeByCli(type) {
     return 'ts';
   }
 
-  throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)('Not a valid value. expected value is js、ts'));
+  throw new _commander.InvalidOptionArgumentError('Not a valid value. expected value is js、ts');
 }
 
 function parsePortByCli(port) {
   if (!port || isNaN(Number(port))) {
-    throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)('Not a valid value.'));
+    throw new _commander.InvalidOptionArgumentError('Not a valid value.');
   }
 
   if (port.toString().length !== 4) {
-    throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)('Port must be 4 digits.'));
+    throw new _commander.InvalidOptionArgumentError('Port must be 4 digits.');
   }
 
   if (port.toString().startsWith('0')) {
-    throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)('Port Cannot start with 0.'));
+    throw new _commander.InvalidOptionArgumentError('Port Cannot start with 0.');
   }
 
   return Number(port);
@@ -54,10 +50,10 @@ function parseBuildEnv(mode, isThrowError = true) {
   }
 
   if (isThrowError) {
-    throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)(`Arg Error: ${mode} not a valid value. you can input 'test' | 'staging' | 'release'`));
+    throw new _commander.InvalidOptionArgumentError(`Arg Error: ${mode} not a valid value. you can input 'test' | 'staging' | 'release'`);
   }
 
-  (0, _log.PrintLog)(_LogType.LogType.cliArgTypeError, mode, 'you can input one of \'test\' | \'staging\' | \'release\'');
+  console.warn(mode + ' you can input one of \'test\' | \'staging\' | \'release\'');
   return undefined;
 }
 
@@ -71,11 +67,11 @@ function parseProjectTypeByCli(type) {
   } // PrintLog(LogType.cliArgTypeError, type, 'you can input one of \'normal\' | \'react\' | \'vue\' | \'nodejs\' | \'miniProgram\'');
 
 
-  throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)('you can input one of \'normal\' | \'react\' | \'vue\' | \'nodejs\' | \'miniProgram\''));
+  throw new _commander.InvalidOptionArgumentError('you can input one of \'normal\' | \'react\' | \'vue\' | \'nodejs\' | \'miniProgram\'');
 }
 
-function parseSmartCliByCli(command) {
-  let cli;
+function parseSmartCommand(command) {
+  let commandName;
   let projectType;
 
   if (command) {
@@ -84,23 +80,23 @@ function parseSmartCliByCli(command) {
 
       if (_mode) {
         projectType = _mode;
-        cli = _cli;
+        commandName = _cli;
       }
     } else {
-      cli = command;
+      commandName = command;
 
-      if (cli === 'create') {
+      if (commandName === 'create') {
         projectType = 'normal';
       }
     }
   }
 
-  if (!cli) {
-    throw new _commander.InvalidOptionArgumentError((0, _log.getLogErrorStr)(`Arg Error: ${command} not a valid command. run 'smart --help'`));
+  if (!commandName) {
+    throw new _commander.InvalidOptionArgumentError(`Arg Error: ${command} not a valid command. run 'smart --help'`);
   }
 
   return {
-    cli,
+    commandName,
     projectType
   };
 }

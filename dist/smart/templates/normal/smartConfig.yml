@@ -1,0 +1,71 @@
+# Only read properties
+type: normal
+scriptType: js
+
+## The following configuration properties are available for custom
+
+# for local server
+host: 127.0.0.1
+port: 3001
+
+# Whether to activate the eslint detection at development time
+eslintEnabled: true
+
+favicon: images/smart.favicon.ico
+
+# build directory path-name
+# start with '/'
+buildDir: /dist
+
+# link: https://webpack.js.org/configuration/output/#outputpublicpath
+publicPath: /
+
+# < [] | { key: [] } >
+vendors:
+
+# link: https://webpack.js.org/plugins/provide-plugin/
+# <key-value>
+provide:
+
+# Default convert images smaller than 30kb to base64
+base64Limit: 30720
+
+# link: https://webpack.js.org/configuration/devtool/
+devtool:
+
+# global env var { [env]: string | {key: value} }
+# Built-in 4 environment variables,
+# corresponding to development environment, test environment, pre-release environment and production environment.
+# SMART_ENV is global var in Built-in, you can parse and use.
+globalVar:
+  # development environment:
+  # value is string:
+  # start: http://your.development.domain.com/api
+  # value is object:
+  # start:
+  #   cdn: https://cdn.your.com/assets
+  #   local: http://localhost:3001/api
+  #   https: https://your.domain.com/api
+  start:
+  # testing environment: http://your.testing.domain.com/api
+  test:
+  # staging environment: http://your.staging.domain.com/api
+  staging:
+  # staging environment: http://your.release.domain.com/api
+  release:
+
+  # You can add your own environment variables if necessary  (** prefix with built-in variable name with "-" **)
+  # start-cdn: xx.xx
+  # test-cdn: xx.xx
+  # ...
+
+
+# link: https://webpack.js.org/configuration/resolve/#resolvealias:
+# <key-value>  if 'value' does not specify a path, use 'key' as the path
+# 'root' is the development directory;  default is src dir
+#
+alias:
+  root:
+  pages:
+  assets:
+

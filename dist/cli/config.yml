@@ -62,46 +62,6 @@ Commands:
           name: htmlPath
           message: Entry the service index.html path
           default: dist/index.html
-#  init:
-#    name: init <project-name>
-#    alias: i
-#    desc: Init a Smart Project, you can change value in smart.config.yml file
-#    options:
-#      - scriptType:
-#        name: -st, --script-type <type>
-#        desc: Specify a scripting language for the project
-#        callback: parseScriptType
-#      - projectType:
-#        name: -t, --projectType <type>
-#        desc: Specify the project type with 'normal' | 'react' | 'vue' | 'nodejs' | 'miniProgram';
-#        callback: parseProjectType
-#
-#    interactive:
-#      type: input
-#      name: Init Project
-#      value: init
-#      notice: Entry The Project Name
-#      key: projectDir
-#      callback: parseProjectName
-#      children:
-#        name: Project Type
-#        type: checkbox
-#        notice: Select Project Type
-#        key: projectType
-#        default:
-#          - normal
-#        choices:
-#          - name: Normal
-#            value: normal
-#          - name: React
-#            value: react
-#          - name: Vue
-#            value: vue
-#          - name: Nodejs
-#            value: nodejs
-#          - name: Mini Program
-#            value: miniProgram
-#        children: *ScriptingLan
 
   create:
     children:
@@ -121,16 +81,16 @@ Commands:
         desc: Create a new project with vue, by default javascript
         options: *ScriptingLanOption
 
-      - name: create-nodejs <project-name>
-        alias: c-n
-        desc: Create a new node project by default javascript
-        options: *ScriptingLanOption
-
-      -
-        name: create-miniprogram <project-name>
-        alias: c-mini
-        desc: Create a new create-miniprogram by default javascript
-        options: *ScriptingLanOption
+#      - name: create-nodejs <project-name>
+#        alias: c-n
+#        desc: Create a new node project by default javascript
+#        options: *ScriptingLanOption
+#
+#      -
+#        name: create-miniprogram <project-name>
+#        alias: c-mini
+#        desc: Create a new create-miniprogram by default javascript
+#        options: *ScriptingLanOption
 
     interactive:
       -
@@ -159,23 +119,23 @@ Commands:
         callback: parseProjectName
         children: *ScriptingLan
 
-      -
-        type: input
-        name: Create A Node Project
-        value: create-nodejs
-        message: Entry The Project Name
-        key: projectDir
-        callback: parseProjectName
-        children: *ScriptingLan
-
-      -
-        type: input
-        name: Create A Miniprogram Project
-        value: create-miniProgram
-        message: Entry The Project Name
-        key: projectDir
-        callback: parseProjectName
-        children: *ScriptingLan
+#      -
+#        type: input
+#        name: Create A Node Project
+#        value: create-nodejs
+#        message: Entry The Project Name
+#        key: projectDir
+#        callback: parseProjectName
+#        children: *ScriptingLan
+#
+#      -
+#        type: input
+#        name: Create A Miniprogram Project
+#        value: create-miniProgram
+#        message: Entry The Project Name
+#        key: projectDir
+#        callback: parseProjectName
+#        children: *ScriptingLan
 
   start:
     name: start
@@ -210,31 +170,6 @@ Commands:
 
         - name: Release
           value: release
-
-  page:
-    name: page <names...>
-    alias: p
-    desc: create new page, more than one use the empty space splice
-    interactive:
-      type: input
-      name: Page
-      value: page
-      key: pages
-      message: Enter one or more names [* more than one use comma splice. *]
-      callback: parsePages
-
-  component:
-    name: component <names...>
-    alias: m
-    desc: create new Component, more than one use the empty space splice
-    interactive:
-      type: input
-      name: Component
-      value: component
-      key: components
-      message: Enter one or more names [* more than one use comma splice. *]
-      callback: parsePages
-
   upgrade:
     name: upgrade
     alias: u

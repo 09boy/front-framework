@@ -1,21 +1,20 @@
-import { WebpackPluginInstance } from 'webpack';
+import { WebpackPluginInstance, AssetInfo } from 'webpack';
 import  MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { isDevEnv } from 'share/env';
 
-export function getStylePlugin(): WebpackPluginInstance[] {
-  const devMode = isDevEnv();
-  let filename = '[name].css';
-  let chunkFilename = '[id].css';
+type Fun = (pathData: any, assetInfo?: AssetInfo) => string;
+export function getStylePlugin(isDevMode: boolean): WebpackPluginInstance[] {
+  let filename: string | Fun = '[name].css';
+  let chunkFilename: string | Fun = '[id].css';
 
-  const plugins: WebpackPluginInstance[] = [];
-
-  if (!devMode) {
+  if (!isDevMode) {
     filename = 'styles/[name].[contenthash].min.css';
     chunkFilename = 'styles/[id].[contenthash].min.css';
   }
 
+  const plugins: WebpackPluginInstance[] = [];
+
   return [
-    new MiniCssExtractPlugin({ filename, chunkFilename, experimentalUseImportModule: true, ignoreOrder: devMode }),
+    new MiniCssExtractPlugin({ filename, chunkFilename, experimentalUseImportModule: true, ignoreOrder: isDevMode }),
     ...plugins,
   ];
 }

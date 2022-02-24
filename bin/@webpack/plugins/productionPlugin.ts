@@ -4,12 +4,12 @@ import CompressionPlugin from 'compression-webpack-plugin';
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import ImageMinimizerPlugin from 'image-minimizer-webpack-plugin';
-import { getDynamicModule } from 'share/projectHelper';
-import { isDevEnv } from 'share/env';
+import extendDefaultPlugins, { optimize, DefaultPlugins,  } from 'svgo';
 
-export function getProductionPlugins(): WebpackPluginInstance[] {
-  const devMode = isDevEnv();
-  if (devMode) {
+import { getDynamicModule } from 'share/smartHelper';
+
+export function getProductionPlugins(isDevMode: boolean): WebpackPluginInstance[] {
+  if (isDevMode) {
     return [];
   }
 
@@ -22,6 +22,8 @@ export function getProductionPlugins(): WebpackPluginInstance[] {
       entryOnly: false,
       exclude: /\/node_modules/
     }),
+
+    // for caching
     new ids.DeterministicModuleIdsPlugin({
       maxLength: 5,
     }),
@@ -32,23 +34,33 @@ export function getProductionPlugins(): WebpackPluginInstance[] {
       threshold: 10240,
       minRatio: 0.8,
     }) as unknown as WebpackPluginInstance,
-    new ImageMinimizerPlugin({
-      exclude: /\/node_modules/,
-      loader: false,
-      severityError: false,
-      minimizerOptions: {
-        plugins: [
-          [getDynamicModule('imagemin-gifsicle'), { interlaced: true }],
-          [getDynamicModule('imagemin-jpegtran'), { progressive: true }],
-          [getDynamicModule('imagemin-optipng'), { optimizationLevel: 5 }],
-          [getDynamicModule('imagemin-svgo'), {
-            /*plugins: [
-              {removeViewBox: false,}
-            ],*/
-          }]
-        ],
-      },
-    }),
+    // new ImageMinimizerPlugin(
+    //   {
+    //     minimizerOptions: {
+    //       plugins: [
+    //             'imagemin-gifsicle',
+    //             // 'imagemin-mozjpeg',
+    //             'imagemin-pngquant',
+    //             // getDynamicModule('imagemin-gifsicle'),
+    //             // getDynamicModule('imagemin-mozjpeg'),
+    //             // getDynamicModule('imagemin-pngquant')
+    //           ],
+    //     }
+    //   }
+    // )
+    // new ImageMinimizerPlugin({
+    //   exclude: /\/node_modules/,
+    //   loader: false,
+    //   severityError: false,
+    //   minimizerOptions: {
+    //     plugins: [
+    //       [getDynamicModule('imagemin-gifsicle'), { interlaced: true }],
+    //       [getDynamicModule('imagemin-jpegtran'), { progressive: true }],
+    //       [getDynamicModule('imagemin-optipng'), { optimizationLevel: 5 }],
+    //       // getDynamicModule('imagemin-svgo'),
+    //     ],
+    //   },
+    // }),
     // new BundleAnalyzerPlugin(),
   ];
 }

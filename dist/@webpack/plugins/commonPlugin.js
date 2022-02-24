@@ -5,33 +5,45 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getCommonPlugins = getCommonPlugins;
 
+var _webpackHelper = require("../../share/webpackHelper");
+
 var _webpack = require("webpack");
 
-var _env = require("../../share/env");
+function getCommonPlugins(isDevMode, mode, provide) {
+  const items = [];
+  items.push(new _webpack.SourceMapDevToolPlugin({
+    // filename[error]: https://github.com/webpack/webpack/issues/9732
+    filename: isDevMode ? '[file].js.map[query]' : 'sourcemaps/[name].[contenthash].map',
+    exclude: ['node_modules']
+  }));
+  const defineVars = {
+    'process.env.NODE_ENV': isDevMode ? 'development' : 'production',
+    'process.env.DEBUG': isDevMode,
+    //   __VUE_OPTIONS_API__: false,
+    //   __VUE_PROD_DEVTOOLS__: false,
+    ...(0, _webpackHelper.getGlobalEnvVar)(mode)
+  };
+  const defineOption = {};
 
-function getCommonPlugins(modeType, mode, provide) {
-  const devMode = (0, _env.isDevEnv)();
-  const items = [new _webpack.DefinePlugin({
-    'process.env.NODE_ENV': JSON.stringify(devMode ? 'development' : 'production'),
-    __VUE_OPTIONS_API__: false,
-    __VUE_PROD_DEVTOOLS__: false
-  })];
-
-  for (const key in mode) {
-    if (Object.hasOwnProperty.call(mode, key)) {
-      const option = mode[key];
-
-      if (typeof option === 'object' && Object.hasOwnProperty.call(option, modeType)) {
-        const value = option[modeType];
-        items.push(new _webpack.DefinePlugin({
-          [key]: JSON.stringify(value)
-        }));
-      }
+  for (const key in defineVars) {
+    if (Object.hasOwnProperty.call(defineVars, key)) {
+      const value = defineVars[key];
+      defineOption[key] = typeof value === 'boolean' ? value : JSON.stringify(value);
     }
   }
 
+  items.push(new _webpack.DefinePlugin(defineOption));
+
   if (provide) {
-    items.push(new _webpack.ProvidePlugin(provide));
+    const provideData = {};
+
+    for (const key in provide) {
+      if (Object.hasOwnProperty.call(provide, key)) {
+        provideData[key] = provide[key];
+      }
+    }
+
+    items.push(new _webpack.ProvidePlugin(provideData));
   }
 
   return items;

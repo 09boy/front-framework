@@ -1,25 +1,19 @@
+import { ProjectType, ScriptType } from 'types/SmartType';
 import { RuleSetRule } from 'webpack';
-import { SmartStructureOption } from 'types/SmartProjectConfig';
+import { isDevMode } from 'share/smartHelper';
 import { getStyleLoader } from './styleLoader';
-import { getFileLoader } from './fileLoader';
+import { getAssetsLoader } from './assetsLoader';
 import { getTranspilingLoader } from './transpilingLoader';
-import { PROJECT_ROOT_PATH } from 'share/path';
-import { SmartProjectOption } from 'types/Smart';
 
+export default function getLoaders(type: ProjectType, sType: ScriptType, base64Limit?: string | number, include?: string[]): RuleSetRule[] {
+  // include = include ? include.map(s => PROJECT_ROOT_PATH + '/' + s) : [];
 
-export type LoaderProps = {
-  projectOption: SmartProjectOption;
-  structure: SmartStructureOption;
-  maxSize: number
-};
-
-export default function getLoaders({ projectOption, structure, maxSize }: LoaderProps, include?: string[]): RuleSetRule[] {
-  include = include ? include.map(s => PROJECT_ROOT_PATH + '/' + s) : [];
+  const isDev = isDevMode();
 
   return [
-    ...getTranspilingLoader(projectOption),
-    ...getStyleLoader(projectOption.projectType),
-    ...getFileLoader(structure, maxSize),
+    ...getTranspilingLoader(isDev, type, sType),
+    ...getStyleLoader(isDev),
+    ...getAssetsLoader(isDev, base64Limit),
   ].map(rule => ({
     ...rule,
     exclude: [
@@ -28,11 +22,14 @@ export default function getLoaders({ projectOption, structure, maxSize }: Loader
       /node_modules[\\/]webpack[\\/]buildin/,
       /bower_components/
     ],
-    include: [
-      PROJECT_ROOT_PATH + '/' + structure.src,
-      PROJECT_ROOT_PATH + '/index.tsx',
-      PROJECT_ROOT_PATH + '/index.tsx',
-      ...(include as string[]),
-    ],
+    include,
+    // include: [
+    //   /*PROJECT_ROOT_PATH + '/src',
+    //   PROJECT_ROOT_PATH + '/index.jsx',
+    //   PROJECT_ROOT_PATH + '/index.tsx',
+    //   PROJECT_ROOT_PATH + '/index.js',
+    //   PROJECT_ROOT_PATH + '/index.ts',
+    //   ...(include as string[]),*/
+    // ],
   }));
 }

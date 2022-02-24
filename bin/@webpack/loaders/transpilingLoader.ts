@@ -1,81 +1,79 @@
+import { ProjectType, ScriptType } from 'types/SmartType';
 import { RuleSetRule } from 'webpack';
 import { Options } from '@babel/preset-env';
-import { isDevEnv } from 'share/env';
-import { getDynamicModule } from 'share/projectHelper';
-import { SmartProjectOption } from 'types/Smart';
+import { getDynamicModule } from 'share/smartHelper';
+import { hasBabelConfigFile } from 'share/webpackHelper';
 
-export function getTranspilingLoader({ scriptType, projectType }: SmartProjectOption): RuleSetRule[] {
-  const devMode = isDevEnv();
-  const isTs = scriptType === 'ts';
-  const isReact = projectType === 'react';
+export function getTranspilingLoader(devMode: boolean, projectType: ProjectType, scriptType: ScriptType): RuleSetRule[] {
+  const hasCustomBabelConfig = hasBabelConfigFile();
+  const loaderOption: Record<string, any> = {};
 
-  let envOptions: Options = {
-    targets: 'defaults',
-    loose: true,
-    useBuiltIns: 'entry',
-    corejs: { version: 3, proposals: true },
-    bugfixes: devMode,
-  };
+  if (!hasCustomBabelConfig) {
+    const isTs = scriptType === 'ts';
+    const isReact = projectType === 'react';
 
-  const presets = [];
+    const envOptions: Options = {
+      // targets: 'defaults', config in package.json
+      loose: true,
+      useBuiltIns: 'entry',
+      corejs: { version: 3, proposals: true },
+      bugfixes: devMode,
+      // debug: devMode,
+    };
 
-  const plugins = [
-    getDynamicModule('@babel/plugin-transform-runtime'),
-    [getDynamicModule('@babel/plugin-proposal-decorators'), { legacy: true }],
-    [getDynamicModule('@babel/plugin-proposal-class-properties'), { loose: true }],
-    getDynamicModule('@babel/plugin-syntax-dynamic-import'),
-    getDynamicModule('@babel/plugin-proposal-async-generator-functions'),
-  ];
+    const presets: string | any[] = [[getDynamicModule('@babel/preset-env'), envOptions]];
+    const plugins: string | any[] = [
+      [getDynamicModule('@babel/plugin-transform-runtime'), { regenerator: false }],
+      //
+      [getDynamicModule('@babel/plugin-proposal-decorators'), { legacy: true }],
+      [getDynamicModule('@babel/plugin-proposal-class-properties'), { loose: true }],
+    ];
 
-  if (isReact) {
-    plugins.push(
-      getDynamicModule('@babel/plugin-syntax-jsx'),
-      getDynamicModule('@babel/plugin-transform-react-jsx'),
-      getDynamicModule('@babel/plugin-transform-react-display-name'),
-    );
-
-    if (devMode) {
-      plugins.push(getDynamicModule('@babel/plugin-transform-react-jsx-self'), getDynamicModule('@babel/plugin-transform-react-jsx-source'), getDynamicModule('react-hot-loader/babel'));
+    if (isReact) {
+      presets.push([getDynamicModule('@babel/preset-react'), {
+        development: devMode,
+      }]);
     }
 
-    presets.push(
-      [getDynamicModule('@babel/preset-react'), { development: devMode }],
-      getDynamicModule('@babel/preset-flow')
-    );
-  }
+    if (devMode) {
+      if (isReact) {
+        presets.push(getDynamicModule('@babel/preset-flow'));
+        plugins.push(
+          getDynamicModule('@babel/plugin-transform-react-jsx-self'),
+          getDynamicModule('@babel/plugin-transform-react-jsx-source'),
+          getDynamicModule('react-hot-loader/babel'));
+      }
 
-  if (isTs) {
-    presets.push(
-      [getDynamicModule('@babel/preset-typescript'), { onlyRemoveTypeImports: true, allowDeclareFields: true }], //It includes   @babel/plugin-transform-typescript
-    );
-  }
+    } else {
+      //
+    }
 
-  if (!devMode) {
-    envOptions = {
-      ...envOptions,
-      debug: false,
-      modules: false,
-    };
-  }
 
-  presets.unshift([
+    if (isTs) {
+      presets.push(
+        [getDynamicModule('@babel/preset-typescript'), { onlyRemoveTypeImports: true, allowDeclareFields: true }], //It includes   @babel/plugin-transform-typescript
+      );
+    }
+
+
+    // getDynamicModule('@babel/plugin-syntax-dynamic-import'),
+    // getDynamicModule('@babel/plugin-proposal-async-generator-functions'),
+
+    // https://blog.liuyunzhuge.com/2019/09/04/babel%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%BA%94%EF%BC%89-polyfill%E5%92%8Cruntime/
     // https://github.com/babel/babel/issues/10008
     // https://github.com/babel/babel/issues/9853
-    getDynamicModule('@babel/preset-env'), envOptions
-  ]);
+    // https://github.com/zloirock/core-js/blob/master/docs/2019-03-19-core-js-3-babel-and-a-look-into-the-future.md
 
+    loaderOption.presets = presets;
+    loaderOption.plugins = plugins;
+  }
+  // console.log(loaderOption);
   const loaders: RuleSetRule[] = [
     {
       test: /\.(ts|js)x?$/,
-      // test: /\.(js)x?$/,
       use: {
         loader: getDynamicModule('babel-loader'),
-        options: {
-          babelrc: false,
-          cacheDirectory: true,
-          presets,
-          plugins,
-        }
+        options: loaderOption
       }
     },
   ];

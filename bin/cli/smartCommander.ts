@@ -1,10 +1,7 @@
 import { Command, OptionValues } from 'commander';
 import { SMART_VERSION } from 'share/version';
-import { PrintLog } from 'share/log';
-import { SmartCommandsOption } from 'types/SmartCliConfig';
-import { LogType } from 'types/LogType';
-import { SmartCliArgs, SmartOption } from 'types/Smart';
-import { parseApiPathByCli, parseBuildEnv, parsePortByCli, parseScriptTypeByCli, parseProjectTypeByCli, parseSmartCliByCli } from './parseFun';
+import { SmartCommandOption, SmartCommandResult, SmartResultOption } from 'types/SmartCliType';
+import { parseApiPathByCli, parseBuildEnv, parsePortByCli, parseScriptTypeByCli, parseProjectTypeByCli, parseSmartCommand } from './parseFun';
 
 function validationOptionParams(callback?: string): any {
   switch (callback) {
@@ -21,44 +18,45 @@ function validationOptionParams(callback?: string): any {
   }
 }
 
-let commandValue: SmartOption;
+let smartCommandResult: SmartCommandResult;
 
 function commandAction(commandArg: any, options?:OptionValues | Command , command?: Command) {
   const cliName = command?.name() || (options as Command)?.name();
-  const { cli, projectType } = parseSmartCliByCli(cliName);
-  const args: SmartCliArgs = { projectType };
+  const { commandName, projectType } = parseSmartCommand(cliName);
+  const option: SmartResultOption = { projectType };
 
-  if (cli === 'build') {
-    args.modeType = parseBuildEnv(commandArg, false);
+  if (commandName === 'build') {
+    option.buildModeType = parseBuildEnv(commandArg, false);
   }
 
   if (options && !command) {
-    Object.assign(args, commandArg);
+    Object.assign(option, commandArg);
   }
 
   if(options && command) {
-    Object.assign(args, options);
-    if (cli === 'create') {
-      args.projectDir = commandArg as string;
-    } else if (Array.isArray(commandArg)){
-      if (cli === 'page') {
-        args.pages = commandArg;
-      } else if (cli === 'component') {
-        args.components = commandArg;
+    Object.assign(option, options);
+    if (commandName === 'create') {
+      option.projectName = commandArg as string;
+    }/* else if (Array.isArray(commandArg)){
+      if (commandName === 'page') {
+        option.pages = commandArg;
+      } else if (commandName === 'component') {
+        option.components = commandArg;
       }
-    }
+    }*/
   }
 
-  commandValue = { cli, args };
+  smartCommandResult = { commandName, option };
 }
 
-export default async function smartCommand(data: SmartCommandsOption[]): Promise<SmartOption> {
+export default async function smartCommand(data: SmartCommandOption[]): Promise<SmartCommandResult> {
   const program = new Command();
   program.version(SMART_VERSION)
          .name('smart')
          .on('command:*', (operands: any[]) => {
            if (operands[0]) {
-             PrintLog(LogType.cliNotExist, operands[0]);
+             // PrintLog(LogType.cliNotExist, operands[0]);
+             console.log(operands[0]);
              process.exit(0);
            }
            process.exitCode = 1;
@@ -79,5 +77,5 @@ export default async function smartCommand(data: SmartCommandsOption[]): Promise
   });
 
   await program.parseAsync(process.argv);
-  return commandValue;
+  return smartCommandResult;
 }

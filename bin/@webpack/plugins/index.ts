@@ -1,27 +1,19 @@
 import { WebpackPluginInstance } from 'webpack';
+import { PluginOptions } from 'types/WebpackType';
+import { isDevMode } from 'share/smartHelper';
 import { getHtmlPlugin } from './htmlPlugin';
 import { getStylePlugin } from './stylePlugin';
 import { getCommonPlugins } from './commonPlugin';
 import { getDevelopmentPlugins } from './developmentPlugin';
 import { getProductionPlugins } from './productionPlugin';
-import { SmartProjectOption } from 'types/Smart';
-import { SmartEntryOption, SmartModeOption } from 'types/SmartProjectConfig';
 
-export type PluginProps = {
-  projectOption: SmartProjectOption;
-  publicPath: string;
-  entryFiles: SmartEntryOption;
-  modeOption: SmartModeOption;
-  provide?: Record<string, any>;
-};
-
-export default function getPlugins({ projectOption, provide, modeOption, entryFiles, publicPath }: PluginProps): WebpackPluginInstance[] {
-
+export default function getPlugins({ entryPath, publicPath, favicon, title, globalVar, provide, eslintEnabled }: PluginOptions): WebpackPluginInstance[] {
+  const isDev = isDevMode();
   return [
-    ...getStylePlugin(),
-    ...getHtmlPlugin(publicPath, entryFiles),
-    ...getCommonPlugins(projectOption.modeType, modeOption, provide),
-    ...getDevelopmentPlugins(projectOption),
-    ...getProductionPlugins(),
+    getHtmlPlugin(publicPath, entryPath, isDev, title, favicon),
+    ...getStylePlugin(isDev),
+    ...getCommonPlugins(isDev, globalVar, provide),
+    ...getDevelopmentPlugins(isDev, eslintEnabled),
+    ...getProductionPlugins(isDev),
   ];
 }

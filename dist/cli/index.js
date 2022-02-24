@@ -11,31 +11,25 @@ var _jsYaml = _interopRequireDefault(require("js-yaml"));
 
 var _fs = require("fs");
 
-var _log = require("../share/log");
-
-var _LogType = require("../types/LogType");
-
 var _smartCommander = _interopRequireDefault(require("./smartCommander"));
-
-var _smartInquirer = _interopRequireDefault(require("./smartInquirer"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// import SmartInquirer from './smartInquirer';
+//
 function loadCliData() {
   try {
-    return _jsYaml.default.load((0, _fs.readFileSync)(`${__dirname}/config.yml`, 'utf8'));
+    const data = _jsYaml.default.load((0, _fs.readFileSync)(`${__dirname}/config.yml`, 'utf8'));
+
+    return data.Commands;
   } catch (e) {
-    (0, _log.PrintLog)(_LogType.LogType.configFileLoadFailed, e.message);
     throw new Error(e.message);
   }
 }
 
-function parseCliDocData(doc, includesCli) {
-  const {
-    Commands
-  } = doc;
-  const commandOptions = [];
-  const inquirerOptions = [];
+function parseCliDocData(Commands, includesCli) {
+  const commandsData = [];
+  const inquirersData = [];
 
   for (const key in Commands) {
     if (Object.hasOwnProperty.call(Commands, key) && key) {
@@ -54,18 +48,18 @@ function parseCliDocData(doc, includesCli) {
       } = Commands[key];
 
       if (Array.isArray(interactive)) {
-        inquirerOptions.push(...interactive);
-      } else {
-        inquirerOptions.push(interactive);
+        inquirersData.push(...interactive);
+      } else if (interactive) {
+        inquirersData.push(interactive);
       }
 
       if (children) {
-        commandOptions.push(...children);
+        commandsData.push(...children);
       } else {
-        commandOptions.push({
-          name: name,
-          alias: alias,
-          desc: desc,
+        commandsData.push({
+          name,
+          alias,
+          desc,
           options,
           callback
         });
@@ -74,21 +68,21 @@ function parseCliDocData(doc, includesCli) {
   }
 
   return {
-    commandOptions,
-    inquirerOptions
+    commandsData,
+    inquirersData
   };
 }
 
-async function SmartCli(includesCli = []) {
+async function SmartCli(commandNames = []) {
   const configData = loadCliData();
   const {
-    commandOptions,
-    inquirerOptions
-  } = parseCliDocData(configData, includesCli);
+    commandsData,
+    inquirersData
+  } = parseCliDocData(configData, commandNames); // console.log(commandsData, commandNames)
+  // if (process.argv.length <= 2) {
+  //   return await SmartInquirer(inquirerOptions);
+  // }
+  //
 
-  if (process.argv.length <= 2) {
-    return await (0, _smartInquirer.default)(inquirerOptions);
-  }
-
-  return await (0, _smartCommander.default)(commandOptions);
+  return await (0, _smartCommander.default)(commandsData);
 }

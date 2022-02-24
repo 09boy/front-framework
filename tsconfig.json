@@ -12,16 +12,12 @@
     "allowJs": true,
     "noEmit": true,
     "strict": true,
+    "jsx": "react-jsx",
     "types": ["node", "jest"],
     "typeRoots": ["./node_modules/@types", "./typings.d.ts"],
-    "lib": ["es2020", "dom"],
-    "baseUrl": ".",
-    "paths": {
-      "*": ["./bin/*"]
-    },
+    "baseUrl": "./bin",
     "rootDir": ".",
     "outDir": "./dist"
   },
-  "include": ["bin/**/*", "__tests__"],
-  "exclude": ["bin/smart/templates", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }

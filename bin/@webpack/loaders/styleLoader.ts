@@ -1,31 +1,28 @@
 import { RuleSetRule } from 'webpack';
-import { getDynamicModule } from 'share/projectHelper';
-import { isDevEnv } from 'share/env';
+import { getDynamicModule } from 'share/smartHelper';
 import  MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { ProjectType } from "types/SmartProjectConfig";
 
 type CssLoaderType = 'css' | 'scss' | 'less';
 
 function getCssLoader(devMode: boolean, importLoaders = 1, loaderType: CssLoaderType):RuleSetRule[] {
 
-  let test = /\.css$/;
+  let test = /\.css$/i;
   if (loaderType === 'scss') {
-    test = /\.(sa|sc)ss$/;
+    test = /\.(sa|sc)ss$/i;
   } else if (loaderType === 'less') {
-    test = /\.less$/;
+    test = /\.less$/i;
   }
 
   const styleLoader = devMode
     ? {
       loader: getDynamicModule('style-loader'),
+      options: {
+        injectType: 'singletonStyleTag',
+      },
     }
     : {
       loader: MiniCssExtractPlugin.loader,
-      options: {
-        modules: {
-          namedExport: true,
-        },
-      }
+      options: {}
     };
 
   const postLoader = getPostCss();
@@ -40,19 +37,7 @@ function getCssLoader(devMode: boolean, importLoaders = 1, loaderType: CssLoader
           options: {
             importLoaders,
             sourceMap: true,
-            modules: {
-              compileType: 'module',
-              mode: 'global',
-              auto: true,
-              namedExport: true,
-              exportLocalsConvention: 'camelCase',
-              exportOnlyLocals: false,
-              exportGlobals: true,
-              // localIdentContext: PROJECT_ROOT_PATH + '/src',
-              localIdentHashPrefix: 'hash',
-              localIdentName: devMode ? '[name]' : '[path][name]__[local]--[hash:base64:5]',
-            },
-          },
+          }
         },
         postLoader,
       ],
@@ -67,9 +52,6 @@ function getPostCss(): RuleSetRule {
       sourceMap: true,
       // execute: true,
       postcssOptions: {
-        /*parser: require('sugarss').parse,
-        execute: true,
-        syntax: require("sugarss"),*/
         plugins: [
           [
             getDynamicModule('postcss-import'),
@@ -79,7 +61,7 @@ function getPostCss(): RuleSetRule {
               features: {
                 'nesting-rules': true,
                 'color-mod-function': { unresolved: 'warn' },
-                browsers: 'last 2 versions',
+                // browsers: 'last 2 versions',
                 autoprefixer: { grid: true },
               }
             }],
@@ -121,32 +103,18 @@ function getLessLoader(): RuleSetRule {
   };
 }
 
-/*function getProductLoader(devMode: boolean): RuleSetUseItem[] {
-  if (devMode) {
-    return [];
-  }
-  return [
-    getDynamicModule('file-loader'),
-    getDynamicModule('extract-loader'),
-  ];
-}*/
-
-export function getStyleLoader(projectType: ProjectType): RuleSetRule[] {
-  if (projectType === 'nodejs') {
-    return [];
-  }
+export function getStyleLoader(isDevMode: boolean): RuleSetRule[] {
   const defaultCssImportCount = 1;
   const defaultStyleImportCount = 2;
-  const devMode = isDevEnv();
 
-  const sLoaders: RuleSetRule[] = getCssLoader(devMode, defaultStyleImportCount, 'scss').map(item => {
+  const sLoaders: RuleSetRule[] = getCssLoader(isDevMode, defaultStyleImportCount, 'scss').map(item => {
     if (Array.isArray(item.use)) {
-      return { ...item, use: [...item.use, getSassLoader(devMode)] };
+      return { ...item, use: [...item.use, getSassLoader(isDevMode)] };
     }
     return item;
   });
 
-  const lessLoaders: RuleSetRule[] = getCssLoader(devMode, defaultStyleImportCount, 'less').map(item => {
+  const lessLoaders: RuleSetRule[] = getCssLoader(isDevMode, defaultStyleImportCount, 'less').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item, use: [...item.use, getLessLoader()] };
     }
@@ -154,7 +122,7 @@ export function getStyleLoader(projectType: ProjectType): RuleSetRule[] {
   });
 
   return [
-    ...getCssLoader(devMode, defaultCssImportCount, 'css'),
+    ...getCssLoader(isDevMode, defaultCssImportCount, 'css'),
     ...sLoaders,
     ...lessLoaders,
   ];

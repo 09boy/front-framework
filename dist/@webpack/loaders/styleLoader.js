@@ -5,53 +5,38 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getStyleLoader = getStyleLoader;
 
-var _projectHelper = require("../../share/projectHelper");
-
-var _env = require("../../share/env");
+var _smartHelper = require("../../share/smartHelper");
 
 var _miniCssExtractPlugin = _interopRequireDefault(require("mini-css-extract-plugin"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function getCssLoader(devMode, importLoaders = 1, loaderType) {
-  let test = /\.css$/;
+  let test = /\.css$/i;
 
   if (loaderType === 'scss') {
-    test = /\.(sa|sc)ss$/;
+    test = /\.(sa|sc)ss$/i;
   } else if (loaderType === 'less') {
-    test = /\.less$/;
+    test = /\.less$/i;
   }
 
   const styleLoader = devMode ? {
-    loader: (0, _projectHelper.getDynamicModule)('style-loader')
+    loader: (0, _smartHelper.getDynamicModule)('style-loader'),
+    options: {
+      injectType: 'singletonStyleTag'
+    }
   } : {
     loader: _miniCssExtractPlugin.default.loader,
-    options: {
-      modules: {
-        namedExport: true
-      }
-    }
+    options: {}
   };
   const postLoader = getPostCss();
   return [{
     test,
     use: [styleLoader, {
-      loader: (0, _projectHelper.getDynamicModule)('css-loader'),
+      loader: (0, _smartHelper.getDynamicModule)('css-loader'),
       options: {
         importLoaders,
-        sourceMap: true,
-        modules: {
-          compileType: 'module',
-          mode: 'global',
-          auto: true,
-          namedExport: true,
-          exportLocalsConvention: 'camelCase',
-          exportOnlyLocals: false,
-          exportGlobals: true,
-          // localIdentContext: PROJECT_ROOT_PATH + '/src',
-          localIdentHashPrefix: 'hash',
-          localIdentName: devMode ? '[name]' : '[path][name]__[local]--[hash:base64:5]'
-        }
+        sourceMap: true
       }
     }, postLoader]
   }];
@@ -59,24 +44,21 @@ function getCssLoader(devMode, importLoaders = 1, loaderType) {
 
 function getPostCss() {
   return {
-    loader: (0, _projectHelper.getDynamicModule)('postcss-loader'),
+    loader: (0, _smartHelper.getDynamicModule)('postcss-loader'),
     options: {
       sourceMap: true,
       // execute: true,
       postcssOptions: {
-        /*parser: require('sugarss').parse,
-        execute: true,
-        syntax: require("sugarss"),*/
-        plugins: [[(0, _projectHelper.getDynamicModule)('postcss-import'), [(0, _projectHelper.getDynamicModule)('postcss-short'), {
+        plugins: [[(0, _smartHelper.getDynamicModule)('postcss-import'), [(0, _smartHelper.getDynamicModule)('postcss-short'), {
           prefix: 'x'
-        }], [(0, _projectHelper.getDynamicModule)('postcss-preset-env'), {
+        }], [(0, _smartHelper.getDynamicModule)('postcss-preset-env'), {
           stage: 0,
           features: {
             'nesting-rules': true,
             'color-mod-function': {
               unresolved: 'warn'
             },
-            browsers: 'last 2 versions',
+            // browsers: 'last 2 versions',
             autoprefixer: {
               grid: true
             }
@@ -94,7 +76,7 @@ function getSassLoader(devMode) {
     outputStyle: 'compressed'
   };
   return {
-    loader: (0, _projectHelper.getDynamicModule)('sass-loader'),
+    loader: (0, _smartHelper.getDynamicModule)('sass-loader'),
     options: {
       sourceMap: true,
       webpackImporter: false,
@@ -105,7 +87,7 @@ function getSassLoader(devMode) {
 
 function getLessLoader() {
   return {
-    loader: (0, _projectHelper.getDynamicModule)('less-loader'),
+    loader: (0, _smartHelper.getDynamicModule)('less-loader'),
     options: {
       sourceMap: true,
       lessOptions: {
@@ -116,35 +98,20 @@ function getLessLoader() {
     }
   };
 }
-/*function getProductLoader(devMode: boolean): RuleSetUseItem[] {
-  if (devMode) {
-    return [];
-  }
-  return [
-    getDynamicModule('file-loader'),
-    getDynamicModule('extract-loader'),
-  ];
-}*/
 
-
-function getStyleLoader(projectType) {
-  if (projectType === 'nodejs') {
-    return [];
-  }
-
+function getStyleLoader(isDevMode) {
   const defaultCssImportCount = 1;
   const defaultStyleImportCount = 2;
-  const devMode = (0, _env.isDevEnv)();
-  const sLoaders = getCssLoader(devMode, defaultStyleImportCount, 'scss').map(item => {
+  const sLoaders = getCssLoader(isDevMode, defaultStyleImportCount, 'scss').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item,
-        use: [...item.use, getSassLoader(devMode)]
+        use: [...item.use, getSassLoader(isDevMode)]
       };
     }
 
     return item;
   });
-  const lessLoaders = getCssLoader(devMode, defaultStyleImportCount, 'less').map(item => {
+  const lessLoaders = getCssLoader(isDevMode, defaultStyleImportCount, 'less').map(item => {
     if (Array.isArray(item.use)) {
       return { ...item,
         use: [...item.use, getLessLoader()]
@@ -153,5 +120,5 @@ function getStyleLoader(projectType) {
 
     return item;
   });
-  return [...getCssLoader(devMode, defaultCssImportCount, 'css'), ...sLoaders, ...lessLoaders];
+  return [...getCssLoader(isDevMode, defaultCssImportCount, 'css'), ...sLoaders, ...lessLoaders];
 }

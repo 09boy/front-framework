@@ -1,56 +1,44 @@
 import { Configuration } from 'webpack';
-import { PROJECT_ROOT_PATH, SMART_ROOT_PATH } from 'share/path';
-import { SmartWebpackOption } from 'types/Smart';
+import { EnvModeType, SmartConfigData } from 'types/SmartType';
+import { getAlias, getExtensions, parseConfigData } from 'share/webpackHelper';
+import { PROJECT_ROOT_PATH } from 'share/path';
+import { isDevMode } from 'share/smartHelper';
 import { getWebpackEntryAndOutputConfiguration } from './entryAndOutput';
-import { parseConfigData } from './tool';
 import getLoaders from './loaders';
 import getPlugins from './plugins';
 import getOptimizationConfig from './optimization';
 
-
-export default function configuration(option: SmartWebpackOption):Configuration {
-  if (process.env.BuildConfig) {
-    option = JSON.parse(process.env.BuildConfig) as SmartWebpackOption;
+export default function webpackConfiguration(data: SmartConfigData): Configuration {
+  if (process.env.NODE_ENV === 'production' && process.env.buildData) {
+    data = JSON.parse(process.env.buildData) as SmartConfigData;
   }
-  const { devMode, name, target, devtool, entryOutOption, pluginsProps, loadersProps, resolveAlias, performance, optimization, resolveExtensions } = parseConfigData(option);
+  const { entryAndOutput, plugins, type, scriptType } = parseConfigData(data);
+  const isDev = isDevMode();
+  const envMode = process.env.__MODE__ as EnvModeType;
 
   return {
-    name,
+    name: 'smart',
     context: PROJECT_ROOT_PATH,
-    ...getWebpackEntryAndOutputConfiguration(entryOutOption),
-
-    //issue: target HRM: https://github.com/webpack/webpack-dev-server/issues/2758
-    target,
-    mode: devMode ? 'development' : 'production',
-    devtool,
+    mode: isDev ? 'development' : 'production',
+    devtool: false, // use SourceMapDevToolPlugin
+    target: 'web', // default is web, you can set 'node'
+    plugins: getPlugins(plugins),
     module: {
-      unsafeCache: true,
-      rules: getLoaders(loadersProps, option.configOption?.loaderIncludes),
-      /*parser: {
-        javascript: {
-          commonjsMagicComments: true,
-          url: 'relative'
-        },
-      },*/
+      rules:  getLoaders(type, scriptType, data.base64Limit),
     },
-    plugins: getPlugins(pluginsProps),
     resolve: {
-      alias: resolveAlias,
-      preferRelative: true,
-      symlinks: true,
-      roots: [PROJECT_ROOT_PATH],
-      extensions: resolveExtensions,
+      alias: getAlias(data.alias),
+      extensions: getExtensions(type, scriptType),
     },
-    resolveLoader: { //
-      modules: [`${SMART_ROOT_PATH}/node_modules`],
-      extensions: ['.js', '.json'],
-    },
-    optimization: getOptimizationConfig(optimization),
-    stats: {
-      cached: true,
-      cachedAssets: true,
-      cachedModules: true,
-    },
-    performance,
+    ...getWebpackEntryAndOutputConfiguration({ ...entryAndOutput, isDevMode: isDev }),
+    // in webpack 5
+    // experiments: {
+    //   futureDefaults: true,
+    // },
+    optimization: getOptimizationConfig(envMode, type),
+    performance: {
+      maxAssetSize: type === 'normal' ? 100000 : 200000,
+      maxEntrypointSize: type === 'normal' ? 200000 : 300000
+    }
   };
 }

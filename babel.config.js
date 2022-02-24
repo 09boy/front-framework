@@ -1,12 +1,13 @@
 module.exports = {
   presets: [
-    ['@babel/preset-env', {targets: {node: 'current'}, modules: 'commonjs'}],
+    ['@babel/preset-env', { targets: { node: 'current' }, modules: 'commonjs' }],
     '@babel/preset-typescript',
   ],
   parserOpts: {
     strictMode: true,
   },
   ignore: ['./bin/smart/templates'],
+
   plugins: [
     [
       'module-resolver',
